@@ -147,14 +147,14 @@ v0.1 코드는 이 가운데 첫 번째부터 세 번째 기준까지를 다음�
 
 ## 8. 실행 환경 (맥북 기준 초안)
 
-맥북 모델과 macOS 버전은 아직 확인하지 못했다 ([open-questions.md](open-questions.md) Q2). 확인할 위치는 [setup-macos.md](setup-macos.md) 1절에 있다.
+사용자의 맥북은 Apple Silicon, 메모리 16GB, macOS Tahoe 26.6.2이고, FileVault가 켜져 있다 (2026-09-30 사용자 확인, [decisions.md](decisions.md) D-014).
 
 - Python 3.11 이상, 가상환경, SQLite를 쓴다. v1은 Docker 없이 구성한다.
 - 수집 데이터와 SQLite 파일은 저장소 루트의 `data/`에 둔다. `data/`와 `*.db`, `*.sqlite`는 .gitignore로 제외되어 있으므로, 다른 경로에 수집 데이터를 저장하지 않는다.
 - 비밀 값(`SEC_USER_AGENT`에 넣는 이메일, 텔레그램 봇 토큰, 감시 서비스의 신호 주소 등)은 `.env` 파일에, 파일 형태의 인증 정보는 `secrets/` 폴더에 두고, 둘 다 커밋하지 않는다.
 - launchd의 LaunchAgent로 자동 실행과 재시작을 관리한다.
 - 전원이 연결된 상태에서 시스템 잠자기를 끈다. 외부 모니터 없이 덮개를 닫으면 잠자기에 들어가므로, 덮개를 열어 두거나 별도 설정을 한다.
-- LaunchAgent는 사용자가 로그인한 뒤에만 실행된다. 따라서 재부팅 뒤 수집이 저절로 다시 시작되려면 자동 로그인이 켜져 있어야 한다. FileVault가 켜져 있으면 자동 로그인을 쓸 수 없으므로, 누군가 FileVault 잠금 화면에서 암호를 입력하기 전까지 수집이 멈춘다. 반대로 FileVault를 끄면 디스크가 암호화되지 않으므로 `.env`에 둔 비밀 값의 보호 수준도 함께 고려한다. 맥북은 배터리가 있어 짧은 정전에는 꺼지지 않는다. Apple Silicon 맥북은 꺼진 상태에서 전원에 연결되면 자동으로 켜지며, macOS Sequoia 15 이상에서는 이 동작을 끌 수 있다. 배터리가 모두 닳은 뒤 전원이 돌아왔을 때도 켜지는지는 설치 뒤 직접 시험한다. 운영 방식은 [open-questions.md](open-questions.md) Q2에서 FileVault 사용 여부와 함께 정한다 ([Apple: 자동 로그인](https://support.apple.com/ko-kr/102316), [Apple: 맥북 자동 켜짐](https://support.apple.com/ko-kr/120622), [Apple: launchd 작업](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html), 2026-09-30 확인).
+- LaunchAgent는 사용자가 로그인한 뒤에만 실행된다. 따라서 재부팅 뒤 수집이 저절로 다시 시작되려면 자동 로그인이 켜져 있어야 한다. FileVault가 켜져 있으면 자동 로그인을 쓸 수 없으므로, 누군가 FileVault 잠금 화면에서 암호를 입력하기 전까지 수집이 멈춘다. 반대로 FileVault를 끄면 디스크가 암호화되지 않으므로 `.env`에 둔 비밀 값의 보호 수준도 함께 고려한다. 맥북은 배터리가 있어 짧은 정전에는 꺼지지 않는다. Apple Silicon 맥북은 꺼진 상태에서 전원에 연결되면 자동으로 켜지며, macOS Sequoia 15 이상에서는 이 동작을 끌 수 있다. 배터리가 모두 닳은 뒤 전원이 돌아왔을 때도 켜지는지는 설치 뒤 직접 시험한다. 사용자의 맥북에서는 FileVault를 켠 채로 운영하고, 재부팅 뒤에는 직접 로그인한다 (D-014, 잠정) ([Apple: 자동 로그인](https://support.apple.com/ko-kr/102316), [Apple: 맥북 자동 켜짐](https://support.apple.com/ko-kr/120622), [Apple: launchd 작업](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html), 2026-09-30 확인).
 - 수집이 멈췄다는 사실을 프로그램이 스스로 알릴 수는 없다. 외부의 무료 감시 서비스(예: healthchecks.io의 무료 요금제, 작업 20개까지 감시)에 주기적으로 신호를 보내고, 신호가 끊기면 휴대전화로 알림을 받는다. 감시 서비스의 신호 주소(ping URL)는 그 자체가 인증 정보이므로 `.env`에 둔다.
 - 항상 전원에 연결해 두므로 배터리가 오래 100%로 유지되지 않게 한다. Apple Silicon 맥북에 macOS Tahoe 26.4 이상이 설치되어 있으면, 시스템 설정 > 배터리에서 충전 옆의 정보 버튼을 눌러 충전 한도를 80~100% 사이에서 정한다(예: 80%). 그 밖의 맥북에서는 최적화된 배터리 충전을 켠다(macOS Big Sur 11 이상). 최적화된 배터리 충전은 특정 상황에서만 80% 이상 충전을 미룬다. 두 기능 모두 배터리 잔량 추정을 위해 가끔 100%까지 충전한다 ([Apple 지원](https://support.apple.com/ko-kr/102338), 2026-09-30 확인).
 - 대시보드는 로컬 웹 서버로 띄우고, 기본적으로 맥북 안에서만 접속한다.
