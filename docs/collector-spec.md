@@ -133,7 +133,7 @@ v0.1 코드는 이 가운데 첫 번째부터 세 번째 기준까지를 다음�
 - high: 한 자료에 기관과 프로젝트가 함께 대조되었다.
 - medium: 기관이나 규제기관이 직접 낸 수집원의 자료에서 프로젝트가 대조되었다.
 - 다음 경우에는 사건만 기록하고 알림을 보내지 않는다: 수집원을 처음 확인할 때 이미 있던 자료(기준선), 발표된 지 3일이 지난 자료, 기존 사건에 묶인 자료(중복과 재확산).
-- 시세 이상: 60분 동안 한 종목의 수익률이 같은 거래소의 BTC 수익률보다 3%p 이상 높거나 낮으면 medium 알림을 보낸다. 같은 종목은 6시간에 한 번만 알린다 ([decisions.md](decisions.md) D-011).
+- 시세 이상 알림은 2026-09-30부터 꺼져 있다 ([decisions.md](decisions.md) D-015). 켜면(`tickers.enabled: true`) 60분 동안 한 종목의 수익률이 같은 거래소의 BTC 수익률보다 3%p 이상 높거나 낮을 때 medium 알림을 보내고, 같은 종목은 6시간에 한 번만 알린다 (D-011).
 - 알림은 항상 로그 파일과 alerts 테이블에 남는다. `NOTIFIER=telegram`이면 텔레그램 봇으로도 보낸다. 전송에 실패한 알림은 5분마다 다시 보내며, 만든 지 24시간 안의 알림을 최대 12번까지 시도한다 ([collector/notify.py](../collector/notify.py)).
 
 ## 7. AI 사용
@@ -190,7 +190,7 @@ v0.1 코드는 이 가운데 첫 번째부터 세 번째 기준까지를 다음�
 | 뉴스 수집 (RSS, Atom, 사이트맵) | 구현. 켜진 수집원은 SEC 보도자료와 발언(`SEC_USER_AGENT` 필요), 연준 보도자료, DTCC Insights, Hedera 블로그, Stellar 블로그다 ([config/sources.yaml](../config/sources.yaml)) |
 | 엔터티 대조, 사건 묶기, 재확산 표시 | 구현 ([config/entities.yaml](../config/entities.yaml)) |
 | 알림 | 구현. 로그 파일과 alerts 테이블에 남기고, 설정하면 텔레그램 봇으로 보낸다. 실패한 알림은 다시 보낸다 (D-010, [setup-macos.md](setup-macos.md) 4-2절) |
-| 시세 감시와 이상 감지 | 구현. 업비트(LINK, XLM, HBAR, ONDO, XRP)와 Kraken(QNT)의 시세를 5분마다 기록하고, 60분 동안 같은 거래소의 BTC보다 3%p 이상 더 움직인 종목을 알린다 ([config/market.yaml](../config/market.yaml), D-011, D-012). 시세 조회가 실패하면 운영 요약과 `status`에 나온다 (9절) |
+| 시세 감시와 이상 감지 | 구현했지만 꺼 두었다 (D-015). 켜면 업비트와 Kraken에서 `watch` 목록의 시세를 5분마다 기록하고, 60분 동안 같은 거래소의 BTC보다 3%p 이상 더 움직인 종목을 알린다 ([config/market.yaml](../config/market.yaml), D-011, D-012). 켜 둔 동안에는 시세 조회 실패가 운영 요약과 `status`에 나온다 (9절) |
 | 가격 반응 | 구현. 사건의 최초 발표 시각을 기준으로, 종목마다 정해진 거래소(업비트 또는 Kraken)의 시간봉 종가로 계산한다. Kraken은 최근 30일(720시간)의 시간봉만 주므로, 그보다 오래된 사건의 QNT 반응은 no_data가 된다. 기준 시각의 가격은 그 시각 직전에 끝난 시간봉의 종가다. BTC 대비 초과 수익률을 함께 저장한다. 같은 시총 구간 중앙값은 아직 계산하지 않는다 |
 | 사건 검토 기록 | 구현 (`collector review`) |
 | 외부 감시 신호 | 구현 (`HEARTBEAT_URL`) |

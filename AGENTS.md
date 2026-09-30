@@ -12,7 +12,7 @@
 ## 현재 상태 (2026-09-30 기준)
 
 - 저장소: https://github.com/tlzkrh1029/crypto_institution_research (공개). 기준 브랜치는 `main`이다 ([docs/decisions.md](docs/decisions.md) D-009). GitHub 기본 브랜치 설정을 main으로 바꾸는 일은 사용자가 한다. 바꾸기 전에는 GitHub 첫 화면에 Claude Code 작업 브랜치(`claude/blissful-cerf-rr8n08`)가 보일 수 있으므로, 이 저장소를 읽는 도구는 main을 기준으로 읽는다.
-- 수집 프로그램 v0.1이 [collector/](collector/)에 있다. 공식 피드 수집, 업비트와 Kraken 시세 감시, 가격 반응 계산, 텔레그램 알림을 구현했다. 구현 현황은 [docs/collector-spec.md](docs/collector-spec.md) 11절에 있다. 2026-09-30에 사용자가 맥북에 설치와 설정을 마쳤다고 알렸다. 맥북 사양과 운영 방식은 [docs/decisions.md](docs/decisions.md) D-014에 있다.
+- 수집 프로그램 v0.1이 [collector/](collector/)에 있다. 공식 피드 수집, 사건 전후의 가격 반응 계산(업비트, Kraken), 텔레그램 알림을 구현했다. 실시간 시세 감시와 시세 이상 알림도 구현했지만 사용자 결정으로 꺼 두었다 ([docs/decisions.md](docs/decisions.md) D-015). 구현 현황은 [docs/collector-spec.md](docs/collector-spec.md) 11절에 있다. 2026-09-30에 사용자가 맥북에 설치와 설정을 마쳤다고 알렸다. 맥북 사양과 운영 방식은 [docs/decisions.md](docs/decisions.md) D-014에 있다.
 - 결정되지 않은 사항은 [docs/open-questions.md](docs/open-questions.md)에 있다. 미결 사항을 임의로 확정하지 않는다. 임시 기본값이 있는 항목은 그 값으로 작업을 진행하고, 임시 기본값을 적용했다는 사실을 결과물(PR 설명이나 research 폴더의 README.md)에 적는다. 임시 기본값이 "없음"인 항목은 사용자에게 확인한다. 사용자에게 물을 수 없는 실행 환경에서는 그 부분을 진행하지 않고, 진행하지 않은 이유를 결과물에 적는다.
 - 작업 단계가 바뀌면 이 절도 함께 갱신한다.
 

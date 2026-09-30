@@ -99,7 +99,7 @@ SEC_USER_AGENT="Hong Gildong personal-research gildong@example.com"
 알림은 다음과 같이 온다.
 
 - `[HIGH]`: 한 자료에 기관과 프로젝트가 함께 나왔다.
-- `[MEDIUM]`: 기관이나 규제기관의 피드에 프로젝트가 나왔거나, 60분 동안 한 종목이 같은 거래소의 BTC보다 3%p 이상 더 움직였다 ([decisions.md](decisions.md) D-011).
+- `[MEDIUM]`: 기관이나 규제기관의 피드에 프로젝트가 나왔다. 60분 동안 BTC보다 크게 움직인 종목을 알리는 시세 이상 알림은 꺼 두었다 ([decisions.md](decisions.md) D-015).
 
 모든 알림은 `data/collector.log`에도 남는다. 전송에 실패한 알림은 5분마다 다시 보내며, 최대 12번(약 1시간) 시도한다. 토큰이 유출되었다고 생각되면 BotFather에서 `/revoke`로 새 토큰을 받고 `.env`를 고친다.
 
@@ -118,11 +118,11 @@ SEC_USER_AGENT="Hong Gildong personal-research gildong@example.com"
 .venv/bin/python -m collector once           # 모든 뉴스 수집원을 한 번씩 확인
 .venv/bin/python -m collector status         # 수집원과 시세 거래소별 마지막 정상 확인 시각과 오류
 .venv/bin/python -m collector events --days 7
-.venv/bin/python -m collector market         # 업비트와 Kraken 시세를 한 번 확인
+.venv/bin/python -m collector market         # 시세를 한 번 확인 (시세 감시를 꺼 둔 동안에는 안내만 출력)
 .venv/bin/python -m collector reactions      # 최근 사건의 가격 반응 계산
 ```
 
-`run`으로 상시 실행하면 뉴스 수집원은 각자의 주기로, 시세는 5분마다, 가격 반응은 30분마다 갱신된다. 주기와 감시 종목은 `config/sources.yaml`과 `config/market.yaml`에서 바꾼다.
+`run`으로 상시 실행하면 뉴스 수집원은 각자의 주기로, 가격 반응은 30분마다 갱신된다. 실시간 시세 감시와 시세 이상 알림은 꺼 두었다 ([decisions.md](decisions.md) D-015). 주기와 가격 반응을 계산할 종목은 `config/sources.yaml`과 `config/market.yaml`에서 바꾼다.
 
 사건을 검토한 결과는 다음과 같이 기록한다. 연결 등급과 사업 단계의 뜻은 [research-principles.md](research-principles.md) 2절과 4절에 있다.
 
