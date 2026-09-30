@@ -11,8 +11,8 @@
 
 ## 현재 상태 (2026-09-30 기준)
 
-- 저장소: https://github.com/tlzkrh1029/crypto_institution_research (공개). main 브랜치가 생기기 전까지 GitHub 기본 브랜치는 `claude/blissful-cerf-rr8n08`이다 ([docs/open-questions.md](docs/open-questions.md) Q5).
-- 설계 단계이며, 수집 프로그램 코드는 아직 없다.
+- 저장소: https://github.com/tlzkrh1029/crypto_institution_research (공개). 기준 브랜치는 `main`이다 ([docs/decisions.md](docs/decisions.md) D-009). GitHub 기본 브랜치 설정을 main으로 바꾸는 일은 사용자가 한다. 바꾸기 전에는 GitHub 첫 화면에 Claude Code 작업 브랜치(`claude/blissful-cerf-rr8n08`)가 보일 수 있으므로, 이 저장소를 읽는 도구는 main을 기준으로 읽는다.
+- 수집 프로그램 v0.1이 [collector/](collector/)에 있다. 공식 피드 수집, 업비트와 Kraken 시세 감시, 가격 반응 계산, 텔레그램 알림을 구현했다. 구현 현황은 [docs/collector-spec.md](docs/collector-spec.md) 11절에 있다. 사용자의 맥북에서는 아직 실행하지 않았다 (2026-09-30 기준).
 - 결정되지 않은 사항은 [docs/open-questions.md](docs/open-questions.md)에 있다. 미결 사항을 임의로 확정하지 않는다. 임시 기본값이 있는 항목은 그 값으로 작업을 진행하고, 임시 기본값을 적용했다는 사실을 결과물(PR 설명이나 research 폴더의 README.md)에 적는다. 임시 기본값이 "없음"인 항목은 사용자에게 확인한다. 사용자에게 물을 수 없는 실행 환경에서는 그 부분을 진행하지 않고, 진행하지 않은 이유를 결과물에 적는다.
 - 작업 단계가 바뀌면 이 절도 함께 갱신한다.
 
@@ -24,13 +24,15 @@
 | [docs/research-principles.md](docs/research-principles.md) | 조사 원칙 | PR로 제안하고 사용자 승인 후 변경 |
 | [docs/hypotheses.md](docs/hypotheses.md) | 검증 중인 가설, 검증 방법, 기각 조건, 상태 | 근거가 생길 때마다 상태 갱신 |
 | [docs/institution-map.md](docs/institution-map.md) | 기관·업무·프로젝트·토큰 연결표 | 원문 링크가 있는 연결만 추가. 직접 확인하지 못한 항목은 "미확인"으로 표시 |
-| [docs/collector-spec.md](docs/collector-spec.md) | 수집 프로그램 설계 | 결정 사항에 맞춰 갱신 |
+| [docs/collector-spec.md](docs/collector-spec.md) | 수집 프로그램 설계와 구현 현황 | 결정 사항과 코드에 맞춰 갱신 |
+| [docs/setup-macos.md](docs/setup-macos.md) | 맥북 설치와 운영 안내 | 코드나 설정이 바뀌면 함께 갱신 |
 | [docs/decisions.md](docs/decisions.md) | 결정 기록 | 항목을 추가만 하고, 기존 항목은 고치지 않음 |
 | [docs/open-questions.md](docs/open-questions.md) | 미결 사항 | 결정되면 decisions.md에 기록하고 여기서는 "결정됨"으로 표시 |
 | [docs/writing-style-ko.md](docs/writing-style-ko.md) | 한국어 문서 작성 지침 (사용자 원문) | 수정·요약 금지 |
 | [research/](research/) | 날짜별 조사 기록과 원자료 | 새 폴더를 추가만 하고, 기존 기록은 고치지 않음 |
+| [collector/](collector/), [config/](config/), [tests/](tests/), [deploy/](deploy/) | 수집 프로그램 코드, 설정, 시험, 맥북 자동 실행 설정 | 코드를 바꾸면 시험도 함께 고치고, 시험이 모두 통과하는지 확인한 뒤 커밋 |
 
-처음 작업하는 AI는 이 파일, research-principles.md, open-questions.md, [README.md](README.md)의 "조사 기록" 표에서 날짜가 가장 늦은 폴더의 README.md(같은 날짜의 폴더가 여러 개면 그 폴더들의 README.md 모두) 순서로 읽는다. 조사 작업을 하면 hypotheses.md와 institution-map.md를 추가로 읽고, 한국어 문서를 쓰면 writing-style-ko.md를 전문으로 읽는다.
+처음 작업하는 AI는 이 파일, research-principles.md, open-questions.md, [README.md](README.md)의 "조사 기록" 표에서 날짜가 가장 늦은 폴더의 README.md(같은 날짜의 폴더가 여러 개면 그 폴더들의 README.md 모두) 순서로 읽는다. 조사 작업을 하면 hypotheses.md와 institution-map.md를 추가로 읽고, 수집 프로그램을 고치면 collector-spec.md와 setup-macos.md를 추가로 읽는다. 한국어 문서를 쓰면 writing-style-ko.md를 전문으로 읽는다.
 
 ## 작업 규칙
 
@@ -57,7 +59,7 @@
 ### 브랜치와 PR
 
 - AGENTS.md, CLAUDE.md, GEMINI.md, research-principles.md, decisions.md처럼 지침 성격을 가진 문서는 별도 브랜치와 PR로 변경을 제안한다. 사용자가 병합해야 반영된다.
-- PR은 GitHub 기본 브랜치를 대상으로 연다. main이 생기기 전까지 기본 브랜치는 Claude Code 작업 브랜치인 `claude/blissful-cerf-rr8n08`이다.
+- PR은 `main`을 대상으로 연다. main에는 직접 푸시하지 않고, 지침 문서가 아닌 코드, 설정, 조사 기록도 PR로 반영한다 ([docs/decisions.md](docs/decisions.md) D-013, 잠정).
 - 각 도구는 자기 작업 브랜치에서 작업한다. 사용자의 명시적인 허락 없이 다른 도구의 작업 브랜치에 푸시하지 않고, force-push는 하지 않는다.
 - PR을 열 수 없는 도구는 작업 브랜치를 푸시한 뒤 사용자에게 브랜치 이름을 알린다. 저장소에 쓸 수 없는 도구(웹 채팅 AI 등)는 파일을 고쳤다고 말하지 않고, 바꿀 파일의 경로와 내용을 사용자에게 제시한다.
 
