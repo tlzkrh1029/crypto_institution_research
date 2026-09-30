@@ -15,11 +15,12 @@ from . import db
 from .config import ConfigError, load_entities, load_settings, load_sources, validate
 from .fetch import Fetcher
 from .heartbeat import Heartbeat
-from .market.jobs import WINDOWS, load_market_config
+from .market.jobs import load_market_config
 from .market.runner import MarketRunner, make_clients
 from .notify import Alert, NotifierConfigError, make_notifier, telegram_chats
 from .pipeline import (Context, deliver_alert, due_sources, retry_undelivered, run_source,
                        sync_sources)
+from .report import build_report, reaction_lines
 from .review import ReviewError, review_event
 from .timeutil import fmt_kst, to_iso, utcnow
 
@@ -159,29 +160,6 @@ def cmd_reactions(args) -> int:
     return 0
 
 
-def _reaction_summary(conn, event_id: int) -> list[str]:
-    lines = []
-    rows = conn.execute(
-        """SELECT symbol, venue, window_name, asset_return, btc_return, excess_return, status
-           FROM price_reactions WHERE event_id = ? ORDER BY symbol""", (event_id,)).fetchall()
-    by_symbol: dict[str, dict[str, object]] = {}
-    for r in rows:
-        by_symbol.setdefault(r["symbol"], {})[r["window_name"]] = r
-    for symbol, windows in by_symbol.items():
-        cells = []
-        for name in WINDOWS:
-            r = windows.get(name)
-            if r is None:
-                continue
-            if r["status"] == "measured":
-                cells.append(f"{name} {r['asset_return']:+.1%} (vs BTC {r['excess_return']:+.1%})")
-            else:
-                cells.append(f"{name} {r['status']}")
-        venue = next(iter(windows.values()))["venue"]
-        lines.append(f"    {symbol} ({venue}): " + ", ".join(cells))
-    return lines
-
-
 def cmd_telegram_chat_id(args) -> int:
     settings, _, _ = _load(args.root)
     token = settings.env("TELEGRAM_BOT_TOKEN")
@@ -249,10 +227,17 @@ def cmd_events(args) -> int:
               f"items={r['n_items']} rerun={r['n_rerun']} {r['symbols'] or ''}")
         print(f"    {r['title']}")
         print(f"    entities: {r['entities'] or ''}")
-        for line in _reaction_summary(conn, r["id"]):
+        for line in reaction_lines(conn, r["id"]):
             print(line)
     if not rows:
         print("no events")
+    return 0
+
+
+def cmd_report(args) -> int:
+    settings, _, _ = _load(args.root)
+    conn = db.connect(settings.db_path)
+    print(build_report(conn, utcnow(), days=args.days), end="")
     return 0
 
 
@@ -317,6 +302,9 @@ def main(argv: list[str] | None = None) -> int:
     events = sub.add_parser("events", help="list recent events")
     events.add_argument("--days", type=int, default=7)
     events.set_defaults(func=cmd_events)
+    report = sub.add_parser("report", help="operating report for the last N days (to paste)")
+    report.add_argument("--days", type=int, default=7)
+    report.set_defaults(func=cmd_report)
     sub.add_parser("telegram-chat-id", help="show chat ids that messaged the bot").set_defaults(
         func=cmd_telegram_chat_id)
     sub.add_parser("notify-test", help="send a test alert through NOTIFIER").set_defaults(

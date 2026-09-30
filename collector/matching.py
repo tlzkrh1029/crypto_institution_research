@@ -59,18 +59,23 @@ class Assessment:
     themes: tuple[str, ...]
     tokens: tuple[str, ...]
     level: str | None  # "high", "medium" or None (record only)
+    publisher_only: bool = False
 
     @property
     def makes_event(self) -> bool:
         """Projects always; institutions only together with a theme.
 
         An institution name alone (e.g. every post in DTCC's own feed) is kept
-        as an item but does not become an event.
+        as an item but does not become an event. Neither is a post in a
+        project's own feed that names no institution and no other project.
         """
+        if self.publisher_only:
+            return False
         return bool(self.projects or (self.institutions and self.themes))
 
 
-def assess(matches: list[Match], publisher_kind: str) -> Assessment:
+def assess(matches: list[Match], publisher_kind: str,
+           publisher_entity: str | None = None) -> Assessment:
     """Decide how loudly to report a new event (docs/collector-spec.md section 6).
 
     high:   an institution and a project/token appear together
@@ -88,4 +93,7 @@ def assess(matches: list[Match], publisher_kind: str) -> Assessment:
         level = "high"
     elif projects and publisher_kind in {"institution", "regulator"}:
         level = "medium"
-    return Assessment(institutions, projects, themes, tokens, level)
+    # A project writing about itself is its normal output, not an event.
+    publisher_only = (publisher_kind == "project" and not institutions
+                      and set(projects) <= {publisher_entity})
+    return Assessment(institutions, projects, themes, tokens, level, publisher_only)

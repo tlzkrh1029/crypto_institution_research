@@ -53,14 +53,14 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 | SEC SRO 규칙 변경 | 거래소의 19b-4(규칙 변경 신청) | SEC SRO 규칙 변경 페이지(https://www.sec.gov/rules-regulations/self-regulatory-organization-rulemaking), 각 거래소 웹사이트 | 19b-4는 EDGAR에 올라오지 않는다. 2025-09-17 SEC가 현물 상품 ETP의 일반 상장 기준을 승인한 뒤로는 기준을 충족하는 상품이 19b-4 없이 상장할 수 있다 | 2026-09-30 확인 |
 | 연준 | 거시 정책 | `https://www.federalreserve.gov/feeds/press_all.xml` (목록: https://www.federalreserve.gov/feeds/feeds.htm) | 따로 표시하지 않은 정보는 퍼블릭 도메인이다. 연준을 출처로 밝힌다. 첫 요청이 일시적으로 실패한 적이 있으므로 재시도를 둔다 | 2026-09-30 작동과 이용 조건 확인 |
 | PR Newswire, Business Wire, GlobeNewswire | 기관과 프로젝트의 보도자료 | PR Newswire 분야별 RSS(예: `https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss`), Business Wire의 `feed.businesswire.com` RSS, GlobeNewswire `https://www.globenewswire.com/rss/list`의 분야별 피드 | PR Newswire는 자동 접근, 데이터베이스 저장, AI 이용을 약관에서 금지한다(제한). Business Wire는 약관 원문을 확인하지 못했고, 검색 결과로는 저장·집계를 금지한다(불명확). GlobeNewswire는 독자용 약관이 없다(불명확). 사용자가 정하기 전에는 구현하지 않는다 (Q10) | 2026-09-30 이용 조건 확인. 보류 |
-| 프로젝트 공식 블로그 (Chainlink, Hedera, Stellar, Quant, Ondo 등) | 프로젝트 발표 | RSS 우선, 없으면 공개 페이지 변경 확인 | robots.txt와 이용 조건을 확인한다 | 미확인 |
+| 프로젝트 공식 블로그 (Chainlink, Hedera, Stellar, Quant, Ondo, 대조군 Ripple) | 프로젝트 발표 | 공식 RSS만 쓴다. 공개 페이지의 HTML은 읽지 않는다 | Hedera는 가능, Stellar는 개인·비상업적 이용 조건으로 가능하다(공개 기록에는 링크만 남긴다). Chainlink 보도자료 RSS는 불명확하고, Quant는 약관이 저장을 금지하며, Ondo와 Ripple은 피드가 없고 약관이 자동 추출을 금지한다. 이 네 곳은 Q10에서 정한다. 프로젝트 쪽 피드가 있는 종목이 HBAR와 XLM뿐이므로 종목별 비교에 주의한다 ([2026-09-30 프로젝트 피드 점검](../research/2026-09-30-claude-project-feed-check/README.md)) | 2026-09-30 작동과 이용 조건 확인. Hedera와 Stellar는 v0.1에 추가 |
 | 업비트 | 국내 가격과 거래대금, 가격 반응 | 공개 API (키 불필요): 시세 `/v1/ticker`, 시간봉 `/v1/candles/minutes/60` (요청당 200개) | Open API 약관(2024-10-30 시행)상 비영리 이용이 가능하다. IP당 그룹별 초당 10회 이하로 요청한다(수집기는 초당 5회 이하). 원자료는 로컬에만 두고, 파생 결과의 공개는 Q11에서 정한다. QNT는 상장되어 있지 않다 | 2026-09-30 작동과 이용 조건 확인. v0.1에 구현 |
 | 코인베이스 | 미국 거래 비중과 가격 프리미엄 | `https://api.exchange.coinbase.com/products/{id}/ticker`, `https://api.coinbase.com/api/v3/brokerage/market/products/{id}` (인증 불필요) | 시장 데이터 약관은 개인·연구 목적 이용만 허락하고, 서면 동의 없이 파생 결과를 외부에 배포하거나 데이터를 AI 기술에 쓰는 것을 금지한다. 공개 저장소와 AI에 쓰지 않는 개인 확인용으로만 쓸 수 있다 (Q12) | 2026-09-30 작동과 이용 조건 확인. 제한, 미구현 |
 | CoinGecko | 전체 가격, 시총, 거래량 | 공개 API | 키 없이 호출하면 IP 단위로 제한된다. 무료 Demo 키(`x-cg-demo-api-key`)를 `.env`에 두고 쓴다. Demo 한도는 분당 100회, 월 10,000회다. 5분마다 1회만 호출해도 30일에 8,640회이므로, 빠른 경로의 가격 감시는 업비트와 코인베이스 공개 API로 하고 CoinGecko는 15분~1시간 주기의 전체 시장 집계에 쓴다. [API 약관](https://www.coingecko.com/en/api_terms)에 따라 이 데이터를 보여 주는 대시보드, 보고서, 문서에는 "Powered by CoinGecko"를 표시한다. 약관은 데이터 저장을 권장하지 않으므로(저장한다면 24시간마다 갱신하고 보안 조치를 한다), 원자료는 로컬 `data/`에만 둔다. Demo는 과거 데이터를 최근 365일까지만 준다 | 2026-09-30 키 없는 호출의 제한, 한도, 약관 확인. 미구현 |
 | 빗썸 | 국내 가격 (업비트 보조) | 공개 API (키 불필요): `/v1/ticker`, `/v1/candles/...` (요청당 200개) | 비영리 이용이 가능하다. 분류별 초당 150회 이하로 요청한다. 데이터를 타인에게 양도하거나 복제·유통하는 것을 금지하므로, 파생 결과의 공개는 Q11에서 정한다. QNT는 상장되어 있지 않다 | 2026-09-30 작동과 이용 조건 확인. 미구현 |
 | Kraken | QNT 가격 (업비트와 빗썸에 상장되지 않음) | 공개 API `/0/public/Ticker`, `/0/public/OHLC` (시간봉 최근 720개) | API 안내는 공개 엔드포인트의 개인적 이용을 허용하지만, 일반 약관 9항은 자동화 도구를 금지해 서로 충돌한다. 사용자가 QNT 가격 출처로 정했고, 이 충돌은 결정 뒤에 사용자에게 알렸다 (D-012). 초당 1회 미만으로 요청한다(수집기는 1.1초 간격). 파생 결과의 공개는 Q11을 따른다 | 2026-09-30 작동과 이용 조건 확인. v0.1에 구현 |
 | CoinMarketCap API (무료 Basic) | 최신 시세 | 공식 API (키 필요) | 약관이 캐시 외의 저장과 파생 저작물을 금지하고, 과거 데이터와 캔들을 제공하지 않는다. 출처 표기가 필요하다 | 2026-09-30 이용 조건 확인. 제한, 미구현 |
-| 무기한 선물 거래소 (바이낸스, 바이빗 등) | 미결제약정, 펀딩비 | 공개 API | 접속 지역 제한이 있다. 2026-09-30 미국 소재 클라우드 환경에서 바이낸스 API는 이용약관의 "b. Eligibility" 조항을 근거로 거부(HTTP 451)했고, 바이빗 API도 국가 단위로 차단(HTTP 403)했다. 설치 장소에서 접속되는지와 함께, 그 지역이 약관상 제한 지역인지도 확인한다 | 일부 확인 |
+| 무기한 선물 거래소 (바이낸스, 바이빗 등) | 미결제약정, 펀딩비 | 공개 API | 접속 지역 제한이 있다. 2026-09-30 미국 소재 클라우드 환경에서 바이낸스 API는 이용약관의 "b. Eligibility" 조항을 근거로 거부(HTTP 451)했고, 바이빗 API도 국가 단위로 차단(HTTP 403)했다. 사용자의 설치 장소에서는 바이낸스 API가 응답했다(HTTP 200, 2026-09-30 사용자 확인). 그 지역이 약관상 제한 지역인지는 확인하지 못했다 | 일부 확인 |
 | ETF 흐름 | 토큰 직접 수요 | 운용사 공개 보유량, 집계 사이트 | 출처별 이용 조건을 확인한다 | 미확인 |
 
 제외하거나 보류한 수집원은 다음과 같다.
@@ -108,7 +108,8 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 
 사건 묶기 규칙은 다음과 같다 ([collector/events.py](../collector/events.py)).
 
-- 기관이나 프로젝트가 대조된 자료만 사건을 만든다. 테마만 대조된 자료는 items에 대조 결과와 함께 저장해 두고, 나중에 검색할 때 쓴다.
+- 프로젝트가 대조된 자료, 또는 기관과 테마가 함께 대조된 자료만 사건을 만든다. 기관 이름만 대조된 자료(예: DTCC가 직접 낸 피드의 모든 글)와 테마만 대조된 자료는 items에 대조 결과와 함께 저장해 두고, 나중에 검색할 때 쓴다.
+- 프로젝트가 직접 낸 피드(publisher_kind: project)에서는 모든 글에 그 프로젝트가 나오므로, 기관이나 다른 프로젝트가 함께 대조될 때만 사건을 만든다 ([collector/matching.py](../collector/matching.py)).
 - 최근 30일 안의 사건 가운데 같은 기관이나 프로젝트가 등장하고 제목이 비슷하면(제목 단어의 Jaccard 유사도 0.4 이상) 같은 사건으로 묶는다. 자료의 발표 시각이 그 사건의 최초 발표보다 14일 이상 늦으면 role을 rerun(재확산)으로 기록한다.
 - 연결 등급(event_assets.directness)은 unknown으로 시작하며, 검토를 거쳐 정한다.
 
@@ -147,14 +148,14 @@ v0.1 코드는 이 가운데 첫 번째부터 세 번째 기준까지를 다음�
 
 ## 8. 실행 환경 (맥북 기준 초안)
 
-맥북 모델과 macOS 버전은 아직 확인하지 못했다 ([open-questions.md](open-questions.md) Q2). 확인할 위치는 [setup-macos.md](setup-macos.md) 1절에 있다.
+사용자의 맥북은 Apple Silicon, 메모리 16GB, macOS Tahoe 26.6.2이고, FileVault가 켜져 있다 (2026-09-30 사용자 확인, [decisions.md](decisions.md) D-014).
 
 - Python 3.11 이상, 가상환경, SQLite를 쓴다. v1은 Docker 없이 구성한다.
 - 수집 데이터와 SQLite 파일은 저장소 루트의 `data/`에 둔다. `data/`와 `*.db`, `*.sqlite`는 .gitignore로 제외되어 있으므로, 다른 경로에 수집 데이터를 저장하지 않는다.
 - 비밀 값(`SEC_USER_AGENT`에 넣는 이메일, 텔레그램 봇 토큰, 감시 서비스의 신호 주소 등)은 `.env` 파일에, 파일 형태의 인증 정보는 `secrets/` 폴더에 두고, 둘 다 커밋하지 않는다.
 - launchd의 LaunchAgent로 자동 실행과 재시작을 관리한다.
 - 전원이 연결된 상태에서 시스템 잠자기를 끈다. 외부 모니터 없이 덮개를 닫으면 잠자기에 들어가므로, 덮개를 열어 두거나 별도 설정을 한다.
-- LaunchAgent는 사용자가 로그인한 뒤에만 실행된다. 따라서 재부팅 뒤 수집이 저절로 다시 시작되려면 자동 로그인이 켜져 있어야 한다. FileVault가 켜져 있으면 자동 로그인을 쓸 수 없으므로, 누군가 FileVault 잠금 화면에서 암호를 입력하기 전까지 수집이 멈춘다. 반대로 FileVault를 끄면 디스크가 암호화되지 않으므로 `.env`에 둔 비밀 값의 보호 수준도 함께 고려한다. 맥북은 배터리가 있어 짧은 정전에는 꺼지지 않는다. Apple Silicon 맥북은 꺼진 상태에서 전원에 연결되면 자동으로 켜지며, macOS Sequoia 15 이상에서는 이 동작을 끌 수 있다. 배터리가 모두 닳은 뒤 전원이 돌아왔을 때도 켜지는지는 설치 뒤 직접 시험한다. 운영 방식은 [open-questions.md](open-questions.md) Q2에서 FileVault 사용 여부와 함께 정한다 ([Apple: 자동 로그인](https://support.apple.com/ko-kr/102316), [Apple: 맥북 자동 켜짐](https://support.apple.com/ko-kr/120622), [Apple: launchd 작업](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html), 2026-09-30 확인).
+- LaunchAgent는 사용자가 로그인한 뒤에만 실행된다. 따라서 재부팅 뒤 수집이 저절로 다시 시작되려면 자동 로그인이 켜져 있어야 한다. FileVault가 켜져 있으면 자동 로그인을 쓸 수 없으므로, 누군가 FileVault 잠금 화면에서 암호를 입력하기 전까지 수집이 멈춘다. 반대로 FileVault를 끄면 디스크가 암호화되지 않으므로 `.env`에 둔 비밀 값의 보호 수준도 함께 고려한다. 맥북은 배터리가 있어 짧은 정전에는 꺼지지 않는다. Apple Silicon 맥북은 꺼진 상태에서 전원에 연결되면 자동으로 켜지며, macOS Sequoia 15 이상에서는 이 동작을 끌 수 있다. 배터리가 모두 닳은 뒤 전원이 돌아왔을 때도 켜지는지는 설치 뒤 직접 시험한다. 사용자의 맥북에서는 FileVault를 켠 채로 운영하고, 재부팅 뒤에는 직접 로그인한다 (D-014, 잠정) ([Apple: 자동 로그인](https://support.apple.com/ko-kr/102316), [Apple: 맥북 자동 켜짐](https://support.apple.com/ko-kr/120622), [Apple: launchd 작업](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html), 2026-09-30 확인).
 - 수집이 멈췄다는 사실을 프로그램이 스스로 알릴 수는 없다. 외부의 무료 감시 서비스(예: healthchecks.io의 무료 요금제, 작업 20개까지 감시)에 주기적으로 신호를 보내고, 신호가 끊기면 휴대전화로 알림을 받는다. 감시 서비스의 신호 주소(ping URL)는 그 자체가 인증 정보이므로 `.env`에 둔다.
 - 항상 전원에 연결해 두므로 배터리가 오래 100%로 유지되지 않게 한다. Apple Silicon 맥북에 macOS Tahoe 26.4 이상이 설치되어 있으면, 시스템 설정 > 배터리에서 충전 옆의 정보 버튼을 눌러 충전 한도를 80~100% 사이에서 정한다(예: 80%). 그 밖의 맥북에서는 최적화된 배터리 충전을 켠다(macOS Big Sur 11 이상). 최적화된 배터리 충전은 특정 상황에서만 80% 이상 충전을 미룬다. 두 기능 모두 배터리 잔량 추정을 위해 가끔 100%까지 충전한다 ([Apple 지원](https://support.apple.com/ko-kr/102338), 2026-09-30 확인).
 - 대시보드는 로컬 웹 서버로 띄우고, 기본적으로 맥북 안에서만 접속한다.
@@ -170,6 +171,8 @@ v0.1 코드는 이 가운데 첫 번째부터 세 번째 기준까지를 다음�
 - 실제로 든 비용
 - 쌓인 사건 기록이 가설을 검증하기에 충분한지
 
+`collector report --days 7` 명령은 이 가운데 기계적으로 셀 수 있는 항목을 한 번에 정리한다. 수집원별 확인 횟수와 오류, 발견 지연(발표 시각부터 수집 시각까지의 중앙값과 최댓값), 수집 공백(20분 넘게 아무 기록이 없던 구간), 새 사건과 가격 반응, 같은 사건에 두 번 이상 보낸 알림, 시세 이상 알림을 보여 준다. 수집원을 처음 확인할 때 기준선으로 저장된 기존 자료의 사건은 개수만 센다. 출력에는 비밀 값과 가격 원자료가 들어가지 않으므로, 대화에 붙여 넣어 검토할 수 있다. 놓친 사건, 잘못 연결한 종목, 비용은 사람이 따로 확인한다.
+
 ## 10. 비용 참고
 
 - X API: 게시물 읽기 1건당 $0.005 (2026-09-30 X 공식 문서 확인). 하루 100건을 읽으면 30일에 약 $15다.
@@ -182,13 +185,14 @@ v0.1 코드는 이 가운데 첫 번째부터 세 번째 기준까지를 다음�
 
 | 기능 | 상태 |
 |---|---|
-| 뉴스 수집 (RSS, Atom, 사이트맵) | 구현. 켜진 수집원은 SEC 보도자료와 발언(`SEC_USER_AGENT` 필요), 연준 보도자료, DTCC Insights다 ([config/sources.yaml](../config/sources.yaml)) |
+| 뉴스 수집 (RSS, Atom, 사이트맵) | 구현. 켜진 수집원은 SEC 보도자료와 발언(`SEC_USER_AGENT` 필요), 연준 보도자료, DTCC Insights, Hedera 블로그, Stellar 블로그다 ([config/sources.yaml](../config/sources.yaml)) |
 | 엔터티 대조, 사건 묶기, 재확산 표시 | 구현 ([config/entities.yaml](../config/entities.yaml)) |
 | 알림 | 구현. 로그 파일과 alerts 테이블에 남기고, 설정하면 텔레그램 봇으로 보낸다. 실패한 알림은 다시 보낸다 (D-010, [setup-macos.md](setup-macos.md) 4-2절) |
 | 시세 감시와 이상 감지 | 구현. 업비트(LINK, XLM, HBAR, ONDO, XRP)와 Kraken(QNT)의 시세를 5분마다 기록하고, 60분 동안 같은 거래소의 BTC보다 3%p 이상 더 움직인 종목을 알린다 ([config/market.yaml](../config/market.yaml), D-011, D-012) |
 | 가격 반응 | 구현. 사건의 최초 발표 시각을 기준으로, 종목마다 정해진 거래소(업비트 또는 Kraken)의 시간봉 종가로 계산한다. Kraken은 최근 30일(720시간)의 시간봉만 주므로, 그보다 오래된 사건의 QNT 반응은 no_data가 된다. 기준 시각의 가격은 그 시각 직전에 끝난 시간봉의 종가다. BTC 대비 초과 수익률을 함께 저장한다. 같은 시총 구간 중앙값은 아직 계산하지 않는다 |
 | 사건 검토 기록 | 구현 (`collector review`) |
 | 외부 감시 신호 | 구현 (`HEARTBEAT_URL`) |
-| 대시보드, 주간 보고 | 미구현. 지금은 `status`, `events`, `items` 명령으로 확인한다 |
+| 운영 요약 | 구현 (`collector report --days N`, 9절) |
+| 대시보드 | 미구현. 지금은 `status`, `events`, `items`, `report` 명령으로 확인한다 |
 | 느린 경로의 AI 해석 | 미구현 (Q8) |
 | 거래소 비중, 선물 지표, ETF 흐름 | 미구현 |

@@ -46,3 +46,18 @@ def test_control_group_is_marked(entities):
     matches = match_text("Ripple expands RLUSD stablecoin custody with a bank", entities)
     ripple = [m for m in matches if m.entity_id == "ripple"]
     assert ripple and ripple[0].control
+
+
+def test_project_feed_needs_more_than_the_project_itself(entities):
+    own = match_text("Chainlink CCIP now live on a new chain, tokenization tooling", entities)
+    assert not assess(own, "project", "chainlink").makes_event
+    # The same text in a newswire is still an event.
+    assert assess(own, "newswire").makes_event
+
+    with_bank = match_text("Swift and Chainlink complete tokenized fund pilot with banks",
+                           entities)
+    result = assess(with_bank, "project", "chainlink")
+    assert result.makes_event and result.level == "high"
+
+    other_project = match_text("Chainlink data feeds now available on Hedera", entities)
+    assert assess(other_project, "project", "chainlink").makes_event

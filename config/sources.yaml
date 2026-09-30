@@ -61,6 +61,38 @@ sources:
     store_excerpt: false
     terms_checked: "2026-09-30 dtcc.com terms (2026-03-11) and RSS page"
 
+  # Project feeds (research/2026-09-30-claude-project-feed-check/). A post
+  # that names only the publishing project does not become an event.
+  # Hedera terms (2025-11-24): no automated-access clause; no copying or
+  # dissemination for commercial purposes. The feed carries full text, so only
+  # title, link and date are kept. robots.txt asks for Crawl-delay 10.
+  - id: hedera-blog
+    name: Hedera blog
+    kind: feed
+    url: https://hedera.com/feed/
+    interval_sec: 1800
+    publisher_kind: project
+    publisher_entity: hedera
+    store_excerpt: false
+    terms_checked: "2026-09-30 hedera.com terms (2025-11-24) and robots.txt"
+
+  # Stellar terms (2026-03-23): personal, non-commercial use only; no copying
+  # or publishing for public purposes. Kept privately; public records cite the
+  # link only. The feed sends no ETag or Last-Modified.
+  - id: stellar-blog
+    name: Stellar blog
+    kind: feed
+    url: https://stellar.org/blog/rss.xml
+    interval_sec: 1800
+    publisher_kind: project
+    publisher_entity: stellar
+    store_excerpt: false
+    terms_checked: "2026-09-30 stellar.org terms of service (2026-03-23) and robots.txt"
+
+  # Not added (terms restrict it or are unclear; docs/open-questions.md Q10):
+  # Chainlink press-release RSS (unclear), Quant /feed/ (terms forbid storing),
+  # Ondo and Ripple (no feed; terms forbid automated extraction).
+
   # DTCC press releases are listed only in the sitemap. The terms forbid
   # systematic extraction; reading sitemap entries needs the user's decision
   # (docs/open-questions.md Q10). Kept disabled.

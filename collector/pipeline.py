@@ -165,7 +165,7 @@ def _process_item(ctx: Context, source: SourceConfig, raw: RawItem, now: datetim
         ).lastrowid
     outcome.items_new += 1
 
-    assessment = assess(matches, source.publisher_kind)
+    assessment = assess(matches, source.publisher_kind, source.publisher_entity)
     if not assessment.makes_event:
         return  # kept in items (with matched_entities) for later search
     token_mention = "yes" if any(
