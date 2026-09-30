@@ -82,10 +82,34 @@ def test_report_sections():
 
 def test_report_lists_gaps_and_ongoing_outage():
     text = build_report(seeded(), NOW, days=7)
-    # 290 -> 170 minutes ago is a 2h gap; 20 minutes ago -> now is exactly the limit.
+    # 290 -> 170 minutes ago is a 2h gap. The failed fed-press run 20 minutes ago
+    # collected nothing, so the outage since the poll 170 minutes ago is ongoing.
     assert "2h00m" in text
-    assert "gaps longer than 20m:" in text
+    assert "gaps longer than 20m: 3 (total 9h40m)" in text
+    assert "2h50m (ongoing)" in text
     assert "market polls: upbit 4" in text
+
+
+def test_failed_runs_do_not_hide_an_offline_period():
+    """Offline for the last two hours: market polls still write an error row every
+    5 minutes, news sources at growing backoff intervals."""
+    conn = db.connect(":memory:")
+    for minutes_ago in range(240, 120, -5):
+        conn.execute("INSERT INTO market_snapshots VALUES ('upbit', 'BTC', 'KRW', ?, 1.0, NULL)",
+                     (iso(minutes_ago),))
+        conn.execute("""INSERT INTO runs (source_id, started_at, finished_at, status)
+                        VALUES ('market:upbit', ?, ?, 'ok')""",
+                     (iso(minutes_ago), iso(minutes_ago)))
+    offline = [("market:upbit", m) for m in range(120, 0, -5)]
+    offline += [("fed-press", m) for m in (120, 110, 90, 50)]
+    for source_id, minutes_ago in offline:
+        conn.execute("""INSERT INTO runs (source_id, started_at, finished_at, status, error)
+                        VALUES (?, ?, ?, 'error', 'ConnectionError')""",
+                     (source_id, iso(minutes_ago), iso(minutes_ago)))
+    conn.commit()
+    text = build_report(conn, NOW, days=1)
+    assert "gaps longer than 20m: 1 (total 2h05m)" in text
+    assert "2h05m (ongoing)" in text
 
 
 def test_report_never_prints_prices():
@@ -96,3 +120,42 @@ def test_report_on_empty_database():
     text = build_report(db.connect(":memory:"), NOW, days=7)
     assert "no activity recorded in this period" in text
     assert "new events: 0" in text
+
+
+def test_report_lists_market_polls_in_sources_section():
+    conn = seeded()
+    for minutes_ago, status, error in [(30, "ok", None), (25, "error", "HTTP 520"),
+                                       (20, "ok", None)]:
+        conn.execute("""INSERT INTO runs (source_id, started_at, finished_at, status, items_seen,
+                                          error) VALUES ('market:kraken', ?, ?, ?, 2, ?)""",
+                     (iso(minutes_ago), iso(minutes_ago), status, error))
+    conn.commit()
+    text = build_report(conn, NOW, days=7)
+    sources = text[text.index("## sources"):text.index("## coverage")]
+    line = next(x for x in sources.splitlines() if x.startswith("market:kraken"))
+    assert line.split()[1:5] == ["2", "-", "1", "-"]
+    assert line.endswith("2026-10-07 08:35 KST HTTP 520")   # even though it recovered
+    # Old market runs outside the period are not listed.
+    assert "market:" not in build_report(conn, NOW + timedelta(days=30), days=7).split(
+        "## coverage")[0]
+
+
+def test_status_shows_market_venues(tmp_path, capsys):
+    import shutil
+    from pathlib import Path
+
+    from collector.__main__ import main
+
+    repo = Path(__file__).resolve().parent.parent
+    shutil.copytree(repo / "config", tmp_path / "config")
+    conn = db.connect(tmp_path / "data" / "collector.db")
+    conn.execute("""INSERT INTO runs (source_id, started_at, finished_at, status, error)
+                    VALUES ('market:kraken', '2026-09-30T10:20:00Z', '2026-09-30T10:20:00Z',
+                            'error', 'ReadTimeout: read timed out')""")
+    conn.commit()
+    conn.close()
+    assert main(["--root", str(tmp_path), "status"]) == 0
+    out = capsys.readouterr().out.splitlines()
+    kraken = next(x for x in out if x.startswith("market:kraken"))
+    assert kraken.split()[1:3] == ["-", "1"] and kraken.endswith("ReadTimeout: read timed out")
+    assert next(x for x in out if x.startswith("market:upbit")).split()[1:3] == ["-", "0"]

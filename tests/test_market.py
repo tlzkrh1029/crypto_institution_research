@@ -2,12 +2,16 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from collector import fetch
+from collector.fetch import FetchError
 from collector.market.base import Candle, Ticker
 from collector.market.jobs import (
     MarketConfig, VenueConfig, compute_reactions, ensure_candles, load_market_config,
     poll_tickers, price_at)
 from collector.market.kraken import KrakenClient
+from collector.market.runner import MarketRunner
 from collector.market.upbit import UpbitClient
+from collector.report import build_report, market_status
 
 from .conftest import ROOT
 
@@ -223,3 +227,114 @@ def test_upbit_client_parses_ticker_and_candles():
     assert client.tickers(["KRW-HBAR"])[0].price == 145.0
     candle = client.hourly_candles("KRW-HBAR", T0)[0]
     assert candle.start_at == datetime(2026, 9, 30, 5, tzinfo=timezone.utc)
+
+
+class Clock:
+    def __init__(self):
+        self.t = 5000.0
+
+    def __call__(self):
+        return self.t
+
+    def sleep(self, seconds):
+        self.t += seconds
+
+
+class ClosingFakeSession(FakeSession):
+    def __init__(self, routes):
+        super().__init__(routes)
+        self.closed = 0
+
+    def close(self):
+        self.closed += 1
+
+
+def test_kraken_burst_reuses_the_connection_and_the_next_tick_resets_it():
+    session = ClosingFakeSession({
+        "AssetPairs": {"error": [], "result": {"QNTUSD": {"altname": "QNTUSD"}}},
+        "Ticker": {"error": [], "result": {"QNTUSD": {"c": ["1", "1"], "v": ["1", "1"]}}},
+    })
+    clock = Clock()
+    client = KrakenClient("ua", session, sleep=clock.sleep, monotonic=clock, clock=clock)
+    client.markets()
+    client.tickers(["QNTUSD"])                 # 1.1 s later, same burst
+    client.tickers(["QNTUSD"])
+    assert session.closed == 0 and len(session.calls) == 3
+    clock.t += 300                             # the next ticker poll
+    client.tickers(["QNTUSD"])
+    assert session.closed == 1
+    assert fetch.IDLE_RESET_SEC < 300
+
+
+class BrokenVenue(FakeVenue):
+    def __init__(self, error, **kwargs):
+        super().__init__(linear_prices, **kwargs)
+        self.error = error
+
+    def tickers(self, market_ids):
+        if self.error is not None:
+            raise self.error
+        return super().tickers(market_ids)
+
+
+def runs(conn):
+    return {r["source_id"]: r for r in conn.execute(
+        "SELECT * FROM runs WHERE source_id GLOB 'market:*' ORDER BY id")}
+
+
+def test_ticker_polls_are_recorded_in_runs_and_failures_are_isolated(harness):
+    ctx, *_ = harness
+    upbit = FakeVenue(linear_prices)
+    upbit.ticker_prices = {"KRW-BTC": 100.0, "KRW-HBAR": 10.0}
+    kraken = BrokenVenue(FetchError("ConnectionError: ('Connection aborted.', "
+                                    "ConnectionResetError(54, 'Connection reset by peer'))"),
+                         name="kraken", listed={"USD-BTC", "USD-QNT"})
+    bithumb = BrokenVenue(KeyError("trade_price"), name="bithumb",
+                          listed={"KRW-BTC", "KRW-XRP"})
+    c = cfg(venue("bithumb", "KRW", ("XRP",)), venue("kraken", "USD", ("QNT",)), venue())
+    runner = MarketRunner(ctx, c, {"bithumb": bithumb, "kraken": kraken, "upbit": upbit})
+    runner.tick(T0)                             # bithumb and kraken fail first
+    rows = runs(ctx.conn)
+    assert rows["market:upbit"]["status"] == "ok"
+    assert rows["market:upbit"]["items_seen"] == 2          # BTC and HBAR stored
+    assert rows["market:kraken"]["status"] == "error"
+    assert "ConnectionResetError(54" in rows["market:kraken"]["error"]
+    assert rows["market:bithumb"]["error"] == "KeyError: 'trade_price'"
+    assert ctx.conn.execute("SELECT COUNT(*) FROM price_reactions").fetchone()[0] == 0
+
+    kraken.error = FetchError("HTTP 520", 520)
+    runner.tick(T0 + timedelta(minutes=5))
+    health = market_status(ctx.conn, "kraken")
+    assert health["failures"] == 2 and health["last_error"] == "HTTP 520"
+    assert market_status(ctx.conn, "upbit")["failures"] == 0
+
+    text = build_report(ctx.conn, T0 + timedelta(minutes=10), days=1)
+    line = next(x for x in text.splitlines() if x.startswith("market:kraken"))
+    assert line.split()[1:5] == ["0", "-", "2", "-"]       # ok, 304, err, skip
+    assert line.endswith("2026-09-24 23:35 KST HTTP 520")   # last error of the period
+    line = next(x for x in text.splitlines() if x.startswith("market:upbit"))
+    assert line.split()[1:4] == ["2", "-", "0"]
+    assert "100.0" not in text and "10.0 " not in text        # no prices
+
+    # `collector status` counts failures since the last ok poll: error, ok, error -> 1.
+    kraken.error = None
+    kraken.ticker_prices = {"USD-BTC": 100.0, "USD-QNT": 10.0}
+    runner.tick(T0 + timedelta(minutes=10))
+    kraken.error = FetchError("HTTP 502", 502)
+    runner.tick(T0 + timedelta(minutes=15))
+    ok_at = ctx.conn.execute("""SELECT started_at FROM runs WHERE source_id = 'market:kraken'
+                                    AND status = 'ok'""").fetchall()
+    assert len(ok_at) == 1
+    health = market_status(ctx.conn, "kraken")
+    assert health["failures"] == 1 and health["last_error"] == "HTTP 502"
+    assert health["last_ok_at"] == ok_at[0][0]
+
+
+def test_manual_market_poll_records_a_run_even_when_it_raises(harness):
+    ctx, *_ = harness
+    kraken = BrokenVenue(FetchError("HTTP 503", 503), name="kraken",
+                         listed={"USD-BTC", "USD-QNT"})
+    runner = MarketRunner(ctx, cfg(venue("kraken", "USD", ("QNT",))), {"kraken": kraken})
+    with pytest.raises(FetchError):
+        runner.run_tickers("kraken", T0)       # `collector market` calls this directly
+    assert runs(ctx.conn)["market:kraken"]["error"] == "HTTP 503"
