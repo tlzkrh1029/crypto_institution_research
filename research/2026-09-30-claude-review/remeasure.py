@@ -1,8 +1,10 @@
 """Re-measure the rank-bucket comparison and the Upbit volume share.
 
-Reproduces the numbers in market-remeasure.md. Uses only free public APIs
-(CoinGecko /coins/markets without a key, Upbit /v1/ticker). Running it later
-produces a new snapshot, not the 2026-09-30 12:39 KST numbers.
+Computes the tables in market-remeasure.md. Uses only free public APIs
+(CoinGecko /coins/markets without a key, Upbit /v1/ticker). The CoinGecko and
+Upbit responses behind the 2026-09-30 numbers are not stored in this
+repository, so running it later produces a new snapshot. Market data:
+Powered by CoinGecko (https://www.coingecko.com/en/api/).
 
 Usage:
     python3 remeasure.py                         # fetch live data
@@ -31,20 +33,25 @@ UPBIT_TICKER_URL = "https://api.upbit.com/v1/ticker?markets="
 WATCH = ["BTC", "ETH", "XRP", "LINK", "XLM", "HBAR", "QNT", "ONDO",
          "ALGO", "AVAX", "ENA", "SOL"]
 
-# Stablecoins, gold-backed tokens and fund tokens excluded by symbol.
+# Stablecoins, gold-backed tokens, and fund / RWA tokens excluded by symbol.
 EXCLUDED_SYMBOLS = {
     "usdt", "usdc", "dai", "usde", "usds", "fdusd", "pyusd", "tusd", "usd1",
     "rlusd", "usdtb", "susde", "susds", "xaut", "paxg", "bsc-usd", "usdf",
     "usdg", "buidl", "usyc", "ousg", "syrupusdc", "gho", "frax", "usd0",
     "crvusd", "eurc", "lusd",
+    # Missed in the first 2026-09-30 run (see ../2026-09-30-claude-fact-check/).
+    "figr_heloc", "usdy", "usdd", "u", "eursafo", "bfusd", "usdgo", "bcap",
+    "ustb", "eutbl",
 }
-# Wrapped, staked, bridged and similar derivative tokens excluded by id.
+# Wrapped, staked, bridged and similar derivative tokens excluded by id part.
+# Project names such as "lido" or "ether-fi" are not used here because they
+# also match governance tokens (LDO, ETHFI).
 EXCLUDED_ID_PARTS = [
-    "wrapped", "staked", "bridged", "liquid-staked", "usd-coin", "tether",
-    "gold", "restaked", "binance-peg", "coinbase-wrapped", "lido", "jito",
-    "rocket-pool", "mantle-staked", "ether-fi", "kelp", "renzo", "solv",
-    "lombard",
+    "wrapped", "staked", "bridged", "restaked", "binance-peg", "usd-coin",
+    "tether", "gold",
 ]
+# Derivative tokens whose id contains none of the parts above.
+EXCLUDED_IDS = {"rocket-pool-eth", "solv-btc"}
 
 BUCKETS = [("1-10", 1, 10), ("11-50", 11, 50), ("51-100", 51, 100)]
 
@@ -52,7 +59,8 @@ BUCKETS = [("1-10", 1, 10), ("11-50", 11, 50), ("51-100", 51, 100)]
 def fetch_json(url, retries=3, wait_sec=8):
     last_error = None
     for _ in range(retries):
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "crypto_institution_research/0.1 (research script)"})
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 body = resp.read().decode("utf-8")
@@ -67,6 +75,8 @@ def is_excluded(coin):
     if coin["symbol"].lower() in EXCLUDED_SYMBOLS:
         return True
     coin_id = coin["id"].lower()
+    if coin_id in EXCLUDED_IDS:
+        return True
     return any(part in coin_id for part in EXCLUDED_ID_PARTS)
 
 
@@ -76,7 +86,9 @@ def median(values):
 
 
 def bucket_table(coins):
-    kept = [c for c in coins if not is_excluded(c)][:100]
+    # Buckets use the original CoinGecko rank without re-ranking, as the Codex
+    # document did with CMC ranks, so each bucket has fewer than 10/40/50 coins.
+    kept = [c for c in coins if not is_excluded(c)]
     rows = []
     for name, lo, hi in BUCKETS:
         members = [c for c in kept
