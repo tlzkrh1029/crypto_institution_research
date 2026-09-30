@@ -4,6 +4,8 @@ from collector import db
 from collector.report import build_report
 from collector.timeutil import to_iso
 
+from .conftest import copy_config
+
 NOW = datetime(2026, 10, 7, 0, 0, tzinfo=timezone.utc)
 
 
@@ -140,14 +142,10 @@ def test_report_lists_market_polls_in_sources_section():
         "## coverage")[0]
 
 
-def test_status_shows_market_venues(tmp_path, capsys):
-    import shutil
-    from pathlib import Path
-
+def _status_with_kraken_error(tmp_path, capsys, tickers_enabled):
     from collector.__main__ import main
 
-    repo = Path(__file__).resolve().parent.parent
-    shutil.copytree(repo / "config", tmp_path / "config")
+    copy_config(tmp_path, tickers_enabled=tickers_enabled)
     conn = db.connect(tmp_path / "data" / "collector.db")
     conn.execute("""INSERT INTO runs (source_id, started_at, finished_at, status, error)
                     VALUES ('market:kraken', '2026-09-30T10:20:00Z', '2026-09-30T10:20:00Z',
@@ -155,7 +153,18 @@ def test_status_shows_market_venues(tmp_path, capsys):
     conn.commit()
     conn.close()
     assert main(["--root", str(tmp_path), "status"]) == 0
-    out = capsys.readouterr().out.splitlines()
+    return capsys.readouterr().out.splitlines()
+
+
+def test_status_shows_market_venues(tmp_path, capsys):
+    out = _status_with_kraken_error(tmp_path, capsys, tickers_enabled=True)
     kraken = next(x for x in out if x.startswith("market:kraken"))
     assert kraken.split()[1:3] == ["-", "1"] and kraken.endswith("ReadTimeout: read timed out")
     assert next(x for x in out if x.startswith("market:upbit")).split()[1:3] == ["-", "0"]
+    assert "tickers: off (config/market.yaml tickers.enabled)" not in out
+
+
+def test_status_says_tickers_are_off_instead_of_venue_rows(tmp_path, capsys):
+    out = _status_with_kraken_error(tmp_path, capsys, tickers_enabled=False)
+    assert "tickers: off (config/market.yaml tickers.enabled)" in out
+    assert not any(x.startswith("market:") for x in out)   # old poll errors are not shown

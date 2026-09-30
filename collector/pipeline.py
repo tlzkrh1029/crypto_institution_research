@@ -220,14 +220,23 @@ def _send(ctx: Context, alert_id: int, alert: Alert, now: datetime) -> bool:
 
 
 def retry_undelivered(ctx: Context, now: datetime, max_attempts: int = RETRY_MAX_ATTEMPTS,
-                      within: timedelta = RETRY_WINDOW) -> int:
-    """Resend alerts that failed to go out (e.g. the network was down)."""
+                      within: timedelta = RETRY_WINDOW,
+                      skip_source_prefixes: tuple[str, ...] = ()) -> int:
+    """Resend alerts that failed to go out (e.g. the network was down).
+
+    Alerts whose source_id starts with one of `skip_source_prefixes` are left
+    undelivered and not charged an attempt. `collector run` passes 'market:'
+    while market.yaml tickers.enabled is false, so an anomaly alert created
+    before the switch is not sent after it.
+    """
     rows = ctx.conn.execute(
         """SELECT * FROM alerts WHERE delivered_at IS NULL AND attempts < ?
                AND created_at >= ? ORDER BY id""",
         (max_attempts, to_iso(now - within))).fetchall()
     sent = 0
     for r in rows:
+        if skip_source_prefixes and (r["source_id"] or "").startswith(skip_source_prefixes):
+            continue
         alert = Alert(level=r["level"], message=r["message"], url=r["url"],
                       event_id=r["event_id"], source_id=r["source_id"])
         if _send(ctx, r["id"], alert, now):

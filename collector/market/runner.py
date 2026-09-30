@@ -4,6 +4,10 @@ Every ticker poll is recorded in the runs table as source 'market:<venue>'
 (status ok or error, items_seen = tickers stored), so `collector report` and
 `collector status` show market failures next to the news sources. Prices are
 never written to runs.
+
+When market.yaml tickers.enabled is false (docs/decisions.md D-015) no ticker
+is polled: no 'market:<venue>' runs rows and no anomaly alerts. Price reactions
+around events still run on their own schedule.
 """
 
 from __future__ import annotations
@@ -62,6 +66,10 @@ class MarketRunner:
         return self._listed[venue]
 
     def run_tickers(self, venue_name: str, now: datetime) -> int:
+        if not self.cfg.tickers_enabled:
+            log.debug("ticker polling is off (market.yaml tickers.enabled); %s skipped",
+                      venue_name)
+            return 0
         venue = next(v for v in self.cfg.venues if v.name == venue_name)
         try:
             alerts = poll_tickers(self.ctx.conn, self.clients[venue_name], venue, self.cfg,
@@ -97,7 +105,9 @@ class MarketRunner:
         return compute_reactions(self.ctx.conn, self.clients, self.cfg, listed, now, event_ids)
 
     def tick(self, now: datetime) -> None:
-        for venue in self.cfg.enabled_venues:
+        # Ticker polls and anomaly alerts only when enabled; reactions either way.
+        ticker_venues = self.cfg.enabled_venues if self.cfg.tickers_enabled else ()
+        for venue in ticker_venues:
             due = self.next_ticker.get(venue.name)
             if due is None or now >= due:
                 self.next_ticker[venue.name] = now + timedelta(seconds=venue.ticker_interval_sec)

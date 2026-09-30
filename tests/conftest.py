@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
+import yaml
 
 from collector import db
 from collector.config import Settings, SourceConfig, load_entities
@@ -51,6 +53,17 @@ class Clock:
 
     def __call__(self) -> datetime:
         return self.now
+
+
+def copy_config(root: Path, *, tickers_enabled: bool | None = None) -> None:
+    """Copy config/ into `root` for CLI tests; optionally override
+    market.yaml tickers.enabled (the repo value follows docs/decisions.md)."""
+    shutil.copytree(ROOT / "config", root / "config")
+    if tickers_enabled is not None:
+        path = root / "config" / "market.yaml"
+        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        raw["tickers"] = {"enabled": tickers_enabled}
+        path.write_text(yaml.safe_dump(raw), encoding="utf-8")
 
 
 def make_source(sid: str, url: str, kind: str = "feed", publisher_kind: str = "newswire",

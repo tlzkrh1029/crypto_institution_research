@@ -1,6 +1,7 @@
-"""Market jobs: ticker snapshots with an anomaly check (fast path) and price
-reactions around events (slow path). docs/collector-spec.md sections 2 and 5,
-docs/research-principles.md section 7.
+"""Market jobs: ticker snapshots with an anomaly check (fast path, only while
+market.yaml tickers.enabled is true; off since docs/decisions.md D-015) and
+price reactions around events (slow path, always on). docs/collector-spec.md
+sections 2 and 5, docs/research-principles.md section 7.
 
 Each symbol is priced on one venue (config/market.yaml) against that venue's
 reference symbol (BTC), so returns never mix currencies or venues.
@@ -45,6 +46,13 @@ class VenueConfig:
     reference: str
     symbols: tuple[str, ...]
     ticker_interval_sec: int
+    # Symbols polled for tickers and checked for anomalies (market.yaml `watch`).
+    # `symbols` is the reaction venue map; None (no `watch` key) watches them all.
+    watch: tuple[str, ...] | None = None
+
+    @property
+    def watch_symbols(self) -> tuple[str, ...]:
+        return self.symbols if self.watch is None else self.watch
 
 
 @dataclass(frozen=True)
@@ -55,6 +63,9 @@ class MarketConfig:
     anomaly_cooldown_hours: int
     reactions_interval_sec: int
     reactions_lookback_days: int
+    # Real-time ticker polling and its anomaly alerts (market.yaml tickers.enabled).
+    # Price reactions do not depend on it.
+    tickers_enabled: bool = True
 
     @property
     def enabled_venues(self) -> tuple[VenueConfig, ...]:
@@ -67,8 +78,18 @@ class MarketConfig:
         return None
 
 
+TOP_LEVEL_KEYS = {"venues", "tickers", "anomaly", "reactions"}
+TICKERS_KEYS = {"enabled"}
+
+
 def load_market_config(path: Path) -> MarketConfig:
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    # A misspelled key (e.g. 'ticker:' or 'tickers: {enable: false}') must not
+    # silently leave ticker polling and anomaly alerts on.
+    unknown = sorted(map(str, set(raw) - TOP_LEVEL_KEYS))
+    if unknown:
+        raise ConfigError(f"market.yaml: unknown top-level key(s) {unknown}; "
+                          f"allowed: {sorted(TOP_LEVEL_KEYS)}")
     venues = []
     seen: set[str] = set()
     for name, v in (raw.get("venues") or {}).items():
@@ -78,6 +99,12 @@ def load_market_config(path: Path) -> MarketConfig:
         if interval < 60:
             raise ConfigError(f"market.yaml: venues.{name}.ticker_interval_sec must be >= 60")
         symbols = tuple(v.get("symbols", []))
+        watch = v.get("watch")
+        if watch is not None:
+            watch = tuple(watch)
+            extra = sorted(set(watch) - set(symbols))
+            if extra:
+                raise ConfigError(f"market.yaml: venues.{name}.watch {extra} not in symbols")
         if v.get("enabled", False):
             dup = seen & set(symbols)
             if dup:
@@ -91,9 +118,24 @@ def load_market_config(path: Path) -> MarketConfig:
             reference=v.get("reference", "BTC"),
             symbols=symbols,
             ticker_interval_sec=interval,
+            watch=watch,
         ))
     anomaly = raw.get("anomaly", {})
     reactions = raw.get("reactions", {})
+    tickers = raw.get("tickers")
+    if tickers is None:
+        tickers = {}   # no block: tickers stay on, as before the block existed
+    if not isinstance(tickers, dict):
+        raise ConfigError("market.yaml: tickers must be a mapping, e.g. 'tickers: "
+                          "{enabled: false}'")
+    unknown = sorted(map(str, set(tickers) - TICKERS_KEYS))
+    if unknown:
+        raise ConfigError(f"market.yaml: unknown key(s) under tickers {unknown}; "
+                          "only 'enabled' is allowed")
+    tickers_enabled = tickers.get("enabled", True)
+    if not isinstance(tickers_enabled, bool):
+        raise ConfigError(f"market.yaml: tickers.enabled must be true or false, "
+                          f"got {tickers_enabled!r}")
     cfg = MarketConfig(
         venues=tuple(venues),
         anomaly_window_min=int(anomaly.get("window_minutes", 60)),
@@ -101,6 +143,7 @@ def load_market_config(path: Path) -> MarketConfig:
         anomaly_cooldown_hours=int(anomaly.get("cooldown_hours", 6)),
         reactions_interval_sec=int(reactions.get("interval_sec", 1800)),
         reactions_lookback_days=int(reactions.get("lookback_days", 30)),
+        tickers_enabled=tickers_enabled,
     )
     if cfg.reactions_interval_sec < 300:
         raise ConfigError("market.yaml: reactions.interval_sec must be >= 300")
@@ -111,7 +154,8 @@ def load_market_config(path: Path) -> MarketConfig:
 
 def poll_tickers(conn: sqlite3.Connection, client: VenueClient, venue: VenueConfig,
                  cfg: MarketConfig, listed: set[str], now: datetime) -> list[Alert]:
-    by_market = {client.market_id(s, venue.quote): s for s in (venue.reference, *venue.symbols)}
+    by_market = {client.market_id(s, venue.quote): s
+                 for s in (venue.reference, *venue.watch_symbols)}
     wanted = [m for m in by_market if m in listed]
     tickers = client.tickers(wanted)
     with conn:
@@ -147,7 +191,7 @@ def _anomalies(conn: sqlite3.Connection, venue_name: str, venue: VenueConfig,
     ref_return = now_ref / past_ref - 1
     source = f"market:{venue_name}"
     alerts = []
-    for symbol in venue.symbols:
+    for symbol in venue.watch_symbols:
         past = _price_near(conn, venue_name, symbol, now - window, tolerance)
         current = _price_near(conn, venue_name, symbol, now, timedelta(minutes=1))
         if not past or not current:
@@ -240,16 +284,21 @@ def compute_reactions(conn: sqlite3.Connection, clients: dict[str, VenueClient],
     written = 0
     for row in rows:
         event_id, symbol, t0 = row["id"], row["symbol"], from_iso(row["t0"])
-        done = {r["window_name"] for r in conn.execute(
-            """SELECT window_name FROM price_reactions WHERE event_id = ? AND symbol = ?
-                   AND status IN ('measured', 'no_market')""", (event_id, symbol))}
-        todo = [w for w in WINDOWS if w not in done]
-        if not todo:
-            continue
         venue = cfg.venue_for(symbol)
         client = clients.get(venue.name) if venue else None
         market = client.market_id(symbol, venue.quote) if client else None
-        if client is None or market not in listed.get(venue.name, set()):
+        has_market = client is not None and market in listed.get(venue.name, set())
+        # no_market is final only while the symbol still has no listed market, so
+        # events recorded before a venue was configured for it are measured later.
+        final = ("measured",) if has_market else ("measured", "no_market")
+        done = {r["window_name"] for r in conn.execute(
+            f"""SELECT window_name FROM price_reactions WHERE event_id = ? AND symbol = ?
+                   AND status IN ({','.join('?' * len(final))})""",
+            (event_id, symbol, *final))}
+        todo = [w for w in WINDOWS if w not in done]
+        if not todo:
+            continue
+        if not has_market:
             written += _write(conn, event_id, symbol, todo, t0, now, venue="none",
                               status="no_market")
             continue

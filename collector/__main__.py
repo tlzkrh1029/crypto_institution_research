@@ -16,7 +16,7 @@ from .config import ConfigError, load_entities, load_settings, load_sources, val
 from .fetch import SECRET_FILTER, Fetcher
 from .heartbeat import Heartbeat
 from .market.jobs import load_market_config
-from .market.runner import MarketRunner, make_clients
+from .market.runner import RUN_SOURCE_PREFIX, MarketRunner, make_clients
 from .notify import Alert, NotifierConfigError, make_notifier, telegram_chats
 from .pipeline import (Context, deliver_alert, due_sources, retry_undelivered, run_source,
                        sync_sources)
@@ -27,6 +27,7 @@ from .timeutil import fmt_kst, to_iso, utcnow
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 TICK_SEC = 30
 RETRY_EVERY = timedelta(minutes=5)
+TICKERS_OFF = "tickers: off (config/market.yaml tickers.enabled)"
 
 
 def _log_handlers(log_path: Path) -> list[logging.Handler]:
@@ -92,9 +93,13 @@ def cmd_check_config(args) -> int:
     market = load_market_config(args.root / "config" / "market.yaml")
     for v in market.venues:
         print(f"market: {v.name} {'on' if v.enabled else 'off'}, {v.quote} "
-              f"{', '.join(v.symbols)} vs {v.reference}")
-    print(f"anomaly: {market.anomaly_excess_pct}%p vs reference over "
-          f"{market.anomaly_window_min}m")
+              f"{', '.join(v.symbols)} vs {v.reference}; ticker watch: "
+              f"{', '.join(v.watch_symbols) or 'none'}")
+    if market.tickers_enabled:
+        print(f"anomaly: {market.anomaly_excess_pct}%p vs reference over "
+              f"{market.anomaly_window_min}m")
+    else:
+        print(TICKERS_OFF)
     # Only whether values are set; the token itself is never printed.
     flags = {name: "set" if settings.env(name) else "not set"
              for name in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "HEARTBEAT_URL")}
@@ -118,6 +123,9 @@ def cmd_run(args) -> int:
     logging.getLogger("collector").info("collector started with %d sources", len(sources))
     log = logging.getLogger("collector")
     last_retry = ctx.clock()
+    # With tickers off, anomaly alerts left undelivered from before the switch
+    # are not resent (docs/decisions.md D-015).
+    retry_skip = () if market.cfg.tickers_enabled else (RUN_SOURCE_PREFIX,)
     while True:
         # One failing source or job must not stop the others.
         for source in due_sources(ctx.conn, sources, ctx.clock()):
@@ -133,7 +141,7 @@ def cmd_run(args) -> int:
         if now - last_retry >= RETRY_EVERY:
             last_retry = now
             try:
-                retry_undelivered(ctx, now)
+                retry_undelivered(ctx, now, skip_source_prefixes=retry_skip)
             except Exception:
                 log.exception("unexpected error while retrying alerts")
         if ctx.heartbeat:
@@ -142,6 +150,12 @@ def cmd_run(args) -> int:
 
 
 def cmd_market(args) -> int:
+    if not load_market_config(args.root / "config" / "market.yaml").tickers_enabled:
+        # Nothing is polled, stored or alerted; price reactions are unaffected.
+        print("ticker monitoring is off (config/market.yaml tickers.enabled: false, "
+              "docs/decisions.md D-015): no tickers polled, no anomaly alerts. "
+              "Price reactions around events still run (collector reactions).")
+        return 0
     ctx, _, market = _context(args.root, args.verbose)
     if not market.clients:
         print("market data is disabled in config/market.yaml")
@@ -209,10 +223,14 @@ def cmd_status(args) -> int:
         print(f"{r['id']:<24} {fmt_kst(r['last_ok_at']):<22} {r['consecutive_failures']:>5}  "
               f"{r['last_error'] or ''}")
     # Ticker polls of the enabled market venues, from the runs table.
-    for venue in load_market_config(args.root / "config" / "market.yaml").enabled_venues:
-        m = market_status(conn, venue.name)
-        print(f"{m['id']:<24} {fmt_kst(m['last_ok_at']):<22} {m['failures']:>5}  "
-              f"{m['last_error'] or ''}")
+    market_cfg = load_market_config(args.root / "config" / "market.yaml")
+    if market_cfg.tickers_enabled:
+        for venue in market_cfg.enabled_venues:
+            m = market_status(conn, venue.name)
+            print(f"{m['id']:<24} {fmt_kst(m['last_ok_at']):<22} {m['failures']:>5}  "
+                  f"{m['last_error'] or ''}")
+    else:
+        print(TICKERS_OFF)   # no polls, so no per-venue health rows
     counts = conn.execute(
         "SELECT (SELECT COUNT(*) FROM items), (SELECT COUNT(*) FROM events), "
         "(SELECT COUNT(*) FROM alerts)").fetchone()
@@ -322,7 +340,8 @@ def main(argv: list[str] | None = None) -> int:
         func=cmd_telegram_chat_id)
     sub.add_parser("notify-test", help="send a test alert through NOTIFIER").set_defaults(
         func=cmd_notify_test)
-    sub.add_parser("market", help="poll venue tickers once and show prices").set_defaults(
+    sub.add_parser("market", help="poll venue tickers once and show prices "
+                   "(no-op while market.yaml tickers.enabled is false)").set_defaults(
         func=cmd_market)
     reactions = sub.add_parser("reactions", help="compute price reactions for recent events")
     reactions.add_argument("--event", type=int, action="append", help="only this event id")
