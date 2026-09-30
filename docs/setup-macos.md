@@ -150,6 +150,12 @@ launchctl kickstart -k gui/$(id -u)/com.crypto-institution-research.collector
 tail -f data/collector.log
 ```
 
+일주일 동안의 운영 결과는 다음 명령으로 한 번에 볼 수 있다. 수집원별 오류, 수집이 멈췄던 구간, 새 사건과 가격 반응, 알림 내역이 나온다. 이 출력에는 `.env`의 값이 들어가지 않으므로, AI와 대화할 때 그대로 붙여 넣어도 된다.
+
+```sh
+.venv/bin/python -m collector report --days 7
+```
+
 ## 8. 운영할 때 주의할 점
 
 - 외부 모니터 없이 덮개를 닫으면 잠자기에 들어간다. 덮개를 열어 둔다.
