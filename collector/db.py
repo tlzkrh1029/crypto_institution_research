@@ -101,6 +101,45 @@ MIGRATIONS: list[str] = [
         error TEXT
     );
     """,
+    # 2: market data (local only; raw prices are never committed, AGENTS.md)
+    """
+    CREATE TABLE market_snapshots (
+        venue TEXT NOT NULL,
+        symbol TEXT NOT NULL,
+        quote TEXT NOT NULL,
+        ts TEXT NOT NULL,
+        price REAL NOT NULL,
+        acc_trade_value_24h REAL,
+        PRIMARY KEY (venue, symbol, ts)
+    );
+    CREATE TABLE candles (
+        venue TEXT NOT NULL,
+        market TEXT NOT NULL,
+        unit_min INTEGER NOT NULL,
+        start_at TEXT NOT NULL,
+        open REAL NOT NULL,
+        high REAL NOT NULL,
+        low REAL NOT NULL,
+        close REAL NOT NULL,
+        volume REAL,
+        PRIMARY KEY (venue, market, unit_min, start_at)
+    );
+    CREATE TABLE price_reactions (
+        event_id INTEGER NOT NULL REFERENCES events(id),
+        symbol TEXT NOT NULL,
+        window_name TEXT NOT NULL,
+        venue TEXT NOT NULL,
+        t_start TEXT NOT NULL,
+        t_end TEXT NOT NULL,
+        asset_return REAL,
+        btc_return REAL,
+        excess_return REAL,
+        bucket_median_return REAL,
+        status TEXT NOT NULL,
+        computed_at TEXT NOT NULL,
+        PRIMARY KEY (event_id, symbol, window_name)
+    );
+    """,
 ]
 
 

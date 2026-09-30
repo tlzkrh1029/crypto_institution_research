@@ -54,9 +54,12 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 | 연준 | 거시 정책 | `https://www.federalreserve.gov/feeds/press_all.xml` (목록: https://www.federalreserve.gov/feeds/feeds.htm) | 따로 표시하지 않은 정보는 퍼블릭 도메인이다. 연준을 출처로 밝힌다. 첫 요청이 일시적으로 실패한 적이 있으므로 재시도를 둔다 | 2026-09-30 작동과 이용 조건 확인 |
 | PR Newswire, Business Wire, GlobeNewswire | 기관과 프로젝트의 보도자료 | PR Newswire 분야별 RSS(예: `https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss`), Business Wire의 `feed.businesswire.com` RSS, GlobeNewswire `https://www.globenewswire.com/rss/list`의 분야별 피드 | PR Newswire는 자동 접근, 데이터베이스 저장, AI 이용을 약관에서 금지한다(제한). Business Wire는 약관 원문을 확인하지 못했고, 검색 결과로는 저장·집계를 금지한다(불명확). GlobeNewswire는 독자용 약관이 없다(불명확). 사용자가 정하기 전에는 구현하지 않는다 (Q10) | 2026-09-30 이용 조건 확인. 보류 |
 | 프로젝트 공식 블로그 (Chainlink, Hedera, Stellar, Quant, Ondo 등) | 프로젝트 발표 | RSS 우선, 없으면 공개 페이지 변경 확인 | robots.txt와 이용 조건을 확인한다 | 미확인 |
-| 업비트 | 국내 가격과 거래대금, 김치 프리미엄 | 공개 API (키 불필요) | 요청 한도를 지킨다 | 2026-09-30 작동 확인, 이용 조건 미확인 |
-| 코인베이스 | 미국 거래 비중과 가격 프리미엄 | `https://api.exchange.coinbase.com/products/{id}/ticker`, `https://api.coinbase.com/api/v3/brokerage/market/products/{id}` (인증 불필요) | | 2026-09-30 작동 확인, 이용 조건 미확인 |
-| CoinGecko | 전체 가격, 시총, 거래량 | 공개 API | 키 없이 호출하면 IP 단위로 제한된다. 무료 Demo 키(`x-cg-demo-api-key`)를 `.env`에 두고 쓴다. Demo 한도는 분당 100회, 월 10,000회다. 5분마다 1회만 호출해도 30일에 8,640회이므로, 빠른 경로의 가격 감시는 업비트와 코인베이스 공개 API로 하고 CoinGecko는 15분~1시간 주기의 전체 시장 집계에 쓴다. [API 약관](https://www.coingecko.com/en/api_terms)에 따라 이 데이터를 보여 주는 대시보드, 보고서, 문서에는 "Powered by CoinGecko"를 표시한다. 약관은 데이터 저장을 권장하지 않으므로(저장한다면 24시간마다 갱신하고 보안 조치를 한다), 원자료는 로컬 `data/`에만 둔다 | 2026-09-30 키 없는 호출의 제한, 한도, 약관 확인 |
+| 업비트 | 국내 가격과 거래대금, 가격 반응 | 공개 API (키 불필요): 시세 `/v1/ticker`, 시간봉 `/v1/candles/minutes/60` (요청당 200개) | Open API 약관(2024-10-30 시행)상 비영리 이용이 가능하다. IP당 그룹별 초당 10회 이하로 요청한다(수집기는 초당 5회 이하). 원자료는 로컬에만 두고, 파생 결과의 공개는 Q11에서 정한다. QNT는 상장되어 있지 않다 | 2026-09-30 작동과 이용 조건 확인. v0.1에 구현 |
+| 코인베이스 | 미국 거래 비중과 가격 프리미엄 | `https://api.exchange.coinbase.com/products/{id}/ticker`, `https://api.coinbase.com/api/v3/brokerage/market/products/{id}` (인증 불필요) | 시장 데이터 약관은 개인·연구 목적 이용만 허락하고, 서면 동의 없이 파생 결과를 외부에 배포하거나 데이터를 AI 기술에 쓰는 것을 금지한다. 공개 저장소와 AI에 쓰지 않는 개인 확인용으로만 쓸 수 있다 (Q12) | 2026-09-30 작동과 이용 조건 확인. 제한, 미구현 |
+| CoinGecko | 전체 가격, 시총, 거래량 | 공개 API | 키 없이 호출하면 IP 단위로 제한된다. 무료 Demo 키(`x-cg-demo-api-key`)를 `.env`에 두고 쓴다. Demo 한도는 분당 100회, 월 10,000회다. 5분마다 1회만 호출해도 30일에 8,640회이므로, 빠른 경로의 가격 감시는 업비트와 코인베이스 공개 API로 하고 CoinGecko는 15분~1시간 주기의 전체 시장 집계에 쓴다. [API 약관](https://www.coingecko.com/en/api_terms)에 따라 이 데이터를 보여 주는 대시보드, 보고서, 문서에는 "Powered by CoinGecko"를 표시한다. 약관은 데이터 저장을 권장하지 않으므로(저장한다면 24시간마다 갱신하고 보안 조치를 한다), 원자료는 로컬 `data/`에만 둔다. Demo는 과거 데이터를 최근 365일까지만 준다 | 2026-09-30 키 없는 호출의 제한, 한도, 약관 확인. 미구현 |
+| 빗썸 | 국내 가격 (업비트 보조) | 공개 API (키 불필요): `/v1/ticker`, `/v1/candles/...` (요청당 200개) | 비영리 이용이 가능하다. 분류별 초당 150회 이하로 요청한다. 데이터를 타인에게 양도하거나 복제·유통하는 것을 금지하므로, 파생 결과의 공개는 Q11에서 정한다. QNT는 상장되어 있지 않다 | 2026-09-30 작동과 이용 조건 확인. 미구현 |
+| Kraken | QNT 등 해외 가격 | 공개 API `/0/public/Ticker`, `/0/public/OHLC` (최근 720개) | API 안내는 공개 엔드포인트의 개인적 이용을 허용하지만, 일반 약관은 자동화 도구를 금지해 서로 충돌한다. 파생 결과 공개에 대한 조항이 없다 (Q12) | 2026-09-30 작동과 이용 조건 확인. 미구현 |
+| CoinMarketCap API (무료 Basic) | 최신 시세 | 공식 API (키 필요) | 약관이 캐시 외의 저장과 파생 저작물을 금지하고, 과거 데이터와 캔들을 제공하지 않는다. 출처 표기가 필요하다 | 2026-09-30 이용 조건 확인. 제한, 미구현 |
 | 무기한 선물 거래소 (바이낸스, 바이빗 등) | 미결제약정, 펀딩비 | 공개 API | 접속 지역 제한이 있다. 2026-09-30 미국 소재 클라우드 환경에서 바이낸스 API는 이용약관의 "b. Eligibility" 조항을 근거로 거부(HTTP 451)했고, 바이빗 API도 국가 단위로 차단(HTTP 403)했다. 설치 장소에서 접속되는지와 함께, 그 지역이 약관상 제한 지역인지도 확인한다 | 일부 확인 |
 | ETF 흐름 | 토큰 직접 수요 | 운용사 공개 보유량, 집계 사이트 | 출처별 이용 조건을 확인한다 | 미확인 |
 
@@ -96,7 +99,9 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 | event_assets | 사건과 토큰의 연결 | event_id, symbol, directness (unknown, direct, project_claim, indirect, association), evidence_quote, evidence_url | 있음 |
 | alerts | 알림 기록 | id, created_at, level, event_id, source_id, message, url, delivered_via, delivered_at | 있음 |
 | runs | 수집 실행 기록 | id, source_id, started_at, finished_at, status (ok, not_modified, error, skipped), http_status, items_seen, items_new, error | 있음 |
-| price_reactions | 가격 반응 | event_id, symbol, window (pre_24h, 1h, 6h, 24h, 3d, 7d), asset_return, btc_return, bucket_median_return, status (measured, pending) | 없음 |
+| price_reactions | 가격 반응 | event_id, symbol, window_name (pre_24h, 1h, 6h, 24h, 3d, 7d), venue, t_start, t_end, asset_return, btc_return, excess_return, bucket_median_return, status (measured, pending, no_market, no_data) | 있음 (bucket_median_return은 비어 있음) |
+| market_snapshots | 시세 기록 (로컬 전용) | venue, symbol, quote, ts, price, acc_trade_value_24h | 있음 |
+| candles | 시간봉 캐시 (로컬 전용) | venue, market, unit_min, start_at, open, high, low, close, volume | 있음 |
 | venue_shares | 거래소별 비중 | ts, symbol, venue, volume_usd, share, premium | 없음 |
 | derivatives | 선물 지표 | ts, symbol, venue, open_interest_usd, funding_rate, source_url | 없음 |
 | flows | 토큰 직접 수요 | date, symbol, kind (etf, treasury, buyback), amount_usd, source_url | 없음 |
@@ -169,3 +174,20 @@ v0.1 코드는 이 가운데 첫 번째와 두 번째 기준을 다음과 같이
 - X API: 게시물 읽기 1건당 $0.005 (2026-09-30 X 공식 문서 확인). 하루 100건을 읽으면 30일에 약 $15다.
 - 웹 검색 도구가 포함된 AI API를 5분마다 호출하면 30일에 8,640회가 된다. OpenAI 가격 문서(2026-09-30 확인)는 웹 검색 도구를 1,000회당 $10로 적는다 (비추론 모델의 web search preview는 1,000회당 $25). $10 기준이면 검색 도구료만 약 $86.40이고, 검색 결과 토큰과 모델 사용료는 따로 과금된다. 한 응답에서 검색을 여러 번 하면 호출 수가 늘어난다.
 - 구독 계정의 CLI를 쓰면 2026-09-30 기준으로 추가 비용은 없지만 사용 한도를 공유한다. 조건이 바뀔 수 있으므로 7절을 참고한다.
+
+## 11. 구현 현황 (v0.1, 2026-09-30)
+
+코드는 [collector/](../collector/)에, 설정은 [config/](../config/)에 있다. 설치와 운영은 [setup-macos.md](setup-macos.md)를 따른다.
+
+| 기능 | 상태 |
+|---|---|
+| 뉴스 수집 (RSS, Atom, 사이트맵) | 구현. 켜진 수집원은 SEC 보도자료와 발언(`SEC_USER_AGENT` 필요), 연준 보도자료, DTCC Insights다 ([config/sources.yaml](../config/sources.yaml)) |
+| 엔터티 대조, 사건 묶기, 재확산 표시 | 구현 ([config/entities.yaml](../config/entities.yaml)) |
+| 알림 | 로그 파일과 alerts 테이블에만 남긴다. 채널은 Q3에서 정한다 |
+| 업비트 시세 감시와 이상 감지 | 구현. 5분마다 시세를 기록하고, 60분 동안 BTC보다 5%p 이상 더 움직인 종목을 알린다 ([config/market.yaml](../config/market.yaml)) |
+| 가격 반응 | 구현. 사건의 최초 발표 시각을 기준으로, 업비트 시간봉 종가로 계산한다. 기준 시각의 가격은 그 시각 직전에 끝난 시간봉의 종가다. BTC 대비 초과 수익률을 함께 저장한다. 같은 시총 구간 중앙값은 아직 계산하지 않는다 |
+| 사건 검토 기록 | 구현 (`collector review`) |
+| 외부 감시 신호 | 구현 (`HEARTBEAT_URL`) |
+| 대시보드, 주간 보고 | 미구현. 지금은 `status`, `events`, `items` 명령으로 확인한다 |
+| 느린 경로의 AI 해석 | 미구현 (Q8) |
+| 거래소 비중, 선물 지표, ETF 흐름 | 미구현 |

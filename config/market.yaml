@@ -1,0 +1,25 @@
+# Market data for the collector. Terms review:
+# research/2026-09-30-claude-data-source-check/README.md
+#
+# Raw prices stay in the local database (data/). Do not commit them.
+
+upbit:
+  enabled: true
+  terms_checked: "2026-09-30 Upbit Open API 이용약관 (2024-10-30) and rate-limit docs"
+  quote: KRW
+  reference: BTC
+  # Watch sample and control (docs/open-questions.md Q7). QNT is not listed on
+  # Upbit, so it has no price here (docs/open-questions.md Q12).
+  symbols: [LINK, XLM, HBAR, QNT, ONDO, XRP]
+  ticker_interval_sec: 300
+
+anomaly:
+  # Alert when a symbol moves this much more (or less) than BTC over the window.
+  window_minutes: 60
+  excess_return_pct: 5.0
+  cooldown_hours: 6
+
+reactions:
+  # Windows follow docs/research-principles.md section 7.
+  interval_sec: 1800
+  lookback_days: 30

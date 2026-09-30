@@ -15,6 +15,9 @@ from . import db
 from .config import ConfigError, load_entities, load_settings, load_sources, validate
 from .fetch import Fetcher
 from .heartbeat import Heartbeat
+from .market.jobs import WINDOWS, load_market_config
+from .market.runner import MarketRunner
+from .market.upbit import UpbitClient
 from .notify import make_notifier
 from .pipeline import Context, due_sources, run_source, sync_sources
 from .review import ReviewError, review_event
@@ -46,6 +49,7 @@ def _load(root: Path):
 
 def _context(root: Path, verbose: bool):
     settings, sources, entities = _load(root)
+    market_cfg = load_market_config(root / "config" / "market.yaml")
     _setup_logging(settings.log_path, verbose)
     conn = db.connect(settings.db_path)
     sync_sources(conn, sources)
@@ -58,7 +62,8 @@ def _context(root: Path, verbose: bool):
         heartbeat=Heartbeat(settings.heartbeat_url, settings.user_agent)
         if settings.heartbeat_url else None,
     )
-    return ctx, sources
+    market = MarketRunner(ctx, market_cfg, UpbitClient(settings.user_agent))
+    return ctx, sources, market
 
 
 def cmd_check_config(args) -> int:
@@ -74,11 +79,14 @@ def cmd_check_config(args) -> int:
     for e in entities:
         kinds[e.kind] = kinds.get(e.kind, 0) + 1
     print("entities:", ", ".join(f"{k}={v}" for k, v in sorted(kinds.items())))
+    market = load_market_config(args.root / "config" / "market.yaml")
+    print(f"market: upbit {'on' if market.enabled else 'off'}, {market.quote} "
+          f"{', '.join(market.symbols)} vs {market.reference}")
     return 0
 
 
 def cmd_once(args) -> int:
-    ctx, sources = _context(args.root, args.verbose)
+    ctx, sources, _ = _context(args.root, args.verbose)
     targets = [s for s in sources if s.enabled and (not args.source or s.id in args.source)]
     for source in targets:
         run_source(ctx, source)
@@ -86,14 +94,69 @@ def cmd_once(args) -> int:
 
 
 def cmd_run(args) -> int:
-    ctx, sources = _context(args.root, args.verbose)
+    ctx, sources, market = _context(args.root, args.verbose)
     logging.getLogger("collector").info("collector started with %d sources", len(sources))
+    log = logging.getLogger("collector")
     while True:
+        # One failing source or job must not stop the others.
         for source in due_sources(ctx.conn, sources, ctx.clock()):
-            run_source(ctx, source)
+            try:
+                run_source(ctx, source)
+            except Exception:
+                log.exception("unexpected error in source %s", source.id)
+        try:
+            market.tick(ctx.clock())
+        except Exception:
+            log.exception("unexpected error in market jobs")
         if ctx.heartbeat:
             ctx.heartbeat.beat(ctx.clock())
         time.sleep(TICK_SEC)
+
+
+def cmd_market(args) -> int:
+    ctx, _, market = _context(args.root, args.verbose)
+    if not market.cfg.enabled:
+        print("market data is disabled in config/market.yaml")
+        return 0
+    now = ctx.clock()
+    alerts = market.run_tickers(now)
+    rows = ctx.conn.execute(
+        "SELECT symbol, price, ts FROM market_snapshots WHERE ts = ? ORDER BY symbol",
+        (to_iso(now),)).fetchall()
+    for r in rows:
+        print(f"{r['symbol']:<6} {r['price']:>16,.2f} {market.cfg.quote}  {fmt_kst(r['ts'])}")
+    print(f"anomaly alerts: {alerts}")
+    return 0
+
+
+def cmd_reactions(args) -> int:
+    ctx, _, market = _context(args.root, args.verbose)
+    now = ctx.clock()
+    written = market.run_reactions(now, args.event or None)
+    print(f"rows written: {written}")
+    return 0
+
+
+def _reaction_summary(conn, event_id: int) -> list[str]:
+    lines = []
+    rows = conn.execute(
+        """SELECT symbol, window_name, asset_return, btc_return, excess_return, status
+           FROM price_reactions WHERE event_id = ? ORDER BY symbol""", (event_id,)).fetchall()
+    by_symbol: dict[str, dict[str, object]] = {}
+    for r in rows:
+        by_symbol.setdefault(r["symbol"], {})[r["window_name"]] = r
+    for symbol, windows in by_symbol.items():
+        cells = []
+        for name in WINDOWS:
+            r = windows.get(name)
+            if r is None:
+                continue
+            if r["status"] == "measured":
+                cells.append(f"{name} {r['asset_return']:+.1%} (vs BTC {r['excess_return']:+.1%})")
+            else:
+                cells.append(f"{name} {r['status']}")
+        lines.append(f"    {symbol}: " + ", ".join(cells))
+    return lines
 
 
 def cmd_status(args) -> int:
@@ -133,6 +196,8 @@ def cmd_events(args) -> int:
               f"items={r['n_items']} rerun={r['n_rerun']} {r['symbols'] or ''}")
         print(f"    {r['title']}")
         print(f"    entities: {r['entities'] or ''}")
+        for line in _reaction_summary(conn, r["id"]):
+            print(line)
     if not rows:
         print("no events")
     return 0
@@ -199,6 +264,11 @@ def main(argv: list[str] | None = None) -> int:
     events = sub.add_parser("events", help="list recent events")
     events.add_argument("--days", type=int, default=7)
     events.set_defaults(func=cmd_events)
+    sub.add_parser("market", help="poll Upbit tickers once and show prices").set_defaults(
+        func=cmd_market)
+    reactions = sub.add_parser("reactions", help="compute price reactions for recent events")
+    reactions.add_argument("--event", type=int, action="append", help="only this event id")
+    reactions.set_defaults(func=cmd_reactions)
     items = sub.add_parser("items", help="list stored items (matched ones by default)")
     items.add_argument("--days", type=int, default=7)
     items.add_argument("--entity", help="only items that matched this entity id")

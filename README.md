@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-2026-09-30 기준으로 설계 단계에 있다. 조사 원칙, 가설, 기관 연결표, 수집 프로그램 설계를 문서로 정리했고, 수집 프로그램 코드는 아직 없다. 결정되지 않은 사항은 [docs/open-questions.md](docs/open-questions.md)에 모아 두었다.
+2026-09-30 기준으로 수집 프로그램 v0.1을 만들었다. 공식 피드 뉴스 수집, 엔터티 대조와 사건 기록, 업비트 시세 감시와 가격 반응 계산이 작동한다. 구현 현황은 [docs/collector-spec.md](docs/collector-spec.md) 11절에, 설치 방법은 [docs/setup-macos.md](docs/setup-macos.md)에 있다. 결정되지 않은 사항은 [docs/open-questions.md](docs/open-questions.md)에 모아 두었다.
 
 ## 먼저 읽을 문서
 
@@ -14,7 +14,8 @@
 | [docs/research-principles.md](docs/research-principles.md) | 조사 원칙 |
 | [docs/hypotheses.md](docs/hypotheses.md) | 검증 중인 가설 |
 | [docs/institution-map.md](docs/institution-map.md) | 기관·업무·프로젝트·토큰 연결표 |
-| [docs/collector-spec.md](docs/collector-spec.md) | 수집 프로그램 설계 초안 |
+| [docs/collector-spec.md](docs/collector-spec.md) | 수집 프로그램 설계와 구현 현황 |
+| [docs/setup-macos.md](docs/setup-macos.md) | 맥북 설치와 운영 안내 |
 | [docs/decisions.md](docs/decisions.md) | 결정 기록 |
 | [docs/open-questions.md](docs/open-questions.md) | 미결 사항 |
 | [docs/writing-style-ko.md](docs/writing-style-ko.md) | 한국어 문서 작성 지침 (사용자 원문) |
@@ -39,7 +40,11 @@
 AGENTS.md                 공통 작업 지침
 CLAUDE.md                 Claude Code용 진입점 (AGENTS.md를 불러옴)
 GEMINI.md                 Gemini CLI용 진입점 (AGENTS.md를 불러옴)
-docs/                     원칙, 가설, 연결표, 설계, 결정, 미결 사항
+docs/                     원칙, 가설, 연결표, 설계, 결정, 미결 사항, 설치 안내
+collector/                수집 프로그램 (Python)
+config/                   수집원, 엔터티, 시장 데이터 설정
+deploy/macos/             맥북 자동 실행 설정
+tests/                    테스트
 research/                 날짜별 조사 기록과 원자료 (추가만 하고 수정하지 않음)
 ```
 
@@ -50,3 +55,4 @@ research/                 날짜별 조사 기록과 원자료 (추가만 하고
 | [research/2026-09-29-codex-meta-ideas/](research/2026-09-29-codex-meta-ideas/) | Codex | 시장 관찰과 아이디어 문서 원본, 같은 대화의 답변 요지 |
 | [research/2026-09-30-claude-review/](research/2026-09-30-claude-review/) | Claude Code | 위 기록에 대한 검토와 하루 뒤 재측정 |
 | [research/2026-09-30-claude-fact-check/](research/2026-09-30-claude-fact-check/) | Claude Code | 원문 사실 확인, 수집원 이용 조건 확인, 첫 커밋 이후 정정 내역 |
+| [research/2026-09-30-claude-data-source-check/](research/2026-09-30-claude-data-source-check/) | Claude Code | Yahoo Finance와 뉴스·시장 데이터 출처의 이용 조건 점검 |

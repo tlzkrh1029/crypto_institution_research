@@ -186,11 +186,11 @@ def _process_item(ctx: Context, source: SourceConfig, raw: RawItem, now: datetim
         event_id=placement.event_id,
         source_id=source.id,
     )
-    _deliver(ctx, alert, now)
+    deliver_alert(ctx, alert, now)
     outcome.alerts += 1
 
 
-def _deliver(ctx: Context, alert: Alert, now: datetime) -> None:
+def deliver_alert(ctx: Context, alert: Alert, now: datetime) -> None:
     conn = ctx.conn
     with conn:
         alert_id = conn.execute(
