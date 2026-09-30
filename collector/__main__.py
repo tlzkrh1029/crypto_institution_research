@@ -16,15 +16,16 @@ from .config import ConfigError, load_entities, load_settings, load_sources, val
 from .fetch import Fetcher
 from .heartbeat import Heartbeat
 from .market.jobs import WINDOWS, load_market_config
-from .market.runner import MarketRunner
-from .market.upbit import UpbitClient
-from .notify import make_notifier
-from .pipeline import Context, due_sources, run_source, sync_sources
+from .market.runner import MarketRunner, make_clients
+from .notify import Alert, NotifierConfigError, make_notifier, telegram_chats
+from .pipeline import (Context, deliver_alert, due_sources, retry_undelivered, run_source,
+                       sync_sources)
 from .review import ReviewError, review_event
 from .timeutil import fmt_kst, to_iso, utcnow
 
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 TICK_SEC = 30
+RETRY_EVERY = timedelta(minutes=5)
 
 
 def _setup_logging(log_path: Path, verbose: bool) -> None:
@@ -58,11 +59,11 @@ def _context(root: Path, verbose: bool):
         conn=conn,
         fetcher=Fetcher(settings.user_agent),
         entities=entities,
-        notifier=make_notifier(settings.notifier),
+        notifier=make_notifier(settings.notifier, settings.env),
         heartbeat=Heartbeat(settings.heartbeat_url, settings.user_agent)
         if settings.heartbeat_url else None,
     )
-    market = MarketRunner(ctx, market_cfg, UpbitClient(settings.user_agent))
+    market = MarketRunner(ctx, market_cfg, make_clients(market_cfg, settings.user_agent))
     return ctx, sources, market
 
 
@@ -80,8 +81,18 @@ def cmd_check_config(args) -> int:
         kinds[e.kind] = kinds.get(e.kind, 0) + 1
     print("entities:", ", ".join(f"{k}={v}" for k, v in sorted(kinds.items())))
     market = load_market_config(args.root / "config" / "market.yaml")
-    print(f"market: upbit {'on' if market.enabled else 'off'}, {market.quote} "
-          f"{', '.join(market.symbols)} vs {market.reference}")
+    for v in market.venues:
+        print(f"market: {v.name} {'on' if v.enabled else 'off'}, {v.quote} "
+              f"{', '.join(v.symbols)} vs {v.reference}")
+    print(f"anomaly: {market.anomaly_excess_pct}%p vs reference over "
+          f"{market.anomaly_window_min}m")
+    # Only whether values are set; the token itself is never printed.
+    flags = {name: "set" if settings.env(name) else "not set"
+             for name in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "HEARTBEAT_URL")}
+    print(f"notifier: {settings.notifier} (telegram token {flags['TELEGRAM_BOT_TOKEN']}, "
+          f"chat id {flags['TELEGRAM_CHAT_ID']})")
+    print(f"heartbeat: {flags['HEARTBEAT_URL']}")
+    make_notifier(settings.notifier, settings.env)  # raises on a missing token or chat id
     return 0
 
 
@@ -97,6 +108,7 @@ def cmd_run(args) -> int:
     ctx, sources, market = _context(args.root, args.verbose)
     logging.getLogger("collector").info("collector started with %d sources", len(sources))
     log = logging.getLogger("collector")
+    last_retry = ctx.clock()
     while True:
         # One failing source or job must not stop the others.
         for source in due_sources(ctx.conn, sources, ctx.clock()):
@@ -108,6 +120,13 @@ def cmd_run(args) -> int:
             market.tick(ctx.clock())
         except Exception:
             log.exception("unexpected error in market jobs")
+        now = ctx.clock()
+        if now - last_retry >= RETRY_EVERY:
+            last_retry = now
+            try:
+                retry_undelivered(ctx, now)
+            except Exception:
+                log.exception("unexpected error while retrying alerts")
         if ctx.heartbeat:
             ctx.heartbeat.beat(ctx.clock())
         time.sleep(TICK_SEC)
@@ -115,16 +134,19 @@ def cmd_run(args) -> int:
 
 def cmd_market(args) -> int:
     ctx, _, market = _context(args.root, args.verbose)
-    if not market.cfg.enabled:
+    if not market.clients:
         print("market data is disabled in config/market.yaml")
         return 0
     now = ctx.clock()
-    alerts = market.run_tickers(now)
+    alerts = 0
+    for venue in market.cfg.enabled_venues:
+        alerts += market.run_tickers(venue.name, now)
     rows = ctx.conn.execute(
-        "SELECT symbol, price, ts FROM market_snapshots WHERE ts = ? ORDER BY symbol",
-        (to_iso(now),)).fetchall()
+        "SELECT venue, symbol, quote, price, ts FROM market_snapshots WHERE ts = ? "
+        "ORDER BY venue, symbol", (to_iso(now),)).fetchall()
     for r in rows:
-        print(f"{r['symbol']:<6} {r['price']:>16,.2f} {market.cfg.quote}  {fmt_kst(r['ts'])}")
+        print(f"{r['venue']:<7} {r['symbol']:<6} {r['price']:>16,.2f} {r['quote']}  "
+              f"{fmt_kst(r['ts'])}")
     print(f"anomaly alerts: {alerts}")
     return 0
 
@@ -140,7 +162,7 @@ def cmd_reactions(args) -> int:
 def _reaction_summary(conn, event_id: int) -> list[str]:
     lines = []
     rows = conn.execute(
-        """SELECT symbol, window_name, asset_return, btc_return, excess_return, status
+        """SELECT symbol, venue, window_name, asset_return, btc_return, excess_return, status
            FROM price_reactions WHERE event_id = ? ORDER BY symbol""", (event_id,)).fetchall()
     by_symbol: dict[str, dict[str, object]] = {}
     for r in rows:
@@ -155,8 +177,39 @@ def _reaction_summary(conn, event_id: int) -> list[str]:
                 cells.append(f"{name} {r['asset_return']:+.1%} (vs BTC {r['excess_return']:+.1%})")
             else:
                 cells.append(f"{name} {r['status']}")
-        lines.append(f"    {symbol}: " + ", ".join(cells))
+        venue = next(iter(windows.values()))["venue"]
+        lines.append(f"    {symbol} ({venue}): " + ", ".join(cells))
     return lines
+
+
+def cmd_telegram_chat_id(args) -> int:
+    settings, _, _ = _load(args.root)
+    token = settings.env("TELEGRAM_BOT_TOKEN")
+    if not token:
+        print("TELEGRAM_BOT_TOKEN is not set in .env", file=sys.stderr)
+        return 2
+    chats = telegram_chats(token)
+    if not chats:
+        print("no messages yet: open the bot in Telegram, press Start (or send any "
+              "message), then run this command again")
+        return 1
+    for chat in chats:
+        print(f"TELEGRAM_CHAT_ID={chat['id']}   ({chat['type']} {chat['name']})")
+    return 0
+
+
+def cmd_notify_test(args) -> int:
+    ctx, _, _ = _context(args.root, args.verbose)
+    alert = Alert(level="test", message="collector notification test",
+                  url="https://github.com/tlzkrh1029/crypto_institution_research")
+    deliver_alert(ctx, alert, ctx.clock())
+    row = ctx.conn.execute(
+        "SELECT delivered_via FROM alerts ORDER BY id DESC LIMIT 1").fetchone()
+    if row["delivered_via"]:
+        print(f"sent via {row['delivered_via']}")
+        return 0
+    print("not delivered; see data/collector.log", file=sys.stderr)
+    return 1
 
 
 def cmd_status(args) -> int:
@@ -264,7 +317,11 @@ def main(argv: list[str] | None = None) -> int:
     events = sub.add_parser("events", help="list recent events")
     events.add_argument("--days", type=int, default=7)
     events.set_defaults(func=cmd_events)
-    sub.add_parser("market", help="poll Upbit tickers once and show prices").set_defaults(
+    sub.add_parser("telegram-chat-id", help="show chat ids that messaged the bot").set_defaults(
+        func=cmd_telegram_chat_id)
+    sub.add_parser("notify-test", help="send a test alert through NOTIFIER").set_defaults(
+        func=cmd_notify_test)
+    sub.add_parser("market", help="poll venue tickers once and show prices").set_defaults(
         func=cmd_market)
     reactions = sub.add_parser("reactions", help="compute price reactions for recent events")
     reactions.add_argument("--event", type=int, action="append", help="only this event id")
@@ -290,7 +347,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return args.func(args)
-    except ConfigError as exc:
+    except (ConfigError, NotifierConfigError) as exc:
         print(f"config error: {exc}", file=sys.stderr)
         return 2
     except KeyboardInterrupt:

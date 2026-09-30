@@ -140,6 +140,11 @@ MIGRATIONS: list[str] = [
         PRIMARY KEY (event_id, symbol, window_name)
     );
     """,
+    # 3: delivery attempts, so undelivered alerts can be retried
+    """
+    ALTER TABLE alerts ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0;
+    CREATE INDEX alerts_undelivered ON alerts(delivered_at, created_at);
+    """,
 ]
 
 
