@@ -1,0 +1,284 @@
+# Entities matched against item titles and excerpts.
+#
+# kind: institution | project | theme
+#   institution + project in the same item  -> "high" alert (connection candidate)
+#   project in an institution/regulator feed -> "medium" alert
+#   theme only                               -> stored for later search, no event
+# match: a list of rules. A rule matches when `pattern` is found and, if given,
+#   `requires` is also found (context words, case-insensitive).
+#   Patterns are case-sensitive unless ignore_case: true.
+# tokens: token symbols linked to a project (docs/institution-map.md).
+# control: true for the same-narrative control group (docs/open-questions.md Q7).
+#
+# Matching only proposes candidates. Connection grades and business stages are
+# decided by review (docs/research-principles.md sections 2 and 4).
+
+x-context:
+  finance: &fin "tokeni[sz]|blockchain|crypto|digital asset|stablecoin|on-?chain|ledger|\\bDLT\\b|deposit token|settlement"
+  payments: &pay "bank|payment|ledger|blockchain|Sibos|tokeni[sz]|messag|interbank|cross-border|ISO 20022|stablecoin|settlement"
+
+entities:
+  # --- institutions in docs/institution-map.md --------------------------------
+  - id: tch
+    kind: institution
+    label: The Clearing House
+    match:
+      - pattern: "The Clearing House"
+      - pattern: "\\bTCH\\b"
+        requires: "payment|bank|clearing|on-?chain|tokeni[sz]|\\bRTP\\b|CHIPS"
+
+  - id: dtcc
+    kind: institution
+    label: DTCC
+    match:
+      - pattern: "\\bDTCC\\b|Fund/?SERV|Depository Trust"
+
+  - id: swift
+    kind: institution
+    label: Swift
+    match:
+      - pattern: "\\bSWIFT\\b|(?<!Taylor )\\bSwift\\b"
+        requires: *pay
+
+  - id: us_bank
+    kind: institution
+    label: U.S. Bank
+    match:
+      - pattern: "U\\.S\\. Bank\\b|U\\.S\\. Bancorp|US Bancorp|\\bUSBDC\\b"
+
+  - id: bvnk
+    kind: institution
+    label: BVNK
+    match:
+      - pattern: "\\bBVNK\\b"
+
+  - id: bybit
+    kind: institution
+    label: Bybit
+    match:
+      - pattern: "\\bBybit\\b"
+
+  - id: franklin_templeton
+    kind: institution
+    label: Franklin Templeton
+    match:
+      - pattern: "Franklin Templeton"
+      - pattern: "\\bBenji\\b"
+        requires: "Franklin|fund|tokeni[sz]"
+
+  - id: lfdt
+    kind: institution
+    label: LF Decentralized Trust
+    match:
+      - pattern: "LF Decentralized Trust|Linux Foundation Decentralized Trust|\\bLFDT\\b"
+
+  - id: ibm
+    kind: institution
+    label: IBM
+    match:
+      - pattern: "\\bIBM\\b"
+        requires: "Hedera|Hashgraph|IDTrust|blockchain|tokeni[sz]|ledger"
+
+  - id: boe
+    kind: institution
+    label: Bank of England
+    match:
+      - pattern: "Bank of England"
+        requires: "stablecoin|tokeni[sz]|blockchain|\\bDLT\\b|Synchroni[sz]|digital pound|RTGS|ledger"
+
+  # --- other institutions (discovery, docs/research-principles.md section 1) --
+  - id: jpmorgan
+    kind: institution
+    label: JPMorgan
+    match:
+      - pattern: "J\\.?P\\. ?Morgan|JPMorgan|Kinexys"
+        requires: *fin
+
+  - id: citi
+    kind: institution
+    label: Citi
+    match:
+      - pattern: "\\bCiti(?:group|bank)?\\b"
+        requires: *fin
+
+  - id: bny
+    kind: institution
+    label: BNY
+    match:
+      - pattern: "\\bBNY\\b|BNY Mellon"
+        requires: *fin
+
+  - id: state_street
+    kind: institution
+    label: State Street
+    match:
+      - pattern: "State Street"
+        requires: *fin
+
+  - id: blackrock
+    kind: institution
+    label: BlackRock
+    match:
+      - pattern: "BlackRock|\\bBUIDL\\b"
+        requires: *fin
+
+  - id: goldman
+    kind: institution
+    label: Goldman Sachs
+    match:
+      - pattern: "Goldman Sachs"
+        requires: *fin
+
+  - id: visa
+    kind: institution
+    label: Visa
+    match:
+      - pattern: "\\bVisa\\b"
+        requires: *fin
+
+  - id: mastercard
+    kind: institution
+    label: Mastercard
+    match:
+      - pattern: "Mastercard"
+        requires: *fin
+
+  - id: euroclear
+    kind: institution
+    label: Euroclear
+    match:
+      - pattern: "Euroclear|Clearstream"
+
+  - id: nasdaq
+    kind: institution
+    label: Nasdaq
+    match:
+      - pattern: "\\bNasdaq\\b"
+        requires: "tokeni[sz]|blockchain|digital asset|on-?chain|DLT"
+
+  - id: ice_nyse
+    kind: institution
+    label: ICE / NYSE
+    match:
+      - pattern: "Intercontinental Exchange|\\bNYSE\\b"
+        requires: "tokeni[sz]|blockchain|digital asset|on-?chain|DLT"
+
+  - id: cme
+    kind: institution
+    label: CME Group
+    match:
+      - pattern: "CME Group"
+        requires: *fin
+
+  - id: broadridge
+    kind: institution
+    label: Broadridge
+    match:
+      - pattern: "Broadridge"
+        requires: *fin
+
+  - id: hsbc
+    kind: institution
+    label: HSBC
+    match:
+      - pattern: "\\bHSBC\\b"
+        requires: *fin
+
+  - id: fidelity
+    kind: institution
+    label: Fidelity
+    match:
+      - pattern: "\\bFidelity\\b"
+        requires: *fin
+
+  # --- projects (watch sample and control, docs/open-questions.md Q7) ---------
+  - id: quant
+    kind: project
+    label: Quant
+    tokens: [QNT]
+    match:
+      - pattern: "Quant Network|Overledger|\\bQNT\\b"
+      - pattern: "\\bQuant\\b"
+        requires: "tokeni[sz]|blockchain|ledger|on-?chain|interoperab|Clearing House|stablecoin|deposit|Overledger"
+
+  - id: chainlink
+    kind: project
+    label: Chainlink
+    tokens: [LINK]
+    match:
+      - pattern: "Chainlink|\\$LINK\\b|\\bLINK token"
+
+  - id: ondo
+    kind: project
+    label: Ondo Finance
+    tokens: [ONDO]
+    match:
+      - pattern: "Ondo Finance|\\bOndo\\b|\\bONDO\\b|Oasis Pro"
+
+  - id: stellar
+    kind: project
+    label: Stellar
+    tokens: [XLM]
+    match:
+      - pattern: "Stellar Development Foundation|\\bXLM\\b"
+      - pattern: "\\bStellar\\b"
+        requires: "blockchain|network|\\bXLM\\b|stablecoin|lumen|payment|tokeni[sz]|USDC|Soroban|ledger|\\bSDF\\b"
+
+  - id: hedera
+    kind: project
+    label: Hedera
+    tokens: [HBAR]
+    match:
+      - pattern: "\\bHedera\\b|Hashgraph|\\bHBAR\\b|\\bCLPR\\b"
+
+  - id: ripple
+    kind: project
+    label: Ripple / XRP
+    tokens: [XRP]
+    control: true
+    match:
+      - pattern: "\\bXRP\\b|\\bXRPL\\b|\\bRLUSD\\b"
+      - pattern: "\\bRipple\\b"
+        requires: "XRP|crypto|blockchain|payment|stablecoin|custody|bank|tokeni[sz]"
+
+  # --- themes (stored for later search; no event on their own) ---------------
+  - id: tokenized_deposits
+    kind: theme
+    label: tokenized deposits
+    match:
+      - pattern: "tokeni[sz]ed deposits?|deposit tokens?"
+        ignore_case: true
+
+  - id: tokenization
+    kind: theme
+    label: tokenization
+    match:
+      - pattern: "tokeni[sz]ation|tokeni[sz]ed (?:funds?|assets?|treasur|money market|securities|bonds?|MMF)"
+        ignore_case: true
+
+  - id: stablecoin
+    kind: theme
+    label: stablecoin
+    match:
+      - pattern: "stablecoins?"
+        ignore_case: true
+
+  - id: collateral
+    kind: theme
+    label: collateral
+    match:
+      - pattern: "tokeni[sz]ed collateral|collateral mobility|on-?chain collateral|collateral management"
+        ignore_case: true
+
+  - id: crypto_etf
+    kind: theme
+    label: crypto ETF
+    match:
+      - pattern: "\\bETFs?\\b|\\bETPs?\\b"
+        requires: "crypto|XRP|Chainlink|Hedera|Stellar|HBAR|\\bLINK\\b|XLM|Quant|Ondo|bitcoin|ether"
+
+  - id: industry_event
+    kind: theme
+    label: industry event
+    match:
+      - pattern: "Sibos|Money ?20/20|SmartCon"

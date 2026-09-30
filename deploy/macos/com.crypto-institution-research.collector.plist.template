@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LaunchAgent for the collector. install.sh replaces __REPO__ with the
+  repository path and copies the result to ~/Library/LaunchAgents/.
+  caffeinate -s keeps the system awake while this process runs on AC power.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.crypto-institution-research.collector</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-s</string>
+    <string>__REPO__/.venv/bin/python</string>
+    <string>-m</string>
+    <string>collector</string>
+    <string>run</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>__REPO__</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>60</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>StandardOutPath</key>
+  <string>__REPO__/data/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__REPO__/data/launchd.err.log</string>
+</dict>
+</plist>

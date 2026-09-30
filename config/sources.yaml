@@ -1,0 +1,17 @@
+# Sources polled by the collector.
+#
+# AGENTS.md: a source is added only after its terms of use were checked
+# (docs/collector-spec.md section 3). `terms_checked` records where and when.
+#
+# Fields:
+#   id, name, url
+#   kind: feed (RSS/Atom) | sitemap
+#   interval_sec: polling interval, >= 60
+#   publisher_kind: institution | regulator | project | newswire | media
+#   requires_env: skip the source until this .env value is set
+#                 (its value is also sent as the User-Agent)
+#   url_filter: sitemap only, regex applied to <loc>
+#   max_age_days: sitemap only, ignore entries whose lastmod is older
+#   enabled: false to keep an entry without polling it
+
+sources: []

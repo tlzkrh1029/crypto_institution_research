@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Sample regulator releases</title>
+  <id>https://example.gov/feed</id>
+  <updated>2026-09-28T12:00:00Z</updated>
+  <entry>
+    <title>Statement on Tokenized Collateral Pilot Using Chainlink Data</title>
+    <link href="https://example.gov/news/statement-collateral"/>
+    <id>https://example.gov/news/statement-collateral</id>
+    <published>2026-09-28T12:00:00Z</published>
+    <updated>2026-09-28T12:30:00Z</updated>
+    <summary>A statement describing a collateral pilot.</summary>
+  </entry>
+</feed>

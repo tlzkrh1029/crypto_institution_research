@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crypto-institution-collector"
+version = "0.1.0"
+description = "Personal research collector for institution-linked crypto news and price reactions"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "feedparser>=6.0",
+    "requests>=2.31",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+collector = "collector.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["collector*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

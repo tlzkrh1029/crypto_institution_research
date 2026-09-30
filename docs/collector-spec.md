@@ -81,22 +81,30 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 - 기사와 보도자료는 제목, 링크, 짧은 발췌만 저장한다. 전문은 저장하지 않는다.
 - 가격·거래량 원자료(CoinGecko, 거래소 API)는 로컬 DB에만 저장하고 공개 저장소에 커밋하지 않는다. research/에는 계산 결과와, 재현에 필요한 소량의 스냅숏만 출처 표기와 함께 둔다.
 
-## 5. 사건 기록 구조 (초안)
+## 5. 사건 기록 구조
 
-시각은 UTC ISO 8601 형식으로 저장하고, 화면에는 KST로 표시한다.
+시각은 UTC ISO 8601 형식으로 저장하고, 화면에는 KST로 표시한다. "구현" 열은 v0.1 코드([collector/db.py](../collector/db.py))에 테이블이 있는지 나타낸다.
 
-| 테이블 | 역할 | 주요 필드 |
-|---|---|---|
-| sources | 수집원 | id, name, kind (rss, api, page), url, poll_interval_sec, last_ok_at, last_error_at, last_error |
-| items | 수집한 개별 자료 | id, source_id, url, canonical_url, title, published_at, updated_at, fetched_at, content_hash, excerpt |
-| events | 여러 자료를 묶은 사건 | id, title, first_published_at, first_seen_at, kind (new, update, rerun, unverified), stage_before, stage_after, token_mention (yes, no, unknown), summary, next_check, reviewed_by (ai, human) |
-| event_items | 사건과 자료의 연결 | event_id, item_id |
-| event_assets | 사건과 토큰의 연결 | event_id, symbol, directness (direct, project_claim, indirect, association), evidence_quote, evidence_url |
-| price_reactions | 가격 반응 | event_id, symbol, window (pre_24h, 1h, 6h, 24h, 3d, 7d), asset_return, btc_return, bucket_median_return, status (measured, pending) |
-| venue_shares | 거래소별 비중 | ts, symbol, venue, volume_usd, share, premium |
-| derivatives | 선물 지표 | ts, symbol, venue, open_interest_usd, funding_rate, source_url |
-| flows | 토큰 직접 수요 | date, symbol, kind (etf, treasury, buyback), amount_usd, source_url |
-| runs | 수집 실행 기록 | id, source_id, started_at, finished_at, status, items_new, error |
+| 테이블 | 역할 | 주요 필드 | 구현 |
+|---|---|---|---|
+| sources | 수집원과 수집 상태 | id, name, kind (feed, sitemap), url, poll_interval_sec, publisher_kind, etag, last_modified, last_ok_at, last_error_at, last_error, consecutive_failures, next_due_at, baseline_done | 있음 |
+| items | 수집한 개별 자료 | id, source_id, url, canonical_url, title, published_at, updated_at, fetched_at, content_hash, excerpt, matched_entities, baseline | 있음 |
+| events | 여러 자료를 묶은 사건 | id, title, first_published_at, first_seen_at, last_seen_at, level (high, medium), token_mention (yes, unknown), stage_before, stage_after, summary, next_check, reviewed_by (ai, human), review_note | 있음 |
+| event_items | 사건과 자료의 연결 | event_id, item_id, role (origin, duplicate, rerun) | 있음 |
+| event_entities | 사건에 등장한 기관·프로젝트·테마 | event_id, entity_id, kind | 있음 |
+| event_assets | 사건과 토큰의 연결 | event_id, symbol, directness (unknown, direct, project_claim, indirect, association), evidence_quote, evidence_url | 있음 |
+| alerts | 알림 기록 | id, created_at, level, event_id, source_id, message, url, delivered_via, delivered_at | 있음 |
+| runs | 수집 실행 기록 | id, source_id, started_at, finished_at, status (ok, not_modified, error, skipped), http_status, items_seen, items_new, error | 있음 |
+| price_reactions | 가격 반응 | event_id, symbol, window (pre_24h, 1h, 6h, 24h, 3d, 7d), asset_return, btc_return, bucket_median_return, status (measured, pending) | 없음 |
+| venue_shares | 거래소별 비중 | ts, symbol, venue, volume_usd, share, premium | 없음 |
+| derivatives | 선물 지표 | ts, symbol, venue, open_interest_usd, funding_rate, source_url | 없음 |
+| flows | 토큰 직접 수요 | date, symbol, kind (etf, treasury, buyback), amount_usd, source_url | 없음 |
+
+사건 묶기 규칙은 다음과 같다 ([collector/events.py](../collector/events.py)).
+
+- 기관이나 프로젝트가 대조된 자료만 사건을 만든다. 테마만 대조된 자료는 items에 대조 결과와 함께 저장해 두고, 나중에 검색할 때 쓴다.
+- 최근 30일 안의 사건 가운데 같은 기관이나 프로젝트가 등장하고 제목이 비슷하면(제목 단어의 Jaccard 유사도 0.4 이상) 같은 사건으로 묶는다. 자료의 발표 시각이 그 사건의 최초 발표보다 14일 이상 늦으면 role을 rerun(재확산)으로 기록한다.
+- 연결 등급(event_assets.directness)은 unknown으로 시작하며, 검토를 거쳐 정한다.
 
 행사 일정(H2 검증용)은 필요하면 `calendar` 테이블(id, name, start_date, end_date, location, source_url)이나 별도 파일로 관리한다.
 
@@ -110,6 +118,13 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 - 수집 장애 (한 출처가 정해진 시간 이상 계속 확인에 실패한 경우)
 
 재확산으로 분류된 사건과 연상 등급만 있는 사건은 알림을 보내지 않고 대시보드에만 표시한다. 알림 채널은 [open-questions.md](open-questions.md) Q3에서 정한다.
+
+v0.1 코드는 이 가운데 첫 번째와 두 번째 기준을 다음과 같이 구현했다 ([collector/matching.py](../collector/matching.py), [collector/pipeline.py](../collector/pipeline.py)).
+
+- high: 한 자료에 기관과 프로젝트가 함께 대조되었다.
+- medium: 기관이나 규제기관이 직접 낸 수집원의 자료에서 프로젝트가 대조되었다.
+- 다음 경우에는 사건만 기록하고 알림을 보내지 않는다: 수집원을 처음 확인할 때 이미 있던 자료(기준선), 발표된 지 3일이 지난 자료, 기존 사건에 묶인 자료(중복과 재확산).
+- 알림 채널이 정해지기 전까지 알림은 로그 파일과 alerts 테이블에만 남는다.
 
 ## 7. AI 사용
 

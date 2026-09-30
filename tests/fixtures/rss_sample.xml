@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Sample financial services feed</title>
+    <link>https://example.com/</link>
+    <description>fixture</description>
+    <item>
+      <title>The Clearing House Partners with Quant to Advance the On-Chain Money Initiative</title>
+      <link>https://example.com/news/tch-quant?utm_source=rss&amp;utm_medium=feed</link>
+      <pubDate>Thu, 24 Sep 2026 14:00:00 GMT</pubDate>
+      <description><![CDATA[<p>The Clearing House selected <b>Quant</b> to power clearing and settlement of tokenized deposits.</p>]]></description>
+    </item>
+    <item>
+      <title>Quant Fund Manager Raises New Capital for Equity Strategy</title>
+      <link>https://example.com/news/quant-fund</link>
+      <pubDate>Thu, 24 Sep 2026 15:00:00 GMT</pubDate>
+      <description>A systematic equity fund closed its second vintage.</description>
+    </item>
+    <item>
+      <title>Taylor Swift Tour Boosts Local Payment Volumes</title>
+      <link>https://example.com/news/swift-tour</link>
+      <pubDate>Thu, 24 Sep 2026 16:00:00 GMT</pubDate>
+      <description>Card payment volumes rose in host cities.</description>
+    </item>
+    <item>
+      <title>Retailer Posts Stellar Results for the Quarter</title>
+      <link>https://example.com/news/stellar-results</link>
+      <pubDate>Thu, 24 Sep 2026 17:00:00 GMT</pubDate>
+      <description>Sales grew 12% year over year.</description>
+    </item>
+    <item>
+      <title>Banks Explore Tokenized Deposits for Cross-Border Payments</title>
+      <link>https://example.com/news/tokenized-deposits</link>
+      <pubDate>Thu, 24 Sep 2026 18:00:00 GMT</pubDate>
+      <description>Several banks are testing deposit tokens.</description>
+    </item>
+  </channel>
+</rss>
