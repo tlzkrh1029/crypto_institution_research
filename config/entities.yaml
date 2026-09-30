@@ -206,38 +206,27 @@ entities:
     label: Chainlink
     tokens: [LINK]
     match:
-      # "Chainlink" is also the chain-link fence ("Chainlink Fence", "vinyl-coated
-      # Chainlink", "Chainlink Mesh", "Chainlink Segments"). The fence words right
-      # after the name are skipped, the whole rule is skipped when the text uses
-      # fence-trade vocabulary, and the text must use crypto or oracle vocabulary
-      # (real Chainlink news does; fence-market reports do not). Bare "fence" is
-      # not used: "on the fence" and "ring-fenced" appear in finance news, and
-      # "defence industry" or "ring(-)fence company" are not fence-trade words
-      # either. ChainLink Research (supply-chain analysts), ChainLink Solutions
-      # (freight broker) and Chainlink Services LLC (a fence contractor) are other
-      # firms. "Chainlinked" is not the name.
-      - pattern: "\\b(?:Chainlink|CHAINLINK)\\b(?! (?:Research|RESEARCH|Solutions|SOLUTIONS)\\b| Services,? (?:LLC|LP|Inc))(?![- ]?(?:[Ff]enc|FENC|[Mm]esh|MESH))|\\bLINK [Tt]okens?\\b|\\b(?:KRW|USDT?|BTC)-LINK\\b|\\bLINK[-/](?:USD[TC]?|KRW|BTC|ETH|EUR)\\b"
-        requires: "^(?![\\s\\S]*(?:barbed[- ]wire|vinyl[- ]coated|galvani[sz]ed (?:steel|wire|mesh|fabric|pipe|posts?)|wire mesh|privacy slats?|(?<![A-Za-z-])(?<!ring )fenc(?:e|ing)[- ]?(?:posts?|panels?|fabric|gates?|compan(?:y|ies)|contractors?|installers?|makers?|manufacturers?|industry|materials?|suppl(?:y|ies)|products?)\\b))(?=[\\s\\S]*(?:blockchain|crypto|tokeni[sz]|\\btokens?\\b|oracles?|(?-i:\\bLINK\\b)|\\bCCIP\\b|\\bDeFi\\b|on-?chain|cross-?chain|smart contracts?|stablecoin|digital assets?|(?-i:\\bSwift\\b|\\bSWIFT\\b)|staking|\\bET[FP]s?\\b|Chainlink Labs|Nazarov|Proof of Reserve|AppChain|Runtime Environment|node operators?|interoperab|public chains?|\\bWeb3\\b|\\bCBDC\\b|e-HKD|Sibos|\\bDTCC\\b))"
-      # The 2017-2019 spelling "ChainLink" is a natural name for supply-chain
-      # and logistics firms, so it needs project-specific context. "Oracle" (the
-      # software company) does not count; "blockchain", "crypto" and
-      # "stablecoin" do not either, because those firms use them too.
-      - pattern: "\\bChainLink\\b(?! (?:Research|RESEARCH|Solutions|SOLUTIONS)\\b| Services,? (?:LLC|LP|Inc))(?![- ]?(?:[Ff]enc|FENC))"
-        requires: "(?-i:\\b[Oo]racles\\b|\\boracle\\b|\\bLINK\\b)|oracle (?:network|service|node)s?|decentrali[sz]ed oracle|on-?chain|smart contracts?|\\bDeFi\\b|Nazarov|SmartContract|\\bCCIP\\b|\\bCBDC\\b|e-HKD|digital assets?"
-      # Ticker lists. DOGE (the US agency), LTC (long-term care), SOL and ETH
-      # (ETH Zurich) are common acronyms, and LINK is also the UK ATM network
-      # and the Illinois SNAP card, so crypto context is required.
-      - pattern: "\\b(?:BTC|ETH|XRP|SOL|XLM|HBAR|AVAX|DOGE|LTC)(?:,| and| or| &) LINK\\b|\\bLINK(?:,| and| or| &) (?:BTC|ETH|XRP|SOL|XLM|HBAR|AVAX|DOGE|LTC)\\b(?! Z[uü]rich)"
-        requires: "altcoin|crypto|bitcoin|\\bether\\b|ethereum|blockchain|\\bDeFi\\b|on-?chain|\\btokens?\\b|\\bcoins?\\b|memecoin|\\bETFs?\\b|\\bETPs?\\b|Upbit|Coinbase|Binance|Kraken|Bithumb"
-      # Interlink Electronics (Nasdaq: LINK) and LINK Mobility (Oslo: LINK.OL)
-      # share the cashtag, and stock sites also write about "whales".
-      - pattern: "(?<!Electronics \\()(?<!Interlink \\()\\$LINK\\b(?!\\.[A-Za-z])"
-        requires: "^(?![\\s\\S]*(?-i:\\bInterlink\\b|LINK Mobility))(?=[\\s\\S]*(?:altcoin|\\bDeFi\\b|on-?chain|staking|\\bwhales?\\b|oracle network|decentrali[sz]ed oracle))"
-      # CCIP is also a Medicare programme and CCI Paris; ENS uses "CCIP-Read"
-      # (EIP-3668), "CCIP-Write" (EIP-5559) and "CCIP gateways" for
-      # cross-chain name lookups.
-      - pattern: "\\bCCIP\\b(?![- ]Read)"
-        requires: "^(?![\\s\\S]*(?:CCIP[- ]?(?:read|write)|EIP-?3668|EIP-?5559|(?-i:\\bENS\\b)))(?=[\\s\\S]*cross-?chain)"
+      # The name or co-founder Sergey Nazarov, but not the fence (fence/mesh/gate right after it, fence-trade words anywhere; "on/off the fence", "ring-fence", "fence-sitters" and "defence" are fine), chain-link clothes and 4x4s, or other things called Chainlink (Research, Solutions, Gallery, Chronicle, a game 'mode', Services LLC).
+      - pattern: "\\b(?:Chainlink|CHAINLINK|Sergey Nazarov)\\b(?!['’]? (?i:Research|Solutions|Gallery|Chronicle|mode)\\b| Services,? (?:LLC|LP|Inc))(?![- ]?(?i:fenc|mesh\\b|gates?\\b))"
+        requires: "(?s)^(?!.*(?:barbed wire|vinyl[- ]coated|galvani[sz]ed (?:steel|wire)|(?<!ring[- ])(?<!on the )(?<!off the )\\bfenc(?:es?|ing)\\b(?!-sit)|\\b(?:dress|bikini|jeans|4[x×]4)\\b))"
+      # "ChainLink" (the 2017-2019 spelling, also supply-chain firms) and lower-case "chainlink" (mostly the fence or fabric) need oracle, on-chain or crypto context ("Oracle" the company does not count).
+      - pattern: "\\b(?:ChainLink|chainlink)\\b(?! (?i:Research|Solutions)\\b)(?![- ]?fenc)"
+        requires: "(?-i:\\bLINK\\b|oracles?\\b|Oracles\\b)|oracle (?:network|node)|decentrali[sz]ed oracle|on-?chain|smart contract|DeFi|Nazarov|CCIP|CBDC|e-HKD|digital asset|crypto|altcoin"
+      # LINK next to another crypto ticker ("SOL, AVAX and LINK"), except ETH Zurich; the requires skips the other LINKs: LINE's token, Interlink (Nasdaq: LINK), LINK Mobility, the Illinois LINK card.
+      - pattern: "\\b(?:BTC|ETH|XRP|BNB|SOL|XLM|HBAR|AVAX|ADA|BCH|HYPE|DOGE|LTC|DOT|UNI|AAVE|CRO|FIL)(?:,| &|,? and|,? or) LINK\\b|\\bLINK(?:,| &|,? and|,? or) (?:BTC|ETH|XRP|BNB|SOL|XLM|HBAR|AVAX|ADA|BCH|HYPE|DOGE|LTC|DOT|UNI|AAVE|CRO|FIL)\\b(?! Z[uü]rich)"
+        requires: "(?s)^(?!.*(?-i:\\bLINE\\b|Bitbox|Interlink|Mobility|Illinois))"
+      # LINK as a traded asset: pairs (KRW-LINK, LINK/USD), amounts ("98,590 LINK", "$1.53M LINK"), "LINK token/ETF/fund/price" (not The LINK Fund, an Indian NGO), price moves ("LINK Surges 13%", "LINK to $200").
+      - pattern: "\\b(?:KRW|USDT?|BTC)-LINK\\b|\\bLINK[-/](?:USD[TC]?|KRW|BTC|ETH|EUR)\\b|\\d[KMB]? LINK\\b(?! (?:card|ATM))|(?<!The )\\bLINK (?:[Tt]okens?|ET[FP]s?|[Ff]und(?! Solutions)|[Pp]rice)\\b|\\bLINK (?i:pops|jumps|surges|soars|gains|rises|climbs|rall(?:y|ies)|spikes|bounces|rebounds|falls|drops|slides|slips|dips|sinks|tumbles|plunges|(?:to|at|above|below) \\$)"
+        requires: "(?s)^(?!.*(?-i:\\bLINE\\b|Bitbox|Interlink|Mobility|Illinois))"
+      # The $LINK cashtag with crypto-market words; Interlink Electronics and LINK Mobility share it.
+      - pattern: "\\$LINK\\b(?!\\.\\w)"
+        requires: "(?s)^(?!.*(?-i:Interlink|LINK Mobility)).*(?:altcoin|DeFi|on-?chain|staking|whales?|oracle)"
+      # CCIP (Cross-Chain Interoperability Protocol) with cross-chain, stablecoin or LINK context; not the ENS lookups CCIP-Read/CCIP-Write, the Medicare programme or CCI Paris.
+      - pattern: "\\bCCIP\\b(?![- ]?(?i:read|write))"
+        requires: "(?s)^(?!.*(?-i:\\bENS\\b)).*(?:cross-?chain|stablecoin|(?-i:\\bLINK\\b))"
+      # The Chainlink fund tickers GLNK (Grayscale) and CLNK (Bitwise), with fund context.
+      - pattern: "\\b[GC]LNK\\b"
+        requires: "ET[FP]|exchange-traded|NYSE|Grayscale|Bitwise|crypto|tokeni"
 
   - id: ondo
     kind: project
@@ -251,117 +240,17 @@ entities:
     label: Stellar
     tokens: [XLM]
     match:
-      # Full names of the foundation, the token, the protocol, the network and
-      # its developer products, and the Upbit Korean name 스텔라루멘. "Stellar
-      # Lumen" (singular, Title Case) is left to the ticker rule: "Stellar Lumen
-      # Quarter" is Lumen Technologies. "Stellar Blockchain Stocks/ETF" and
-      # "Stellar network reliability" are adjective uses.
-      - pattern: "Stellar Development Foundation|STELLAR (?:DEVELOPMENT FOUNDATION|LUMENS)\\b|Stellar (?:Lumens|lumens?)\\b|스텔라 ?루멘|Stellar Consensus Protocol|Stellar Disbursement Platform|Stellar Aid Assist|Stellar Community Fund|Stellar (?:Anchor Platform|Wallets Kit|Asset Contracts?|Asset Sandbox)\\b"
-      # Network and blockchain names, unless the text names another Stellar
-      # company ("Stellar Cyber ... Stellar network sensors", "Stellar Health
-      # grows the Stellar network"). In Title Case "Stellar Blockchain" counts
-      # only when no capitalised word follows and no article or possessive comes
-      # before ("a Stellar Blockchain Team", "JPMorgan's Stellar Blockchain
-      # Unit" are the adjective).
-      - pattern: "(?<!\\b[Aa] )(?<!\\b[Aa]n )(?<!['’]s )Stellar (?:[Pp]ublic )?Blockchain\\b(?! [A-Z])|Stellar (?:[Pp]ublic )?blockchain\\b(?! (?:[Ss]tocks?|ETFs?|[Rr]evenues?|[Rr]eturns?|[Gg]rowth|[Rr]ally|[Gg]ains|[Ee]arnings|[Yy]ear|[Qq]uarter|[Ss]ector|[Ii]ndex|[Tt]eam|[Uu]nit)\\b)|(?:Stellar (?:network|mainnet|testnet)|[Tt]he Stellar (?:Network|Mainnet))\\b(?! (?:[Ee]ffects?|[Gg]rowth|[Pp]erformance|[Rr]eliability|[Qq]uality|[Cc]overage|[Uu]ptime|[Ss]peeds?|of)\\b)"
-        requires: "^(?![\\s\\S]*(?-i:Stellar (?:Cyber|Bancorp|Bank|Health|Blade|Recovery|Data Recovery|Capital|Energy|Industries|Wind|Partners(?! [Ww]ith\\b)|Foundation for the Arts)\\b))"
-      # Ticker. Not Excel 4.0 (XLM) macros, the XLM-R/XLM-V language models or
-      # XLMedia (AIM: XLM, XLM.L); the whole rule is skipped when the text is
-      # about Excel 4.0 macros, language models or XLMedia.
-      - pattern: "(?<!Excel )(?<!4\\.0 \\()(?<!macros \\()(?<!macro \\()(?<!AIM: )(?<!LON: )(?<!AIM:)(?<!LON:)\\bXLM\\b(?!-R|-[A-Z]\\b|-\\d|\\.L\\b|/XL4\\b| 4\\.0|\\)? ?[Mm]acros?\\b| [Mm]odels?\\b)"
-        requires: "^(?![\\s\\S]*(?:Excel 4\\.0|Excel macro|\\bXL4\\b|macro sheets?|XLMedia|\\bmBERT\\b|RoBERTa|multilingual|cross-?lingual|language models?))(?=[\\s\\S]*(?:Stellar|lumens|crypto|token|coin|digital asset|blockchain|on-?chain|stablecoin|\\bET[FP]s?\\b|exchange-traded|futures|Grayscale|price|trading|listing|KRW-XLM|XLM[-/](?:USDT?|USDC|KRW|BTC|EUR)\\b|Upbit|Bithumb|Binance|Kraken|스텔라|루멘|가상자산|암호화폐|가상화폐|업비트|빗썸|코인))"
-      # Bare "Stellar" only where it reads as a name, never as the adjective
-      # ("Posts Stellar Results", "Was Stellar for", "Nothing Short of
-      # Stellar", "Less Than Stellar") or as another company. When the text
-      # names Stellar Cyber, Bancorp/Bank, Health, Blade, Recovery, Capital,
-      # Energy, Industries, Wind, Partners (the firm, not "Partners With") or the
-      # Foundation for the Arts, bare "Stellar" is that company ("Stellar's Open
-      # XDR", "Stellar customers", (“Stellar”)), so these rules are skipped. The
-      # pipeline joins title and excerpt with a space, so an excerpt that starts
-      # with "Stellar" follows the last word of the title.
-      # (a) possessive or compound: "Stellar's", "Stellar-based".
-      - pattern: "\\bStellar(?:['’]s|-(?:based|native|issued|powered|listed))\\b"
-        requires: &stellar_ctx "^(?![\\s\\S]*(?-i:Stellar (?:Cyber|Bancorp|Bank|Health|Blade|Recovery|Data Recovery|Capital|Energy|Industries|Wind|Partners(?! [Ww]ith\\b)|Foundation for the Arts)\\b))(?=[\\s\\S]*(?:blockchain|crypto|digital (?:asset|dollar|currenc)|stablecoin|USDC|EURC|PYUSD|tokeni[sz]|on-?chain|\\bDLT\\b|distributed ledger|smart contract|mainnet|\\bXLM\\b|Soroban|\\bSDF\\b|Denelle Dixon|DeFi|real-world asset|\\bRWA\\b|\\bCBDC\\b|hryvnia))"
-      # (b1) before "(" or a lowercase verb or product noun ("Stellar (XLM)",
-      # "Stellar said", "Stellar partners with", "Stellar mainnet"). Title Case
-      # adjectives take capitalised words, so lowercase ones are safe; result
-      # nouns after "protocol"/"futures" still count as the adjective ("Stellar
-      # futures volume lifts CME").
-      - pattern: "(?<!Be |Is |So |be |is |so )(?<!Are |Log |Was |are |log |was )(?<!Been |Book |Logs |Look |Post |Seem |Stay |Were |been |book |logs |look |post |seem |stay |were )(?<!Books |Enjoy |Flows |Gains |Looks |Notch |Posts |Prove |Quite |Sales |Seems |Stays |Still |Truly |books |enjoy |flows |gains |looks |notch |posts |prove |quite |sales |seems |stays |still |truly )(?<!Demand |Enjoys |Growth |Looked |Pretty |Proved |Proven |Proves |Remain |Report |Seemed |Simply |Stayed |demand |enjoys |growth |looked |pretty |proved |proven |proves |remain |report |seemed |simply |stayed )(?<!Deliver |Good to |Revenue |revenue |Inflows |Notches |Records |Remains |Reports |Results |Returns |Volumes |deliver |good to |inflows |notches |records |remains |reports |results |returns |volumes )(?<!Delivers |Earnings |Great to |Remained |Short of |Solid to |delivers |earnings |great to |remained |short of |solid to )(?<!Sued |Sues )(?<!Charged |Charges )(?!(?<=\\b[Aa] )Stellar(?:[,.:;!?]| and\\b| or\\b| [-–—]| Foundation\\b))\\bStellar(?= \\(| (?:is|has|will|was|said|says|today|now|also|mainnet|testnet|ledger|chain|anchors?|partners with|launches|joins|integrates|announces|adds|expands|unveils|introduces|debuts|selects|becomes|supports)\\b| (?:protocol|ecosystem)\\b(?! (?:of|for)\\b)(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)| (?:cryptocurrency |crypto )?futures\\b(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b))"
-        requires: *stellar_ctx
-      # (b1) Title Case verbs and product nouns ("Stellar Launches", "Stellar
-      # Partners With", "Stellar Surges 12%", "Stellar Futures", "Stellar ETF")
-      # take the attributive adjective too ("Sees Stellar Crypto Futures
-      # Volume", "Two Stellar Launches:", "Builds Stellar Ecosystem of"), so they
-      # count only in subject position: at the start, after punctuation or after
-      # "and"/"&". Result nouns after a product noun, "of"/"for" after
-      # Network/Ecosystem/Foundation/Protocol, and a price verb not followed by a
-      # figure or a preposition ("Stellar Rallies Lift Crypto Stocks") are skipped.
-      # "Stellar Hits and Misses" and "Stellar Launches Lift ..." are the noun.
-      - pattern: "(?:^|(?<=[:;,.?!] )|(?<=\\b[Aa]nd )|(?<=& ))Stellar(?= (?:(?:Launches|Joins|Integrates|Announces|Adds|Expands|Unveils|Introduces|Debuts|Taps|Selects|Enters|Surpasses|Tops|Reaches|Crosses|Named|Powers|Enables|Onboards|Brings|Welcomes|Is(?! the [Ww]ord\\b)|Hits(?! (?:and|&) Misses\\b))\\b(?!:)(?<!Launches(?= (?:Lift|Drive|Boost|Fuel|Help|Spark|Power|Push|Lead|Give|Show|Make|Mark|Signal)\\b))(?<!Debuts(?= (?:Lift|Drive|Boost|Fuel|Help|Spark|Power|Push|Lead|Give|Show|Make|Mark|Signal)\\b))|Moves (?:Into|Toward|To|Onto|Beyond)\\b|Partners? (?:[Ww]ith|[Oo]n|[Tt]o)\\b(?! (?:[Ff]raud|[Ss]ecurities|[Vv]iolat|[Mm]islead|[Dd]efraud|[Rr]unning|[Oo]perating|[Ss]elling|[Oo]ffering|[Ii]nsider|[Ss]teal|[Mm]isappropriat))|Teams [Uu]p\\b|Goes [Ll]ive\\b|Price (?:(?:Surges|Rallies|Jumps|Slides|Falls|Climbs|Soars|Rises|Drops|Dips|Tumbles|Slumps|Rebounds|Spikes|Plunges|Sinks)\\b(?= (?:\\d|\\$|(?i:after|as|on|to|above|below|past|amid|over|in|while|despite|from|toward|towards|near|ahead|with|by|since|back)\\b)|[,.;:!?]?\\s*$)|(?:Prediction|Analysis|Forecast|Today)\\b)|(?:Surges|Rallies|Jumps|Slides|Falls|Climbs|Soars|Rises|Drops|Dips|Tumbles|Slumps|Rebounds|Spikes|Plunges|Sinks)\\b(?= (?:\\d|\\$|(?i:after|as|on|to|above|below|past|amid|over|in|while|despite|from|toward|towards|near|ahead|with|by|since|back)\\b)|[,.;:!?]?\\s*$)|(?:[Cc]ryptocurrency |[Cc]rypto )?Futures\\b(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)|(?:Protocol|Ecosystem)\\b(?! (?:of|for)\\b)(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)|Network\\b(?! (?:[Ee]ffects?|[Gg]rowth|[Pp]erformance|[Rr]eliability|[Qq]uality|[Cc]overage|[Uu]ptime|[Ss]peeds?|of|for)\\b)|Foundation\\b(?! (?:for|of|[Ll]aid|[Ss]et|[Bb]uilt)\\b)|ET[FP]s?\\b(?! (?:[Ii]nflows|[Ff]lows|[Dd]emand|[Dd]ebut|[Rr]eturns?|[Pp]erformance|[Yy]ear|[Ss]ales|[Gg]rowth|[Vv]olumes?|[Tt]rading)\\b)|Meridian\\b|(?:DEX|USDC|EURC|PYUSD)\\b(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)))"
-        requires: "^(?![\\s\\S]*(?-i:Stellar (?:Cyber|Bancorp|Bank|Health|Blade|Recovery|Data Recovery|Capital|Energy|Industries|Wind|Partners(?! [Ww]ith\\b)|Foundation for the Arts)\\b))(?=[\\s\\S]*(?:blockchain|crypto|digital (?:asset|dollar|currenc)|stablecoin|USDC|EURC|PYUSD|tokeni[sz]|on-?chain|\\bDLT\\b|distributed ledger|smart contract|mainnet|\\bXLM\\b|Soroban|\\bSDF\\b|Denelle Dixon|DeFi|real-world asset|\\bRWA\\b|\\bCBDC\\b|hryvnia|\\bET[FP]s?\\b|Grayscale|altcoin))"
-      # (b1) a fund or futures product as the object of a listing or filing verb
-      # ("Files for Stellar ETF", "CME Adds Stellar Futures"), not after other
-      # words ("After Stellar ETF Launch").
-      - pattern: "\\b(?:[Ff]il(?:es?|ed|ing) for|[Aa]ppl(?:y|ies|ied) for|[Ss]eeks?|[Ll]ist(?:s|ed|ing)?|[Aa]dds?|[Aa]dded|[Aa]pprov(?:es?|ed)|[Dd]elay(?:s|ed)?|[Rr]eject(?:s|ed)?|[Ll]aunch(?:es|ed)?|[Dd]ebuts?|[Oo]ffers?|[Pp]lans?)(?: (?:[Ss]pot|[Tt]he|[Ii]ts|[Ff]irst|U\\.S\\.))* Stellar (?:ETF|ETP|Futures|Trust)s?\\b(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)(?! (?:[Ii]nflows|[Ff]lows|[Dd]emand|[Dd]ebut|[Rr]eturns?|[Pp]erformance|[Yy]ear|[Ss]ales|[Gg]rowth|[Vv]olumes?|[Tt]rading)\\b)"
-        requires: "^(?![\\s\\S]*(?-i:Stellar (?:Cyber|Bancorp|Bank|Health|Blade|Recovery|Data Recovery|Capital|Energy|Industries|Wind|Partners(?! [Ww]ith\\b)|Foundation for the Arts)\\b))(?=[\\s\\S]*(?:blockchain|crypto|digital (?:asset|dollar|currenc)|stablecoin|USDC|EURC|PYUSD|tokeni[sz]|on-?chain|\\bDLT\\b|distributed ledger|smart contract|mainnet|\\bXLM\\b|Soroban|\\bSDF\\b|Denelle Dixon|DeFi|real-world asset|\\bRWA\\b|\\bCBDC\\b|hryvnia|\\bET[FP]s?\\b|Grayscale|altcoin))"
-      # (b1) the same verbs and product nouns anywhere, when the text also has a
-      # Stellar-specific cue (XLM, SDF, Soroban, Denelle Dixon).
-      - pattern: "(?<!Be |Is |So |be |is |so )(?<!Are |Log |Was |are |log |was )(?<!Been |Book |Logs |Look |Post |Seem |Stay |Were |been |book |logs |look |post |seem |stay |were )(?<!Books |Enjoy |Flows |Gains |Looks |Notch |Posts |Prove |Quite |Sales |Seems |Stays |Still |Truly |books |enjoy |flows |gains |looks |notch |posts |prove |quite |sales |seems |stays |still |truly )(?<!Demand |Enjoys |Growth |Looked |Pretty |Proved |Proven |Proves |Remain |Report |Seemed |Simply |Stayed |demand |enjoys |growth |looked |pretty |proved |proven |proves |remain |report |seemed |simply |stayed )(?<!Deliver |Good to |Revenue |revenue |Inflows |Notches |Records |Remains |Reports |Results |Returns |Volumes |deliver |good to |inflows |notches |records |remains |reports |results |returns |volumes )(?<!Delivers |Earnings |Great to |Remained |Short of |Solid to |delivers |earnings |great to |remained |short of |solid to )(?!(?<=\\b[Aa] )Stellar(?:[,.:;!?]| and\\b| or\\b| [-–—]| Foundation\\b))\\bStellar(?= (?:(?:Launches|Joins|Integrates|Announces|Adds|Expands|Unveils|Introduces|Debuts|Taps|Selects|Enters|Surpasses|Tops|Reaches|Crosses|Named|Powers|Enables|Onboards|Brings|Welcomes|Is(?! the [Ww]ord\\b)|Hits(?! (?:and|&) Misses\\b))\\b(?!:)(?<!Launches(?= (?:Lift|Drive|Boost|Fuel|Help|Spark|Power|Push|Lead|Give|Show|Make|Mark|Signal)\\b))(?<!Debuts(?= (?:Lift|Drive|Boost|Fuel|Help|Spark|Power|Push|Lead|Give|Show|Make|Mark|Signal)\\b))|Moves (?:Into|Toward|To|Onto|Beyond)\\b|Partners? (?:[Ww]ith|[Oo]n|[Tt]o)\\b(?! (?:[Ff]raud|[Ss]ecurities|[Vv]iolat|[Mm]islead|[Dd]efraud|[Rr]unning|[Oo]perating|[Ss]elling|[Oo]ffering|[Ii]nsider|[Ss]teal|[Mm]isappropriat))|Teams [Uu]p\\b|Goes [Ll]ive\\b|Price (?:(?:Surges|Rallies|Jumps|Slides|Falls|Climbs|Soars|Rises|Drops|Dips|Tumbles|Slumps|Rebounds|Spikes|Plunges|Sinks)\\b(?= (?:\\d|\\$|(?i:after|as|on|to|above|below|past|amid|over|in|while|despite|from|toward|towards|near|ahead|with|by|since|back)\\b)|[,.;:!?]?\\s*$)|(?:Prediction|Analysis|Forecast|Today)\\b)|(?:Surges|Rallies|Jumps|Slides|Falls|Climbs|Soars|Rises|Drops|Dips|Tumbles|Slumps|Rebounds|Spikes|Plunges|Sinks)\\b(?= (?:\\d|\\$|(?i:after|as|on|to|above|below|past|amid|over|in|while|despite|from|toward|towards|near|ahead|with|by|since|back)\\b)|[,.;:!?]?\\s*$)|(?:[Cc]ryptocurrency |[Cc]rypto )?Futures\\b(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)|(?:Protocol|Ecosystem)\\b(?! (?:of|for)\\b)(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)|Network\\b(?! (?:[Ee]ffects?|[Gg]rowth|[Pp]erformance|[Rr]eliability|[Qq]uality|[Cc]overage|[Uu]ptime|[Ss]peeds?|of|for)\\b)|Foundation\\b(?! (?:for|of|[Ll]aid|[Ss]et|[Bb]uilt)\\b)|ET[FP]s?\\b(?! (?:[Ii]nflows|[Ff]lows|[Dd]emand|[Dd]ebut|[Rr]eturns?|[Pp]erformance|[Yy]ear|[Ss]ales|[Gg]rowth|[Vv]olumes?|[Tt]rading)\\b)|Meridian\\b|(?:DEX|USDC|EURC|PYUSD)\\b(?! (?:[Vv]olumes?|[Rr]evenues?|[Gg]rowth|[Tt]rading|[Dd]emand|[Aa]ctivity|[Ff]ees|[Ii]nflows|[Ff]lows|[Bb]usiness|[Ss]ales|[Rr]esults|[Rr]eturns?|[Gg]ains|[Pp]erformance|[Nn]umbers|[Ff]igures|[Ee]arnings|[Pp]rofits?|TVL|[Oo]pen [Ii]nterest|[Mm]omentum|[Uu]ptake)\\b)))"
-        requires: "^(?![\\s\\S]*(?-i:Stellar (?:Cyber|Bancorp|Bank|Health|Blade|Recovery|Data Recovery|Capital|Energy|Industries|Wind|Partners(?! [Ww]ith\\b)|Foundation for the Arts)\\b))(?=[\\s\\S]*(?:blockchain|crypto|digital (?:asset|dollar|currenc)|stablecoin|USDC|EURC|PYUSD|tokeni[sz]|on-?chain|\\bDLT\\b|distributed ledger|smart contract|mainnet|\\bXLM\\b|Soroban|\\bSDF\\b|Denelle Dixon|DeFi|real-world asset|\\bRWA\\b|\\bCBDC\\b|hryvnia))(?=[\\s\\S]*(?:(?-i:\\bXLM\\b|\\bSDF\\b)|Soroban(?! Capital)|Denelle Dixon|Stellar Development Foundation|Stellar Lumens))"
-      # (b2) before punctuation, the end, "by", a dash, a lowercase function
-      # word or an asset noun ("Stellar and", "Stellar for", "Stellar
-      # stablecoins"). In Title Case the adjective takes the same words
-      # ("Tokenized Fund Performance Stellar in 2025", "Crypto Stocks Stellar
-      # as"), so the word before "Stellar" must leave room only for the name:
-      # the start of the text, "&" or "/", a lowercase word, a possessive, or a
-      # listed preposition, question word or verb ("With", "From", "Why",
-      # "Selects", "Picks"). After a colon, comma, bracket, quote or dash only
-      # "Stellar to <verb>" and "Stellar in talks" count ("Exclusive: Stellar
-      # to Launch", not "Verdict: Stellar.", "— Stellar and" or "Has Been
-      # “Stellar”"). "Stellar to" at the start or after "From" also needs a verb
-      # or a chain name ("From Stellar to Solana", not "From Stellar to
-      # Stalled"). Linking verbs, adverbs, result nouns and the idioms "Less
-      # Than", "Far From", "More/Better/Other Than" and "as Stellar as" before it
-      # are skipped.
-      - pattern: "(?:^|(?<=[&/] )|(?<=[,:;(\\\"“‘—–-] )(?=Stellar (?:to|in [Tt]alks)\\b)|(?<=[(\\\"“‘])(?=Stellar (?:to|in [Tt]alks)\\b)|(?<![\\w'’.$%-])(?:[a-z][\\w'’.-]*|[A-Z][\\w.&-]*['’]s|With|From|Onto|Into|Via|To|On|At|For|By|In|Beyond|Across|Atop|Over|About|Between|Behind|Inside|Through|Toward|Towards|Versus|Vs\\.?|And|Or|Than|Like|Including|Plus|Amid|After|Before|Unlike|Why|How|What|When|Where|Whether|Can|Could|Will|Would|Should|Does|Did|The|Taps|Tapped|Adds|Added|Chooses|Choose|Chose|Choosing|Selects|Select|Selected|Selecting|Picks|Pick|Picked|Picking|Uses|Use|Used|Using|Explores|Explore|Exploring|Backs|Backed|Joins|Join|Joined|Brings|Bring|Brought|Bringing|Expands|Expand|Expanded|Expanding|Extends|Integrates|Integrate|Integrated|Integrating|Launches|Launch|Launched|Launching|Deploys|Deploy|Deployed|Deploying|Supports|Support|Supported|Supporting|Embraces|Adopts|Adopt|Adopted|Lists|List|Listed|Listing|Delists|Connects|Connect|Connecting|Links|Enables|Welcomes|Partners|Invests|Moves|Move|Migrates|Migrate|Onboards|Leaves|Ditches|Drops|Sues|Sued|Charges|Charged|Approves|Approved|Delays|Rejects|Files|Filed) )(?!(?:(?<![\\s\\S])|(?<=[Ff]rom )|(?<=[,:;(\\\"“‘—–-] )|(?<=[(\\\"“‘]))Stellar to (?!(?:(?i:launch|list|add|join|bring|expand|extend|partner|acquire|integrate|support|offer|build|deploy|issue|enable|pilot|test|upgrade|host|power|settle|tokeni[sz]e|unveil|introduce|debut|roll|enter|open|raise|invest|fund|back|allow|halt|pause|end|migrate|move|cut|get|receive|win|seek|file|announce|hold|merge|sell|buy|sign|take|help|replace|release|reward|burn|use|work|team|collaborate|start|begin|explore|submit|propose|create|mint|connect|adopt|accept|provide|process|serve|present|go|become|onboard|speak|testify|meet|hire|name|appoint|cut|drop|delist)|Solana|Ethereum|Bitcoin|XRPL?|Polygon|Avalanche|Algorand|Hedera|Arbitrum|Aptos|Cardano|Polkadot|Tron|Sui|Canton|Tezos|Celo|Base|Optimism|Chainlink|Litecoin|Dogecoin|Ripple|Hyperliquid|Cosmos|NEAR|Near|TON)\\b))(?<!Far From )(?<!Far from )(?<!far from )(?<!Less Than )(?<!Less than )(?<!less than )(?<!More Than )(?<!More than )(?<!more than )(?<!Other Than )(?<!Other than )(?<!other than )(?<!Better Than )(?<!Better than )(?<!better than )(?<!Be |Is |So |be |is |so )(?<!Are |But |Log |Was |but |are |log |was )(?<!Been |Book |Logs |Look |Post |Seem |Stay |Were |been |book |logs |look |post |seem |stay |were )(?<!Books |Enjoy |Flows |Gains |Looks |Notch |Posts |Prove |Quite |Sales |Seems |Stays |Still |Truly |books |enjoy |flows |gains |looks |notch |posts |prove |quite |sales |seems |stays |still |truly )(?<!Demand |Enjoys |Growth |Looked |Pretty |Proved |Proven |Proves |Remain |Report |Seemed |Simply |Stayed |demand |enjoys |growth |looked |pretty |proved |proven |proves |remain |report |seemed |simply |stayed )(?<!Deliver |Good To |Good to |Revenue |revenue |Inflows |Notches |Records |Remains |Reports |Results |Returns |Volumes |deliver |good to |inflows |notches |records |remains |reports |results |returns |volumes )(?<!Delivers |Earnings |Great To |Great to |Remained |Short Of |Short of |Solid To |Solid to |delivers |earnings |great to |remained |short of |solid to )(?!(?<=\\b[Aa]s )Stellar (?:[Aa]s|by)\\b)(?!(?<=\\b[Aa] )Stellar(?:[,.:;!?]| and\\b| or\\b| [-–—]| Foundation\\b))Stellar(?=\\s*[.;:!?)\\]\\\"”]|\\s*$|,\\s*$|,\\s+[a-z]| [-–—] | by (?![Aa]ny\\b|[Ee]very\\b|[Aa]ll\\b|[Mm]ost\\b|[Ff]ar\\b)| (?:and|or|for|as|to|in|on|with|via|at|from|into|over|wallets?|assets?|tokens?|stablecoins?)\\b)"
-        requires: *stellar_ctx
-      # (c) mid-sentence before a lowercase word: "Mastercard and Stellar
-      # partner". The word before "Stellar" follows the (b2) rule, so an
-      # excerpt that starts "Stellar trading volumes" after a Title Case title
-      # does not count. Residual risk: a sentence-case title that ends in a
-      # lowercase word, followed by such an excerpt.
-      - pattern: "(?:(?<=[&/] )|(?<![\\w'’.$%-])(?:[a-z][\\w'’.-]*|[A-Z][\\w.&-]*['’]s|With|From|Onto|Into|Via|To|On|At|For|By|In|Beyond|Across|Atop|Over|About|Between|Behind|Inside|Through|Toward|Towards|Versus|Vs\\.?|And|Or|Than|Like|Including|Plus|Amid|After|Before|Unlike|Why|How|What|When|Where|Whether|Can|Could|Will|Would|Should|Does|Did|The|Taps|Tapped|Adds|Added|Chooses|Choose|Chose|Choosing|Selects|Select|Selected|Selecting|Picks|Pick|Picked|Picking|Uses|Use|Used|Using|Explores|Explore|Exploring|Backs|Backed|Joins|Join|Joined|Brings|Bring|Brought|Bringing|Expands|Expand|Expanded|Expanding|Extends|Integrates|Integrate|Integrated|Integrating|Launches|Launch|Launched|Launching|Deploys|Deploy|Deployed|Deploying|Supports|Support|Supported|Supporting|Embraces|Adopts|Adopt|Adopted|Lists|List|Listed|Listing|Delists|Connects|Connect|Connecting|Links|Enables|Welcomes|Partners|Invests|Moves|Move|Migrates|Migrate|Onboards|Leaves|Ditches|Drops|Sues|Sued|Charges|Charged|Approves|Approved|Delays|Rejects|Files|Filed) )(?<!Far From )(?<!Far from )(?<!far from )(?<!Less Than )(?<!Less than )(?<!less than )(?<!More Than )(?<!More than )(?<!more than )(?<!Other Than )(?<!Other than )(?<!other than )(?<!Better Than )(?<!Better than )(?<!better than )(?<!Be |Is |So |be |is |so )(?<!Are |But |Log |Was |but |are |log |was )(?<!Been |Book |Logs |Look |Post |Seem |Stay |Were |been |book |logs |look |post |seem |stay |were )(?<!Books |Enjoy |Flows |Gains |Looks |Notch |Posts |Prove |Quite |Sales |Seems |Stays |Still |Truly |books |enjoy |flows |gains |looks |notch |posts |prove |quite |sales |seems |stays |still |truly )(?<!Demand |Enjoys |Growth |Looked |Pretty |Proved |Proven |Proves |Remain |Report |Seemed |Simply |Stayed |demand |enjoys |growth |looked |pretty |proved |proven |proves |remain |report |seemed |simply |stayed )(?<!Deliver |Good To |Good to |Revenue |revenue |Inflows |Notches |Records |Remains |Reports |Results |Returns |Volumes |deliver |good to |inflows |notches |records |remains |reports |results |returns |volumes )(?<!Delivers |Earnings |Great To |Great to |Remained |Short Of |Short of |Solid To |Solid to |delivers |earnings |great to |remained |short of |solid to )(?!(?<=\\b[Aa]s )Stellar (?:[Aa]s|by)\\b)(?!(?<=[Ff]rom )Stellar to (?!(?:(?i:launch|list|add|join|bring|expand|extend|partner|acquire|integrate|support|offer|build|deploy|issue|enable|pilot|test|upgrade|host|power|settle|tokeni[sz]e|unveil|introduce|debut|roll|enter|open|raise|invest|fund|back|allow|halt|pause|end|migrate|move|cut|get|receive|win|seek|file|announce|hold|merge|sell|buy|sign|take|help|replace|release|reward|burn|use|work|team|collaborate|start|begin|explore|submit|propose|create|mint|connect|adopt|accept|provide|process|serve|present|go|become|onboard|speak|testify|meet|hire|name|appoint|cut|drop|delist)|Solana|Ethereum|Bitcoin|XRPL?|Polygon|Avalanche|Algorand|Hedera|Arbitrum|Aptos|Cardano|Polkadot|Tron|Sui|Canton|Tezos|Celo|Base|Optimism|Chainlink|Litecoin|Dogecoin|Ripple|Hyperliquid|Cosmos|NEAR|Near|TON)\\b))Stellar (?=[a-z])(?!(?:growth|results|returns|gains|performance|quarter|year|week|month|momentum|demand|inflows|flows|sales|earnings|figures|numbers|start|debut|run|rally|record|showing|reviews?|ratings?|jobs|revenue|profits?)\\b)"
-        requires: *stellar_ctx
-      # (d) "on Stellar" before a capitalised word. Mostly this is the adjective
-      # ("Tops Forecasts on Stellar Servicing Business", "Rising on Stellar
-      # Institutional Uptake"), so the name counts before a network noun
-      # ("on Stellar Mainnet"), before a verb with a figure or record ("USDC on
-      # Stellar Tops $1 Billion"), and in "support/custody for Stellar
-      # Tokenized Assets", unless a result noun follows ("on Stellar USDC
-      # Growth").
-      - pattern: "(?<!% )(?<!Up )(?<!Bet |Pop )(?<!Beat |Bets |Gain |High |Jump |Leap |Pops |Ride |Rise |Rose |Soar )(?<!Banks |Beats |Build |Climb |Count |Gains |Highs |Jumps |Leaps |Rally |Rides |Rises |Soars |Spike |Surge |Trade )(?<!Builds |Climbs |Counts |Gained |Higher |Jumped |Popped |Record |Rocket |Soared |Spiked |Spikes |Surged |Surges |Thrive |Trades )(?<!Advance |Bounces |Climbed |Percent |Rallied |Rallies |Rebound |Rockets |Thrives )(?<!Advanced |Advances |Rebounds )(?<!Capitalise |Capitalize )(?<!Capitalises |Capitalizes )\\b(?:on|onto|to|via|atop|across|using) Stellar (?:(?![A-Z][\\w'’-]* (?:[A-Z][\\w'’-]* )?(?:Demand|Revenues?|Growth|Activity|Rally|Results|Earnings|Returns|Gains|Sales|Profits?|Performance|Inflows|Flows|Numbers|Figures|Quarter|Q[1-4]|Year|Momentum|Guidance|Outlook|Interest|Adoption|Appetite|Sentiment|Volumes?|Fees|Margins?|Bill|Vote|Effects?|Reliability|Uptake|Economics|Licensing|Business|Trading|Signups|Data)\\b)(?:Mainnet|Testnet|Network|Blockchain|Soroban|USDC|EURC|PYUSD)\\b|(?:Hit|Hits|Top|Tops|Reach|Reaches|Surpass|Surpasses|Cross|Crosses|Doubles?|Triples?|Soar|Soars|Jump|Jumps|Climb|Climbs|Grow|Grows|Rise|Rises|Surge|Surges|Near|Nears) (?=\\$|\\d|[Rr]ecords?\\b|[Nn]ew\\b|[Aa]ll-[Tt]ime\\b|[Mm]ilestones?\\b))|\\b(?:[Ss]upport|[Cc]ustody|[Ii]ntegration|[Tt]rading) for Stellar (?![A-Z][\\w'’-]* (?:[A-Z][\\w'’-]* )?(?:Demand|Revenues?|Growth|Activity|Rally|Results|Earnings|Returns|Gains|Sales|Profits?|Performance|Inflows|Flows|Numbers|Figures|Quarter|Q[1-4]|Year|Momentum|Guidance|Outlook|Interest|Adoption|Appetite|Sentiment|Volumes?|Fees|Margins?|Bill|Vote|Effects?|Reliability|Uptake|Economics|Licensing|Business|Trading|Signups|Data)\\b)(?:Tokenized|Tokenised|Assets?|Tokens?|Stablecoins?)\\b"
-        requires: *stellar_ctx
-      # (d) "on/to Stellar" at the end of a title, where the excerpt follows
-      # after a space ("Goes Live on Stellar PayPal today announced ..."): any
-      # capitalised word except companies and idioms, only when a deployment verb
-      # comes shortly before in the same clause ("Launches USDG on Stellar",
-      # "Brings EURC to Stellar") or the text has a Stellar-specific cue. Not
-      # after market-move and "build/bet/count on" verbs, "%", "Record" or
-      # "Higher", and not when one of the next two words is a result noun.
-      - pattern: "(?<!% )(?<!Up )(?<!Bet |Pop )(?<!Beat |Bets |Gain |High |Jump |Leap |Pops |Ride |Rise |Rose |Soar )(?<!Banks |Beats |Build |Climb |Count |Gains |Highs |Jumps |Leaps |Rally |Rides |Rises |Soars |Spike |Surge |Trade )(?<!Builds |Climbs |Counts |Gained |Higher |Jumped |Popped |Record |Rocket |Soared |Spiked |Spikes |Surged |Surges |Thrive |Trades )(?<!Advance |Bounces |Climbed |Percent |Rallied |Rallies |Rebound |Rockets |Thrives )(?<!Advanced |Advances |Rebounds )(?<!Capitalise |Capitalize )(?<!Capitalises |Capitalizes )\\b(?:on|onto|to|via|atop|across|using) Stellar(?:,| (?!(?:Bancorp|Bank|Cyber|Blade|Health|Energy|Industries|Data|Wind|Partners|Capital|Group|Entertainment|Management|Solutions|Technologies|Recovery|Holdings|Ventures|Awards|Results|Earnings|Growth|Quarter|Year|Week|Month|Day|Session|Performance|Returns?|Gains|Inflows|Flows|Demand|Sales|Revenue|Profits?|Numbers|Figures|Jobs|Start|Debut|Run|Rally|Record|Momentum|Outlook|Guidance|Reviews?|Ratings?|First|Second|Third|Fourth|Q[1-4]|Trading|Crypto|ETF|Heights|Highs|Levels|Note|Streak|Footing|Form|Pace|Track|Trajectory|Terms|Profitability)\\b)(?![A-Z][\\w'’-]* (?:[A-Z][\\w'’-]* )?(?:Demand|Revenues?|Growth|Activity|Rally|Results|Earnings|Returns|Gains|Sales|Profits?|Performance|Inflows|Flows|Numbers|Figures|Quarter|Q[1-4]|Year|Momentum|Guidance|Outlook|Interest|Adoption|Appetite|Sentiment|Volumes?|Fees|Margins?|Bill|Vote|Effects?|Reliability|Uptake|Economics|Licensing|Business|Trading|Signups|Data)\\b)[A-Z])"
-        requires: "^(?![\\s\\S]*(?-i:Stellar (?:Cyber|Bancorp|Bank|Health|Blade|Recovery|Data Recovery|Capital|Energy|Industries|Wind|Partners(?! [Ww]ith\\b)|Foundation for the Arts)\\b))(?=[\\s\\S]*(?:blockchain|crypto|digital (?:asset|dollar|currenc)|stablecoin|USDC|EURC|PYUSD|tokeni[sz]|on-?chain|\\bDLT\\b|distributed ledger|smart contract|mainnet|\\bXLM\\b|Soroban|\\bSDF\\b|Denelle Dixon|DeFi|real-world asset|\\bRWA\\b|\\bCBDC\\b|hryvnia))(?=[\\s\\S]*(?:(?-i:\\bXLM\\b|\\bSDF\\b)|Soroban(?! Capital)|Denelle Dixon|Stellar Development Foundation|Stellar Lumens|\\b(?:live|launch(?:es|ed|ing)?|deploy(?:s|ed|ing)?|issu(?:e|es|ed|ing)|mint(?:s|ed|ing)?|available|debut(?:s|ed|ing)?|arriv(?:e|es|ed|ing)|roll(?:s|ed|ing)? out|integrat(?:e|es|ed|ing)|native)\\b(?:\\s+[^\\s.;:!?]+){0,4}?\\s+(?:on|onto|to|via|atop|across|using) Stellar\\b|\\b(?:expand(?:s|ed|ing)?|extend(?:s|ed|ing)?|bring(?:s|ing)?|brought|com(?:e|es|ing)|mov(?:e|es|ed|ing)|migrat(?:e|es|ed|ing)|port(?:s|ed|ing)?)\\b(?:\\s+[^\\s.;:!?]+){0,4}?\\s+(?:to|onto) Stellar\\b))"
-      # (e) in a list of chains: "Bitcoin, Ethereum and Stellar Lead ...", "on
-      # Stellar, Solana ETFs", with crypto or market context. Not before one or
-      # two words ending in a result noun ("Bitcoin and Stellar Retail Trading
-      # Lift"), and "Stellar, <chain>" only where the (b2) rule allows the name
-      # ("Payrolls Stellar, Bitcoin Falls" is the adjective).
-      - pattern: "\\b(?:Bitcoin|BTC|Ethereum|ETH|Solana|SOL|XRP|Polygon|Avalanche|Algorand|Hedera|HBAR|Arbitrum|Aptos|Cardano|Polkadot|Tron|Sui|Canton|Tezos|Celo|Chainlink|Litecoin|Dogecoin)(?:,| and| &| or) Stellar\\b(?! (?:Bancorp|Bank|Cyber|Blade|Health|Energy|Industries|Data|Wind|Partners|Capital|Group|Entertainment|Management|Solutions|Technologies|Recovery|Holdings|Ventures|Awards|Results|Earnings|Growth|Quarter|Year|Week|Month|Day|Session|Performance|Returns?|Gains|Inflows|Flows|Demand|Sales|Revenue|Profits?|Numbers|Figures|Jobs|Start|Debut|Run|Rally|Record|Momentum|Outlook|Guidance|Reviews?|Ratings?|First|Second|Third|Fourth|Q[1-4]|Trading|Crypto|ETF|Heights|Highs|Levels|Note|Streak|Footing|Form|Pace|Track|Trajectory|Terms|Profitability|Tech)\\b)(?! [A-Z][\\w'’-]* (?:[A-Z][\\w'’-]* )?(?:Demand|Revenues?|Growth|Activity|Results|Earnings|Returns|Sales|Profits?|Performance|Inflows|Flows|Numbers|Figures|Quarter|Q[1-4]|Year|Guidance|Outlook|Interest|Appetite|Sentiment|Volumes?|Fees|Margins?|Bill|Vote|Trading|Data|Report|Business|Economics)\\b)|(?:^|(?<=, )|(?<=[&/] )|(?<![\\w'’.$%-])(?:[a-z][\\w'’.-]*|[A-Z][\\w.&-]*['’]s|With|From|Onto|Into|Via|To|On|At|For|By|In|Beyond|Across|Atop|Over|About|Between|Behind|Inside|Through|Toward|Towards|Versus|Vs\\.?|And|Or|Than|Like|Including|Plus|Amid|After|Before|Unlike|Why|How|What|When|Where|Whether|Can|Could|Will|Would|Should|Does|Did|The|Taps|Tapped|Adds|Added|Chooses|Choose|Chose|Choosing|Selects|Select|Selected|Selecting|Picks|Pick|Picked|Picking|Uses|Use|Used|Using|Explores|Explore|Exploring|Backs|Backed|Joins|Join|Joined|Brings|Bring|Brought|Bringing|Expands|Expand|Expanded|Expanding|Extends|Integrates|Integrate|Integrated|Integrating|Launches|Launch|Launched|Launching|Deploys|Deploy|Deployed|Deploying|Supports|Support|Supported|Supporting|Embraces|Adopts|Adopt|Adopted|Lists|List|Listed|Listing|Delists|Connects|Connect|Connecting|Links|Enables|Welcomes|Partners|Invests|Moves|Move|Migrates|Migrate|Onboards|Leaves|Ditches|Drops|Sues|Sued|Charges|Charged|Approves|Approved|Delays|Rejects|Files|Filed) )(?<!Far From )(?<!Far from )(?<!far from )(?<!Less Than )(?<!Less than )(?<!less than )(?<!More Than )(?<!More than )(?<!more than )(?<!Other Than )(?<!Other than )(?<!other than )(?<!Better Than )(?<!Better than )(?<!better than )(?<!Be |Is |So |be |is |so )(?<!Are |But |Log |Was |but |are |log |was )(?<!Been |Book |Logs |Look |Post |Seem |Stay |Were |been |book |logs |look |post |seem |stay |were )(?<!Books |Enjoy |Flows |Gains |Looks |Notch |Posts |Prove |Quite |Sales |Seems |Stays |Still |Truly |books |enjoy |flows |gains |looks |notch |posts |prove |quite |sales |seems |stays |still |truly )(?<!Demand |Enjoys |Growth |Looked |Pretty |Proved |Proven |Proves |Remain |Report |Seemed |Simply |Stayed |demand |enjoys |growth |looked |pretty |proved |proven |proves |remain |report |seemed |simply |stayed )(?<!Deliver |Good To |Good to |Revenue |revenue |Inflows |Notches |Records |Remains |Reports |Results |Returns |Volumes |deliver |good to |inflows |notches |records |remains |reports |results |returns |volumes )(?<!Delivers |Earnings |Great To |Great to |Remained |Short Of |Short of |Solid To |Solid to |delivers |earnings |great to |remained |short of |solid to )(?!(?<=\\b[Aa] )Stellar(?:[,.:;!?]| and\\b| or\\b| [-–—]| Foundation\\b))Stellar(?:,| and| &| or) (?:Ethereum|Solana|Polygon|Avalanche|Algorand|Hedera|Arbitrum|Aptos|Cardano|Polkadot|Tron|Sui|XRP|XRPL|Canton|Tezos|Celo|Bitcoin|Chainlink|Litecoin|Dogecoin)\\b(?![-’'])"
-        requires: "^(?![\\s\\S]*(?-i:Stellar (?:Cyber|Bancorp|Bank|Health|Blade|Recovery|Data Recovery|Capital|Energy|Industries|Wind|Partners(?! [Ww]ith\\b)|Foundation for the Arts)\\b))(?=[\\s\\S]*(?:blockchain|crypto|digital (?:asset|dollar|currenc)|stablecoin|USDC|EURC|PYUSD|tokeni[sz]|on-?chain|\\bDLT\\b|distributed ledger|smart contract|mainnet|\\bXLM\\b|Soroban|\\bSDF\\b|Denelle Dixon|DeFi|real-world asset|\\bRWA\\b|\\bCBDC\\b|hryvnia|\\bET[FP]s?\\b|\\bETNs?\\b|Grayscale|altcoin|\\btokens?\\b|\\bcoins?\\b|futures|Coinbase|Binance|Kraken|Upbit))"
-      # Stellar's smart-contract platform. Soroban is also a Japanese abacus
-      # and Soroban Capital Partners (Eric Mandelblatt's hedge fund).
-      - pattern: "\\bSoroban\\b(?! Capital)"
-        requires: "^(?![\\s\\S]*(?:Soroban Capital|Mandelblatt))(?=[\\s\\S]*(?:smart contract|blockchain|crypto|Stellar|\\bXLM\\b|on-?chain|tokeni[sz]))"
+      # Names never used as the adjective: the foundation, the token, the consensus protocol, "Stellar-based/-native", stellar.org, 스텔라루멘.
+      - pattern: "(?i:Stellar (?:Development Foundation|Consensus Protocol))|Stellar [Ll]umens|STELLAR LUMENS|Stellar-(?:[Bb]ased|[Nn]ative)|Stellar\\.org\\b|스텔라 ?루멘"
+      # The ticker, but not XLM-R/XLM-V/XLM-RoBERTa models, XLMedia (XLM.L), Excel 4.0 (XLM) macros or cross-lingual language models.
+      - pattern: "\\bXLM\\b(?!-(?:[RV]|RoBERTa)\\b|\\.L\\b|\\)? macros?\\b)"
+        requires: "(?s)^(?!.*(?:Excel 4\\.0|\\bXL4\\b|XLMedia|mBERT|multilingual|cross-?lingual))"
+      # "Stellar" (not quoted; not before a result noun, "$" or a digit), lowercase "stellar futures" / "with stellar to", and Soroban (not Soroban Capital).
+      # requires: no adjective idiom ("Less Than Stellar", "Racks up Stellar") and no other Stellar firm, then a crypto, payments or partner word
+      # (DTCC, CME Group, MoneyGram, Mastercard, IBM World Wire) or "on/to/with/from Stellar" ending the text or a clause ("... Dollar Product on Stellar").
+      # "bank" is not a cue: bank news uses the adjective ("Zenith Bank ... on Stellar Trading Performance").
+      - pattern: "(?<![“\"(])\\bStellar\\b(?! (?i:results?|quarter|Q\\d|year|week|month|first|start|run|debut|IPO|growth|returns|earnings|numbers|performance|inflows|demand|revenue|sales|profit\\w*|record|guidance|jobs|tech|heights|streak|note|milestone|talent|customer|retail|institutional|investor|mining|fiscal|to stall\\w*|by any|hits and|network (?:effects|reliability))\\b| [$\\d])|\\bstellar futures\\b|\\bwith stellar to\\b|\\bSoroban\\b(?! Capital)"
+        requires: "(?s)^(?!.*(?-i:\\b[Aa] Stellar,|(?:Posts?|Reports|Make|Enjoy|Builds?|Racks [Uu]p|Less Than|Far [Ff]rom|Short of|Not as|Good [Tt]o|Simply|Was|Were|Remain(?:ed)?|Still|Prove) Stellar\\b|Stellar (?:Bancorp|Bank|Cyber|Health|Blade|Capital|Partners(?! [Ww]ith)|Energy|Industries|Recovery|Data|Wind|V|LED|Trading Systems|Gate Games|Foundation for)\\b)).*(?:crypto|blockchain|tokeni[sz]|stablecoin|digital (?:asset|currenc|commodit)|CBDC|on-?chain|real-world asset|\\bET[FP]s?\\b|bitcoin|ethereum|\\bXRP\\b|\\b(?:USD[CGT]|PYUSD|EURC)\\b|payment|remittance|cross-(?:border|chain)|settle|clearing|\\bDTCC\\b|CME Group|MoneyGram|Mastercard|World Wire|mainnet|smart contract|Stellar (?:network|futures)|(?-i:\\b(?:on|to|with|from) Stellar(?=\\s*$|[,.;:!?])))"
 
   - id: hedera
     kind: project
@@ -381,233 +270,138 @@ entities:
         requires: "XRP|crypto|blockchain|payment|stablecoin|custody|bank|tokeni[sz]"
 
   # --- coverage: CoinGecko market-cap ranks 11-20 ----------------------------
-  # CoinGecko /coins/markets snapshot at 2026-09-30 22:56 KST; the rank table
-  # is kept in the dated research/ record, not here. Left out by the owner's
-  # rules: stablecoins, wrapped and staking tokens, gold-linked tokens and LEO.
-  # Exchange tokens (WBT) are kept. Chainlink and Stellar, which fall in this
-  # range, are the entries above. This list is coverage, not the interest
-  # sample or the control group of docs/open-questions.md Q7, so none of these
-  # is marked control.
-  # Test headlines: tests/test_entities_ranks_11_20.py.
+  # Selected from a CoinGecko /coins/markets snapshot at 2026-09-30 22:56 KST;
+  # the rank table belongs in a dated research/ record, not here. Left out by
+  # the owner's rules: stablecoins, wrapped and staking tokens, gold-linked
+  # tokens and LEO. Exchange tokens (WBT) are kept. Chainlink and Stellar were
+  # in the same selection; their entries are above. This list is coverage, not
+  # the interest sample or the control group of docs/open-questions.md Q7, so
+  # none of these is marked control.
+  # The rules favour recall on institution-linked headlines and stay short.
+  # Tests: real headlines with source URLs in tests/test_entities_gold.py;
+  # synthetic red-team headlines, and the false positives accepted for recall,
+  # in tests/test_entities_ranks_11_20.py.
   - id: hyperliquid
     kind: project
     label: Hyperliquid
     tokens: [HYPE]
     match:
-      # Full names, in Title Case or all caps. "hyperliquid" is also a finance
-      # adjective ("hyperliquid Treasuries", "reserves must be hyperliquid"),
-      # which looks the same in a Title Case or all-caps headline. Rule 1 skips
-      # the name after a copula that follows a word ("Treasuries Are
-      # Hyperliquid", whatever follows, since the excerpt comes right after the
-      # title; not "What Is Hyperliquid" or "Is Hyperliquid's"), after a degree
-      # or linking word ("More", "Keep", "Remain"), after a plural asset noun
-      # ("Reserves Hyperliquid,"), after "by" before punctuation ("Backed by
-      # Hyperliquid, High-Quality Assets"), and before an asset noun
-      # ("Hyperliquid Deposits") or "Is the". The copula and "Is the" checks are
-      # for Title Case and all caps only: in sentence case the adjective is
-      # lowercase ("winners are Hyperliquid and Aster" is the name). Linking
-      # verbs include look, seem, appear, prove and become ("Treasuries Look
-      # Hyperliquid"). Rules 2 and 3 take some skipped cases back with context;
-      # they never take the bond/bill nouns or "Holdings" ("Hyperliquid
-      # Holdings" is ambiguous).
-      # "Hyper Foundation" is not "Hyperledger Foundation".
-      - pattern: "(?<!\\b(?i:be) )(?<!\\b(?i:remain) )(?<!\\b(?i:remains) )(?<!\\b(?i:stay) )(?<!\\b(?i:stays) )(?<!\\b(?i:still) )(?<!\\b(?i:very) )(?<!\\b(?i:less) )(?<!\\b(?i:more) )(?<!\\b(?i:most) )(?<!\\b(?i:so) )(?<!\\b(?i:too) )(?<!\\b(?i:highly) )(?<!\\b(?i:keep) )(?<!\\b(?i:keeps) )(?<!\\b(?i:make) )(?<!\\b(?i:makes) )(?<!\\b(?i:reserves) )(?<!\\b(?i:funds) )(?<!\\b(?i:treasuries) )(?<!\\b(?i:portfolios) )(?<!\\b(?i:deposits) )(?<!\\b(?i:securities) )(?<!\\b(?i:assets) )(?<!\\b(?i:balances) )(?<!\\b(?i:bonds) )(?<!\\b(?i:look) )(?<!\\b(?i:looks) )(?<!\\b(?i:looked) )(?<!\\b(?i:seem) )(?<!\\b(?i:seems) )(?<!\\b(?i:seemed) )(?<!\\b(?i:appear) )(?<!\\b(?i:appears) )(?<!\\b(?i:prove) )(?<!\\b(?i:proves) )(?<!\\b(?i:proved) )(?<!\\b(?i:proven) )(?<!\\b(?i:become) )(?<!\\b(?i:becomes) )(?<!\\b(?i:became) )(?!(?:(?<=\\w (?:Is|IS) )|(?<=\\w (?:Are|ARE) )|(?<=\\w (?:Was|WAS) )|(?<=\\w (?:Were|WERE) ))(?<!\\b(?i:what|when) (?:Is|IS) )(?<!\\b(?i:why|how|who) (?:Is|IS) )(?<!\\b(?i:where|which) (?:Is|IS) )(?<!\\b(?i:what|when) (?:Are|ARE) )(?<!\\b(?i:why|how|who) (?:Are|ARE) )(?<!\\b(?i:where|which) (?:Are|ARE) )(?<!\\b(?i:what|when) (?:Was|WAS) )(?<!\\b(?i:why|how|who) (?:Was|WAS) )(?<!\\b(?i:where|which) (?:Was|WAS) )(?<!\\b(?i:what|when) (?:Were|WERE) )(?<!\\b(?i:why|how|who) (?:Were|WERE) )(?<!\\b(?i:where|which) (?:Were|WERE) )(?:Hyperliquid|HYPERLIQUID)(?!['’][Ss]\\b))(?!(?<=\\b(?i:by) )(?:Hyperliquid|HYPERLIQUID)(?:[,.;:!]| (?i:and|or)\\b|\\s*$))\\b(?:Hyperliquid|HYPERLIQUID)\\b(?! (?i:treasuries|u\\.?s\\.? treasur\\w*|t-?bills?|securities|bonds?|gilts?|bunds?|sovereigns?|money|treasury(?! (?:firms?|compan(?:y|ies)|vehicles?|strateg(?:y|ies))\\b)|assets?|collateral|instruments?|reserves?|funding|government|markets?|stocks?|equit(?:y|ies)|cash|debt|credit|deposits?|portfolios?|investments?|repo|dollars?|holdings?)\\b| Is the\\b| IS THE\\b)|\\bHyperEVM\\b|\\bHyperBFT\\b|\\bHyper Foundation\\b"
-      # "HyperLiquid" (camel case) is a common misspelling; it needs context too.
-      # Rule 2 takes every case back with Hyperliquid-specific context: HyperEVM,
-      # HyperCore, USDH, $HYPE, "HYPE token/price/ETF/...", a HYPE trading
-      # pair, Hyper Foundation, Hyperliquid's. Generic words (staking, DEX, an
-      # all-caps HYPE) do not count: a speech on stablecoin reserves can mention
-      # ETH staking or DEX settlement.
-      - pattern: "\\b(?:Hyper[Ll]iquid|HYPERLIQUID)\\b(?! (?i:treasuries|u\\.?s\\.? treasur\\w*|treasury (?:markets?|bills?|notes?|bonds?|securities|yields?)|t-?bills?|securities|bonds?|gilts?|bunds?|sovereigns?|money|holdings?)\\b)"
-        requires: "HyperEVM|HyperCore|HyperBFT|\\bUSDH\\b|\\$HYPE\\b|Hyper Foundation|Hyperliquid['’]s|Hyperliquid (?:Labs|Strategies|Policy Center)|\\(HYPE\\)|\\b(?:KRW|USDT?|BTC)-HYPE\\b|\\bHYPE[/-](?:USD[CTH]?|EUR|BTC|KRW|PERP)\\b|(?-i:(?<![A-Z]{2} )(?<![Tt]he )\\bHYPE (?:[Tt]okens?|[Pp]rice|[Ss]lides?|[Ss]lips?|[Cc]limbs?|[Jj]umps?|[Ff]alls?|[Dd]rops?|[Rr]ises?|[Rr]all(?:y|ies)|[Ss]urges?|[Ss]oars?|[Tt]umbles?|[Ss]taking|[Ss]takers?|[Hh]olders?|[Hh]oldings|ETFs?|ETPs?|[Ff]utures|[Oo]ptions|[Pp]erps?|[Tt]reasury|[Bb]uybacks?)\\b)"
-      # Rule 3 takes back the name before an asset noun, before "Is the" and in
-      # camel case ("Hyperliquid Market Share Slips ... Perps", "Hyperliquid Is
-      # the Most Profitable Crypto Venue") with derivatives-venue context, but
-      # not after a copula, a degree or linking word or "by" ("Reserves Must Be
-      # Hyperliquid"), where only rule 2 counts.
-      - pattern: "(?<!\\b(?i:be) )(?<!\\b(?i:remain) )(?<!\\b(?i:remains) )(?<!\\b(?i:stay) )(?<!\\b(?i:stays) )(?<!\\b(?i:still) )(?<!\\b(?i:very) )(?<!\\b(?i:less) )(?<!\\b(?i:more) )(?<!\\b(?i:most) )(?<!\\b(?i:so) )(?<!\\b(?i:too) )(?<!\\b(?i:highly) )(?<!\\b(?i:keep) )(?<!\\b(?i:keeps) )(?<!\\b(?i:make) )(?<!\\b(?i:makes) )(?<!\\b(?i:reserves) )(?<!\\b(?i:funds) )(?<!\\b(?i:treasuries) )(?<!\\b(?i:portfolios) )(?<!\\b(?i:deposits) )(?<!\\b(?i:securities) )(?<!\\b(?i:assets) )(?<!\\b(?i:balances) )(?<!\\b(?i:bonds) )(?<!\\b(?i:look) )(?<!\\b(?i:looks) )(?<!\\b(?i:looked) )(?<!\\b(?i:seem) )(?<!\\b(?i:seems) )(?<!\\b(?i:seemed) )(?<!\\b(?i:appear) )(?<!\\b(?i:appears) )(?<!\\b(?i:prove) )(?<!\\b(?i:proves) )(?<!\\b(?i:proved) )(?<!\\b(?i:proven) )(?<!\\b(?i:become) )(?<!\\b(?i:becomes) )(?<!\\b(?i:became) )(?!(?:(?<=\\w (?:Is|IS) )|(?<=\\w (?:Are|ARE) )|(?<=\\w (?:Was|WAS) )|(?<=\\w (?:Were|WERE) ))(?<!\\b(?i:what|when) (?:Is|IS) )(?<!\\b(?i:why|how|who) (?:Is|IS) )(?<!\\b(?i:where|which) (?:Is|IS) )(?<!\\b(?i:what|when) (?:Are|ARE) )(?<!\\b(?i:why|how|who) (?:Are|ARE) )(?<!\\b(?i:where|which) (?:Are|ARE) )(?<!\\b(?i:what|when) (?:Was|WAS) )(?<!\\b(?i:why|how|who) (?:Was|WAS) )(?<!\\b(?i:where|which) (?:Was|WAS) )(?<!\\b(?i:what|when) (?:Were|WERE) )(?<!\\b(?i:why|how|who) (?:Were|WERE) )(?<!\\b(?i:where|which) (?:Were|WERE) )(?:Hyperliquid|HYPERLIQUID)(?!['’][Ss]\\b))(?!(?<=\\b(?i:by) )(?:Hyperliquid|HYPERLIQUID)(?:[,.;:!]| (?i:and|or)\\b|\\s*$))\\b(?:Hyper[Ll]iquid|HYPERLIQUID)\\b(?! (?i:treasuries|u\\.?s\\.? treasur\\w*|treasury (?:markets?|bills?|notes?|bonds?|securities|yields?)|t-?bills?|securities|bonds?|gilts?|bunds?|sovereigns?|money|holdings?)\\b)"
-        requires: "\\bperps?\\b|perpetual (?:futures|contracts?|swaps?)|(?:spot|perp\\w*|on-?chain) order ?books?|(?:crypto|derivatives|perps?|trading|on-?chain) (?:venues?|exchanges?)|decentrali[sz]ed exchange"
-      # SC//HyperCore (Scale Computing, virtualization) shares the name and its
-      # releases talk about order books (backlog) and perpetual licences;
-      # Holepunch's "Hypercore" differs only in case.
-      - pattern: "(?<!/)\\bHyperCore\\b"
-        requires: "HyperEVM|(?:spot|perp\\w*|on-?chain) order ?books?|\\bperps?\\b|\\$HYPE|\\bUSDH\\b|(?-i:(?<![-/])(?<![Cc]rypto )(?<![Dd]igital )(?<![Cc]hain )(?<!Web3 )(?<!DeFi )(?<!AI )\\bNative Markets\\b)"
-      # Hubble Protocol (Solana) also issued a stablecoin called USDH. The
-      # issuer name is matched case-sensitively so "crypto-native markets"
-      # does not count.
+      # 1. The name, but not the finance adjective: not right before an asset noun ("Hyperliquid Treasuries"; checked per mention, so "on Hyperliquid" elsewhere still counts) and not after a copula or asset noun anywhere ("Treasury Market Is Hyperliquid", "Keep Reserves Hyperliquid").
+      - pattern: "\\b(?:Hyper[Ll]iquid|HYPERLIQUID)\\b(?! (?i:(?:U\\.S\\. )?Treasuries|T-Bills|Bonds|Government|Money|Collateral|Markets|Stocks|Deposits|Investments|Dollar|Portfolios|Repo)\\b)"
+        requires: "^(?![\\s\\S]*(?:\\b(?:treasur(?:y|ies)|markets?|funds|reserves|collateral|assets|deposits|bonds)(?-i: (?:Must |Should |MUST )?(?:Is|IS|Are|ARE|Be|BE|Were|Remains?|Stays?|Looks?)(?: More)?) (?-i:Hyperliquid|HYPERLIQUID)\\b(?!['’])|(?-i:\\b(?:Reserves|Funds) Hyperliquid\\b|\\bby Hyperliquid,|\\bHow Hyperliquid Is the\\b)))"
+      # 2. The name, in any case, next to the HYPE ticker, even where rule 1 skips it ("Hyperliquid Collateral Rules Tighten After HYPE Price Swing", "HYPE, or hyperliquid, ETFs"); not "BEYOND THE HYPE".
+      - pattern: "\\b(?:[Hh]yper[Ll]iquid|HYPERLIQUID)\\b"
+        requires: "(?-i:(?<![A-Z]{2} )(?<![Tt]he )\\bHYPE\\b)"
+      # 3. Names used only by Hyperliquid and its HYPE treasury company ("Hyper Foundation" is not "Hyperledger Foundation").
+      - pattern: "\\bHyperEVM\\b|\\bHyperBFT\\b|\\bHyper Foundation\\b|\\bHyperion DeFi\\b"
+      # 4. HyperCore only with trading context: Scale Computing, Xiaomi and Zephyr sell products called HyperCore.
+      - pattern: "\\bHyperCore\\b"
+        requires: "Hyperliquid|\\bperps?\\b|\\bUSD[CH]\\b|(?-i:\\bHYPE\\b)"
+      # 5. USDH, but not Hubble Protocol's USDH (Hermetica's is "USDh").
       - pattern: "\\bUSDH\\b"
-        requires: "(?-i:(?<![-/])(?<![Cc]rypto )(?<![Dd]igital )(?<![Cc]hain )(?<!Web3 )(?<!DeFi )(?<!AI )\\bNative Markets\\b)|HyperEVM"
-      # HYPE is an English word (all-caps headlines, "Don't Believe the HYPE")
-      # and the ticker of Hyper Bit Technologies (CSE / Cboe Canada: HYPE, a
-      # crypto miner; cashtag $HYPE.CN), an iShares UCITS ETF on Xetra and the
-      # Italian e-money firm HYPE (Banca Sella), which sells crypto. Only token
-      # phrasing (in either case, "HYPE Futures") and trading pairs ("HYPE/USD",
-      # "KRW-HYPE") count; an all-caps run before HYPE ("BEYOND THE HYPE TOKENS")
-      # is skipped. Not in texts naming iShares, UCITS, Xetra or a high-yield
-      # corporate bond fund ("iShares HYPE ETF").
-      - pattern: "\\$HYPE\\b(?!\\.[A-Za-z])|(?<![A-Z]{2} )(?<!iShares )\\bHYPE (?:[Tt]okens?|[Ss]taking|[Ss]takers?|[Hh]olders?|[Hh]oldings|ETFs?|ETPs?|[Tt]reasury|[Bb]uybacks?|[Ff]utures|[Oo]ptions|[Pp]erps?)\\b|\\bHYPE[/-](?:USD[CTH]?|EUR|BTC|KRW|PERP)\\b|\\b(?:KRW|USDT?|BTC)-HYPE\\b"
-        requires: "^(?![\\s\\S]*(?:\\biShares\\b|\\bUCITS\\b|\\bXetra\\b|high[- ]yield corp))"
-      - pattern: "\\b(?:Grayscale|Bitwise|21Shares|VanEck|Canary)(?:'s|’s)? HYPE\\b(?! (?!ETFs?\\b|ETPs?\\b)[A-Z]{2,}\\b)"
-      - pattern: "(?<![A-Z]{2} )(?<![Tt]he )(?<!:)(?<!: )\\bHYPE\\b(?! [A-Z]{2,}\\b)(?!\\))"
-        requires: "Hyperion DeFi|(?-i:(?<![-/])(?<![Cc]rypto )(?<![Dd]igital )(?<![Cc]hain )(?<!Web3 )(?<!DeFi )(?<!AI )\\bNative Markets\\b)|Hyperliquid Strategies|Kinetiq"
+        requires: "^(?![\\s\\S]*\\bHubble\\b)"
+      # 6. HYPE as a token (cashtag, token nouns, listing verbs, pairs); not the word, iShares' HYPE ETF, $HYPE.CN (Hyper Bit), all-caps runs ("AI HYPE ETF FLOWS") or Hype Network's mobile-mining token.
+      - pattern: "\\$HYPE\\b(?!\\.[A-Za-z])|(?<![A-Z]{2} )(?<!iShares )\\bHYPE (?:[Tt]okens?|ETFs?|ETPs?|[Ff]unds|[Tt]rust|[Ff]utures|[Oo]ptions|[Ss]taking|[Tt]reasury|[Hh]oldings)\\b|\\b(?:[Ll]ist(?:s|ed|ing)?|[Aa]dd(?:s|ed|ing)?|[Ss]upports?|[Bb]uys?|[Bb]ought) HYPE\\b|\\bHYPE[/-](?:USD[CTH]?|EUR|BTC|KRW|PERP)\\b|\\b(?:KRW|USDT?|BTC)-HYPE\\b"
+        requires: "^(?![\\s\\S]*\\bhype network\\b)"
 
   - id: dogecoin
     kind: project
     label: Dogecoin
     tokens: [DOGE]
     match:
-      # Names that only refer to Dogecoin, even in a text that also mentions
-      # the Department of Government Efficiency ("DOGE").
-      - pattern: "\\bDogecoin (?:Foundation|ETFs?|ETPs?|ETNs?|exchange-traded|Trust|futures|treasur(?:y|ies)|Core)\\b"
+      # Fund, futures, treasury and foundation names and "Dogecoin (DOGE)": always the coin, even in stories about the agency DOGE.
+      - pattern: "\\bdogecoin (?:\\(DOGE|foundation|core|trust|ETFs?|ETPs?|ETNs?|exchange-traded|futures|treasur(?:y|ies))\\b"
         ignore_case: true
-      # The Foundation's corporate arm (Nasdaq: HODO). Guardian/FT style writes
-      # the agency as "Doge", so a "House of Doge" pun needs company context.
-      - pattern: "House of Doge"
-        requires: "dogecoin|\\bHODO\\b|Brag House|CleanCore|Margiotta|memecoin|meme coin|\\$DOGE"
-      # The full name (and the Korean 도지코인), but not in stories about the
-      # Department of Government Efficiency that explain its acronym as a nod to
-      # Dogecoin (either word order, DOGE or Doge; "shares an acronym with",
-      # "lifted from"), and not Baby Doge Coin, wrapped or pegged DOGE, rivals
-      # and look-alikes ("Dogecoin killer", "dogecoin rivals", "a Dogecoin
-      # copycat", "Dogecoin clones", "Dogecoin-like memecoins") or the Doge
-      # meme, mascot or Kabosu. Naming the agency alone does not skip the rule
-      # ("Dogecoin jumps as Musk leaves the Department of Government
-      # Efficiency"); an explanation of its name does ("a nod/wink to/at",
-      # "evokes", "referencing", "known as DOGE after", "a joke about", "like
-      # the dogecoin memecoin"). Agency phrases ("DOGE team/staff/cuts/access/
-      # service") skip it too, unless dogecoin is the subject of a price move
-      # ("Dogecoin jumps 8% as DOGE team wraps up work"). "Dogecoin Cash" is a
-      # fork; "Dogecoin cashes in" and "cash-out" are not.
-      - pattern: "(?:(?<!baby )(?<!wrapped )(?<!peg )\\bdogecoin\\b(?!(?:['’]s)? (?:killers?|rivals?|copycats?|clones?|imitators?|knock-?offs?|wannabes?)\\b| cash\\b(?!-)| 2\\.0|-(?:style|themed|inspired|like)\\b| (?:meme|mascot|dog)\\b(?! ?coin))|(?<!베이비)(?<!베이비 )도지코인)"
+      # House of Doge (Nasdaq: HODO) and the U.S. Dogecoin fund tickers; a Guardian-style "House of Doge" agency pun lacks market words.
+      - pattern: "House of Doge|\\b(?<!DOG \\()(?:GDOG|BWOW|TDOG|TXXD|DOJE)\\b"
+        requires: &doge_market "dogecoin|crypto|digital asset|\\btoken|\\b\\w*coins?\\b|\\bET[FP]s?\\b|futures|\\bspot\\b|Coinbase|Grayscale|Bitwise|21Shares|Osprey|Paxos|CleanCore|Brag House|\\bHODO\\b"
+      # The name (and 도지코인), except look-alike tokens ("next Dogecoin", "Dogecoin competitor/spinoff", "Dogecoin-inspired") and, unless an ETF/ETP is named, texts explaining the agency's name ("DOGE, a nod to dogecoin") or about Kabosu.
+      - pattern: "(?<!baby )(?<!wrapped )(?<!peg )(?<!next )\\bdogecoin\\b(?!(?:['’]s)? (?:killer|rival|copycat|clone|competitor|spinoff|spin-off)s?\\b| cash\\b(?!-)| 2\\.0|-(?:style|like|inspired|themed)\\b)|(?<!베이비)(?<!베이비 )도지코인"
         ignore_case: true
-        requires: "^(?![\\s\\S]*(?:government efficiency[^.;]{0,80}?\\b(?:(?:nod|homage|tribute|allusion|reference|wink) (?:to|at)|(?:play|riff|pun) on|named (?:after|for)|inspired by|evok(?:es|ed|ing)|referenc(?:es|ed|ing)|allud(?:es|ed|ing) to|echo(?:es|ed|ing)(?= (?:the |its )?(?:dogecoin|meme|coin|cryptocurrency|name))|(?:known|called|dubbed|nicknamed) (?:as )?DOGE after|jok(?:e|ing) (?:about|on)|like (?:the )?dogecoin|(?:takes?|took|gets?|got|borrow(?:s|ed)?|derives?|derived|draws?|drew) its name|shares? (?:an? |its |the )?(?:name|acronym|moniker)|(?:lifted|taken|borrowed) from|namesake)\\b|정부 ?효율(?:성)?부[^.;]{0,80}?(?:이름|명칭|따온|따와|본뜬|본떠|오마주|착안)|\\bKabosu\\b|(?-i:\\bD(?:OGE|oge)\\b)(?!\\)| meme).{0,60}\\b(?:(?:nod|homage|tribute|allusion|reference|wink) (?:to|at)|(?:play|riff|pun) on|named (?:after|for)|inspired by|evok(?:es|ed|ing)|referenc(?:es|ed|ing)|allud(?:es|ed|ing) to|echo(?:es|ed|ing)(?= (?:the |its )?(?:dogecoin|meme|coin|cryptocurrency|name))|(?:known|called|dubbed|nicknamed) (?:as )?DOGE after|jok(?:e|ing) (?:about|on)|like (?:the )?dogecoin|(?:takes?|took|gets?|got|borrow(?:s|ed)?|derives?|derived|draws?|drew) its name|shares? (?:an? |its |the )?(?:name|acronym|moniker)|(?:lifted|taken|borrowed) from|namesake)\\b|\\b(?:(?:nod|homage|tribute|allusion|reference|wink) (?:to|at)|(?:play|riff|pun) on|named (?:after|for)|inspired by|evok(?:es|ed|ing)|referenc(?:es|ed|ing)|allud(?:es|ed|ing) to|jok(?:e|ing) (?:about|on))\\b[^.;]{0,40}?\\bdogecoin\\b[^.;]{0,40}?(?-i:\\bD(?:OGE|oge)\\b)(?!\\)| meme)))(?!(?![\\s\\S]*\\bdogecoin(?:['’]s)? (?:price )?(?:jump|rall|slide|slid|fall|fell|rise|rose|surge|drop|climb|slump|gain|dip|tumble|soar|sink|sank|spike|plunge|rebound|rip|pop|crash|slip|edge)\\w*)[\\s\\S]*\\bDOGE(?:['’]s)? (?:team|staff(?:ers?)?|cuts?(?! (?:losses|gains))|employees|officials|engineers|aides|access|operatives|service|subcommittee|caucus|dividend)\\b)"
-      # The ticker DOGE is also the Department of Government Efficiency, so it
-      # counts only in market forms (cashtag, trading pair, fund or futures
-      # name, a price move, a coin amount) next to crypto market words.
-      - pattern: "\\$DOGE\\b|\\bDOGE[/-](?:USDT?|USDC|KRW|BTC|EUR)\\b|\\bKRW-DOGE\\b|\\bDOGEUSD[TC]?\\b|\\bDOGE (?:(?:ETFs?|ETPs?|ETNs?|exchange-traded|Trust(?! [Ff]unds?\\b)|futures|tokens?|holdings(?! of [a-z])|holders)\\b|[Tt]reasury (?:[Cc]ompan|[Ss]trateg|[Ff]irm|[Vv]ehicle))|\\bDOGE(?:['’]s)? price (?:(?:jump|fall|rise|slide|drop|climb|surge|soar|slump|sink|tumble|hold|gain|dip|spike|crash|rebound|recover)(?:s|es|d|ed|ing)?|rose|fell|slid|sank|rall(?:y|ies|ied|ying)|prediction|analysis|action|chart|today|outlook|forecast)\\b|(?<![\\w$.,])(?!(?:19|20)\\d\\d\\b)\\d[\\d,.]*(?: (?:million|billion|thousand))? DOGE\\b(?=\\s*(?:$|[.;:)]|,(?!\\s*[A-Z])|tokens?\\b|coins?\\b|worth\\b|to\\b|from\\b|for\\b|into\\b))"
-        requires: "dogecoin|crypto|digital asset|\\btoken|\\b\\w*coins?\\b|Coinbase|\\bETFs?\\b|\\bETPs?\\b|Grayscale|Bitwise|21Shares|Osprey|memecoin|meme coin|wallet|futures|\\bspot\\b"
+        requires: "\\bET[FP]s?\\b|^(?![\\s\\S]*(?:\\bKabosu\\b|도지코인에서 (?:이름|따)|(?:\\bname(?:sake|d after|d for)?|\\ban? (?:nod|tribute|homage|wink) (?:to|at)|\\bacronym|\\bmoniker|\\breferencing|\\bknown as DOGE after|\\blike the(?= dogecoin))\\b[^.;]{0,40}?dogecoin))"
+      # The ticker in trading pairs, cashtags and product names; the agency is also "DOGE", so market words must appear too.
+      - pattern: "\\$DOGE\\b|\\bKRW-DOGE\\b|\\bDOGE(?:[/-]?(?:USD[CT]?|EUR|KRW|BTC)\\b|(?i: (?:ETFs?|ETPs?|ETNs?|exchange-traded|futures|tokens?|digital assets?|mining(?! of)|holdings(?! of \\D)|treasury (?:compan|strateg|firm))))"
+        requires: *doge_market
+      # The ticker with its price ("DOGE price", "DOGE drops 1.4%") or a coin amount ("7.5 million DOGE", "and some Doge"); not "DOGE price tag/cuts" or "some DOGE staff".
+      - pattern: "\\bDOGE(?:['’]s)? (?i:price)\\b(?![- ](?i:tag|cut|review))|\\bDOGE (?i:jump|drop|fall|fell|rise|rose|surg|slid|rall|climb|soar|slump|dip|tumbl|plung|gain)\\w* \\d[\\d.]*%|\\b\\d[\\d,.]*(?i: [mb]illion)? DOGE(?= (?i:tokens?|coins?|worth|to|from|for|into)\\b|[.;)]|,(?! [A-Z])|$)|\\bsome D(?:OGE|oge)\\b(?! [a-z])"
+        requires: *doge_market
+      # The ticker, or "Doge", in a list of other coins ("SOL, ADA, XRP, DOGE"; "HBAR, DOGE, and LINK"; "Doge, Solana").
+      - pattern: "\\b(?:BTC|ETH|XRP|SOL|ADA|LTC|BCH|SHIB|XLM|HBAR|LINK|Solana|Cardano|Litecoin)(?:,| and| &) D(?:OGE|oge)\\b|\\bD(?:OGE|oge),? (?:and |& )?(?:BTC|ETH|XRP|SOL|ADA|LTC|BCH|SHIB|XLM|HBAR|LINK|Solana|Cardano|Litecoin)\\b"
 
   - id: monero
     kind: project
     label: Monero
     tokens: [XMR]
     match:
-      # The name, but not the 2018 forks and imitators (Monero Classic,
-      # Monero-Classic, Monero Original, Monero 0 / Zero, MoneroV, Monero Gold)
-      # or Wrapped Monero, in title case or all caps. "Monero 0.18", "Monero
-      # Zero-Day" and "Monero Gold Rush" still match. Texts naming the actor
-      # Mark Monero are skipped, so a later bare "Monero" in the same story does
-      # not match. Moneroo, Monerium and Wownero do not match \bMonero\b.
-      - pattern: "(?<!Wrapped )(?<!wrapped )(?<!WRAPPED )\\b(?:Monero|MONERO)\\b(?! ?(?:Classic|CLASSIC|Original|ORIGINAL|Gold(?! Rush)|GOLD(?! RUSH)|Zero(?![\\w-])|ZERO(?![\\w-])|0(?![\\w-]|\\.\\w))|-Classic)"
-        requires: "^(?![\\s\\S]*(?-i:\\bM(?:ark|ARK) M(?:onero|ONERO)\\b))"
-      # The ticker, next to crypto context, but not Wrapped XMR, the XMR-Stak
-      # miner (like XMRig, malware news that does not name Monero), and not
-      # XMReality's Nasdaq Stockholm ticker (XMR:SS, XMR.ST, XMR SS,
-      # STO: XMR, or any text naming XMReality), the Cape Canaveral Skid Strip
-      # (FAA code XMR), XMR X-ray/MR imaging suites or PlayReady XMR licences.
-      - pattern: "(?<![:.])(?<!STO: )(?<!Wrapped )(?<!wrapped )\\bXMR\\b(?![:.](?:SS|ST)\\b| SS\\b|-Stak)"
-        requires: "^(?![\\s\\S]*(?:XMReality|Skid Strip|Cape Canaveral|PlayReady|X-ray(?: and |/)MR|magnetic resonance|\\bMRI\\b))[\\s\\S]*?(?:Monero|모네로|crypto|암호화폐|가상자산|coin|코인|token|privacy|wallet|mining|miner|hashrate|delist|blockchain|digital (?:asset|currency)|virtual (?:asset|currency)|ransom|darknet|sanction|MiCA|Kraken|Binance|\\bOKX\\b|decentrali[sz]ed|Haveno|\\$XMR|XMR/|/XMR|\\bXMR-(?:USDT?|USDC|BTC|ETH|EUR|KRW)\\b|\\b(?:KRW|BTC|USDT)-XMR\\b)"
+      # Name or 모네로 (not 모네로부터 "from Monet") in crypto (also cripto/크립토), market, regulator or named-institution context; not the forks (Monero Classic/Original/Zero/0/Gold), Wrapped Monero, actor Mark Monero or Mexican cartoonists ("monero").
+      - pattern: "(?<![Ww]rapped )(?<!WRAPPED )\\b(?:Monero|MONERO)\\b(?!(?i: ?(?:classic|original|gold(?! rush)|zero(?![\\w-])|0(?![\\w-]|\\.\\w))|-classic))|모네로(?!부터)"
+        requires: "^(?![\\s\\S]*(?:(?-i:\\bM(?:ark|ARK) M(?:onero|ONERO)\\b|\\bMonero (?:Hern|Rap[eé]|de Milenio))|caricatur|cartonista))[\\s\\S]*(?:XMR|cr[iy]pto|coin(?!cid)|token|blockchain|wallet|privacy|node|fork|hashrate|min(?:ing|ers?)\\b|FCMP|upgrade|developer|Ethereum|delist|\\blist(?:s|ed|ing)\\b|exchange|trading|deposit|\\bET[FPN]s?\\b|price|whale|surges?\\b|surged|soar|rall(?:y|ie)|plung|ransom|hack|launder|dark ?web|darknet|sanction|regulat|\\bbank|Treasury|(?-i:\\b(?:IRS|SEC|CFTC|DOJ|FBI|OFAC|FinCEN|FATF|FCA|ECB|Fed|Europol|AML|KYC)\\b)|Binance|Kraken|\\bOKX\\b|Upbit|Bithumb|Tether|Chainalysis|CipherTrace|Homeland Security|Revolut|Grayscale|Zcash|코인|크립토|가상자산|암호화폐|거래|상장|시세|가격|고가|빗썸|업비트|바이낸스|레볼루트|리볼루트|해[커킹]|몸값)"
+      # Ticker XMR in crypto context; not XMReality (XMR:SS, STO: XMR), the Skid Strip airfield, XMR-Stak, PlayReady licences or X-ray/MR suites.
+      - pattern: "(?<![:.])(?<!STO: )(?<![Ww]rapped )\\bXMR\\b(?![:.](?:SS|ST)\\b| SS\\b|-Stak)"
+        requires: "^(?![\\s\\S]*(?:XMReality|Skid Strip|Cape Canaveral|PlayReady|X-ray(?: and |/)MR|magnetic resonance|\\bMRI\\b))[\\s\\S]*(?:Monero|모네로|crypto|coin|코인|가상자산|암호화폐|token|privacy|wallet|min(?:ing|ers?)\\b|hashrate|delist|blockchain|digital (?:asset|currency)|ransom|hack|darknet|sanction|MiCA|Kraken|Binance|\\bOKX\\b|decentrali[sz]ed|Haveno|\\$XMR|XMR/|/XMR|XMR-(?:USDT?|USDC|BTC|ETH|EUR|KRW)\\b|(?:KRW|BTC|USDT)-XMR\\b)"
 
   - id: whitebit
     kind: project
     label: WhiteBIT / WBT
     tokens: [WBT]
     match:
-      - pattern: "\\bwhitebit\\b"
+      # The exchange in any case (WhiteBIT, WHITEBIT, whitebit.com, whitebit.eu) and in Korean (화이트비트, 화이트빗).
+      - pattern: "\\bwhitebit\\b|화이트비트|화이트빗"
         ignore_case: true
-      - pattern: "\\bWhitechain\\b"
-      # WBT is also Weebit Nano (ASX: WBT, WBT.AX, Bloomberg WBT AU, "$WBT" on
-      # social media; its product is ReRAM), Welbilt (NYSE: WBT until 2022), the
-      # Charlotte radio station WBT / WBT-FM, web-based training and wet-bulb
-      # temperature. The bare ticker needs exchange-token context and is skipped
-      # when the text names one of those. "to/can/may/will exchange tokens" is a
-      # verb phrase; the \b keeps "crypto exchange tokens" in.
-      - pattern: "(?<!ASX:)(?<!ASX: )(?<!NYSE:)(?<!NYSE: )(?<!Nano \\()(?<!Welbilt \\()\\bWBT\\b(?!\\.AX)"
-        requires: "^(?![\\s\\S]*(?:Weebit|\\bReRAM\\b|\\bWBT[ .:]AU\\b|Welbilt|\\bASX\\b|\\bradio\\b|Charlotte|WBT-FM|web[- ]based training|\\be-?learning|wet[- ]bulb|World Bank(?:'s)? Treasury))(?=[\\s\\S]*(?:\\bWBT ?(?:tokens?|coins?|ETFs?|ETPs?)\\b|\\bWBT ?/ ?(?:USDT?|USDC|EUR|BTC)\\b|\\$WBT\\b(?!\\.)|(?<!\\bcan )(?<!\\bto )(?<!\\bmay )(?<!\\bwill )\\bexchange[- ]tokens?\\b|\\bCEX tokens?\\b|centrali[sz]ed crypto(?:currency)? exchange))"
+      # Its chain, capitalised so "a white chain" does not count, and 화이트체인 in Korean.
+      - pattern: "\\bWhitechain\\b|화이트체인"
+      # Parent group of WhiteBIT and White Tech; "W Group" alone is too common, so it needs crypto or MiCA context.
+      - pattern: "\\bW Group\\b"
+        requires: "crypto|\\bMiCA\\b|White ?Tech|Whitechain"
+      # Bare WBT needs crypto/market context; skipped if another WBT is named (Weebit Nano, Welbilt, WBT radio, web-based training, wet-bulb, World Bank Treasury).
+      - pattern: "\\bWBT\\b"
+        requires: "^(?![\\s\\S]*(?:Weebit|ReRAM|\\bWBT[ .:]A[UX]\\b|\\bASX\\b|NYSE: ?WBT|Welbilt|\\bradio\\b|Charlotte|WBT-FM|web[- ]based training|e-?learning|wet[- ]bulb|World Bank(?:'s)? Treasury))[\\s\\S]*(?:[ck]rypto(?!graph)|token|coin|\\bBTC\\b|\\bMiCA\\b|all[- ]time high|Kraken|Bybit|Binance|\\bWBT ?ET[FP]|\\bWBT ?/|\\$WBT\\b|코인|토큰|가상자산|암호화폐)"
 
   - id: cardano
     kind: project
     label: Cardano
     tokens: [ADA]
     match:
-      # Cardano's own organisations and unambiguous product phrases, plus the
-      # Korean forms 카르다노(ADA), 에이다(ADA) and 카르다노 재단.
-      - pattern: "(?:Cardano|CARDANO) (?:Foundation|FOUNDATION)|카르다노 ?재단|\\bIOHK\\b|Input Output Hong Kong|\\bEMURGO\\b|\\bEmurgo\\b|Charles Hoskinson|CHARLES HOSKINSON|\\b(?:Cardano|CARDANO)(?: Trust| TRUST)? (?:ETFs?|ETPs?|[Ff]utures|FUTURES|[Bb]lockchain|BLOCKCHAIN|[Nn]etwork|NETWORK|[Mm]ainnet|[Ee]cosystem|[Nn]odes?|[Hh]ard [Ff]ork|[Ss]mart [Cc]ontracts?|[Ww]allets?|[Ss]tablecoins?|DeFi|[Ss]take [Pp]ools?|[Ss]taking|STAKING)\\b|\\b(?:Cardano|CARDANO) \\(ADA\\)|(?:카르다노|에이다) ?\\(ADA\\)"
-      # Input Output Global (IOG, also written "Input | Output"). "Input Output"
-      # is an economics term ("Input Output Global Value Chains", "... Global
-      # Tables"), so the company name needs crypto context.
-      - pattern: "Input (?:\\| )?Output Global\\b(?! [Vv]alue| [Ss]upply| [Tt]rade| [Pp]roduction| [Tt]ables?| [Dd]atabases?| [Mm]odels?| [Ll]inkages?)"
-        requires: "Cardano|crypto(?!graph|log)|blockchain|on-?chain|tokeni[sz]|(?<!same )\\btokens?\\b(?! of\\b)|staking|\\bDeFi\\b|smart contracts?|stablecoin|digital assets?|Hoskinson|(?-i:\\bADA\\b)"
-      # Bare "Cardano" collides with Cardano Group (Dutch/UK pensions, LDI and
-      # fiduciary manager bought by Mercer in 2024; Cardano Risk Management,
-      # Cardano Advisory, Cardano Development, ACTIAM), the mathematician
-      # Gerolamo Cardano (Cardano's formula, the Cardano grille cipher, his
-      # dice and games of chance) and the town Cardano al Campo. The whole rule
-      # is skipped when the text uses pension-industry words, so the group's
-      # comments on crypto or tokenised gilts do not count. "crypto" skips
-      # "cryptography" and "cryptologic"; "stake" alone and "coin" alone are
-      # left out because pension news uses them ("takes a stake", "the other
-      # side of the coin"); "Grayscale" counts only capitalised, since
-      # steganography papers hide text in "grayscale" images. A pension story
-      # that names the coin only as bare "Cardano" is missed; "Cardano ETF"
-      # and the other rule-1 phrases still match it.
-      - pattern: "(?:(?<!Gerolamo )(?<!Girolamo )(?<!Jerome )(?<!manager )(?<!specialist )(?<!consultancy )(?<!consultant )(?<!adviser )(?<!advisor )(?<!pensions firm )(?<!pension firm )(?<!investment firm )\\b(?:Cardano|CARDANO)\\b(?! (?i:al Campo)| (?:Group|GROUP|Risk|RISK|Investments?|INVESTMENTS?|Development|DEVELOPMENT|Asset|ASSET|Advisory|ADVISORY|ACTIAM|Actiam|Insights|INSIGHTS|Pensions?|PENSIONS?|Holdings?|HOLDINGS?|UK|NL|Nederland|Netherlands|Rotterdam|Sustainable|SUSTAINABLE|Ltd|LTD|Limited|LIMITED)\\b| B\\.V\\.| (?i:grille|grid|cipher|formula|method|joint|shaft)\\b|['’]s (?i:formula|method|rule|solution|grille|grid|cipher|cubic|dice|games?)\\b|,? (?:the|a) (?:Dutch|UK|British|London|Rotterdam|pensions?|investment|fiduciary|risk|LDI|asset|advisory|sustainable|Renaissance|Italian)\\b)|카르다노(?!의? ?(?:공식|해법|방법|격자)))"
-        requires: "^(?![\\s\\S]*(?:pension|\\bLDI\\b|liability[- ]driven|defined[- ]benefit|\\bgilts?\\b|\\bMercer\\b|fiduciary manag|\\btrustees\\b|\\bDB schemes?\\b|ACTIAM|al Campo|Malpensa|Gerolamo|Girolamo|연금|연기금|머서|지롤라모))(?=[\\s\\S]*(?:crypto(?!graph|log)|blockchain|(?-i:\\bADA\\b|\\bIOG\\b|Grayscale)|tokeni[sz]|(?<!same )\\btokens?\\b(?! of\\b)|on-?chain|staking|stake pools?|\\bDeFi\\b|smart contracts?|stablecoin|digital assets?|virtual assets?|altcoin|\\bmainnet\\b|hard fork|\\bdApps?\\b|\\bWeb3\\b|proof[- ]of[- ]stake|Hoskinson|Bitcoin|Ethereum|Solana|\\bXRP\\b|Chainlink|Polkadot|Dogecoin|Litecoin|Hedera|Coinbase|Binance|Kraken|Upbit|\\bBTC\\b|가상자산|암호화폐|가상화폐|디지털 ?자산|블록체인|스테이킹|비트코인|이더리움|업비트|빗썸|그레이스케일))"
-      # ADA is also the Americans with Disabilities Act, the Antideficiency
-      # Act, the American Dental/Diabetes Association, an Assistant District
-      # Attorney and Adacel Technologies (ASX: ADA), so the bare ticker never
-      # matches. Only crypto-specific phrases and market pairs do ("ADA coin"
-      # but not "ADA coin-operated machines" or "ADA coin slots"), and not in
-      # disability or transit text ("ADA tokens" for paratransit fares).
-      - pattern: "\\bADA (?:tokens?|coins?(?![- ](?:operated|slots?|mechanisms?|returns?|box(?:es)?|changers?|acceptors?|machines?)\\b)|holders|staking|stakers|whales|ETFs?|ETPs?|[Ff]utures|spot ETF)\\b|\\b(?:KRW|USDT?|BTC)-ADA\\b|\\bADA[-/](?:USD[TC]?|KRW|BTC|ETH|EUR)\\b"
-        requires: "^(?![\\s\\S]*(?:disabilit|Americans with|paratransit|wheelchair|\\bDental\\b|Diabetes|District Attorney|Antideficiency))"
-      # The $ADA cashtag is also Adacel Technologies on the ASX.
-      - pattern: "(?<!Adacel \\()(?<!Adacel Technologies \\()(?<!ASX: )(?<!ASX:)\\$ADA\\b"
-        requires: "^(?![\\s\\S]*(?:Adacel|\\bASX\\b))(?=[\\s\\S]*(?:Cardano|crypto(?!graph|log)|altcoin|staking|\\bDeFi\\b|on-?chain|blockchain|\\bwhales?\\b|(?<!same )\\btokens?\\b(?! of\\b)|\\$BTC|\\$ETH|\\$XRP|\\$SOL|\\$DOGE|\\$LINK|\\$HBAR|\\$XLM))"
-      # Ticker lists. DOT is left out (Department of Transportation and ADA
-      # rules); DOGE (the Government Efficiency department), SOL (statute of
-      # limitations) and LTC (long-term care) sit next to the disability ADA in
-      # legal and benefits news, so the rule is skipped when the text uses
-      # disability or legal words. "coinsurance" is not a coin. "accessible"
-      # alone is allowed ("makes BTC, ETH and ADA accessible to investors").
-      - pattern: "\\b(?:BTC|ETH|XRP|SOL|XLM|HBAR|DOGE|AVAX|LTC|TRX|BNB|SUI|LINK|SHIB|XMR)(?:,| and| or| &| /) ADA\\b(?! (?:claims?|lawsuits?|suits?|complian\\w*|violations?|rules?|requirements?|accessibility|Title|standards?|litigation|plaintiffs?|regulations?|coordinators?|accommodations?|guidelines?)\\b)|\\bADA(?:,| and| or| &| /) (?:BTC|ETH|XRP|SOL|XLM|HBAR|DOGE|AVAX|LTC|TRX|BNB|SUI|LINK|SHIB|XMR)\\b"
-        requires: "^(?![\\s\\S]*(?:disabilit|Americans with|inaccessib|wheelchair|paratransit|screen[- ]readers?|Government Efficiency|statute of limitations|Antideficiency|Dental|Diabetes|District Attorney))(?=[\\s\\S]*(?:crypto(?!graph|log)|altcoin|(?<!same )\\btokens?\\b(?! of\\b)|\\b\\w*coins?\\b|Coinbase|blockchain|staking|\\bDeFi\\b|\\bETFs?\\b|\\bETPs?\\b|digital assets?|futures|on-?chain))"
+      # Names and product phrases that only mean the blockchain (any case); 카르다노 재단 = Cardano Foundation.
+      - pattern: "Cardano Foundation|\\bIOHK\\b|\\bEMURGO\\b|Charles Hoskinson|\\bCardano(?: Trust)? (?:ET[FPN]s?|futures|blockchain|network|mainnet|ecosystem|wallets?|cards?)\\b|카르다노 ?재단"
+        ignore_case: true
+      # Bare Cardano, 카르다노 or Input Output Global with crypto context or an adoption verb (uses/tests Cardano); not the Cardano pensions group (Mercer), the mathematician Gerolamo Cardano or Cardano al Campo. Korean 카르다노 is its own context.
+      - pattern: "\\b(?:[Cc]ardano|CARDANO)\\b(?! (?:Group|GROUP|Risk|RISK|Development|Advisory|Sustainable|B\\.V\\.)|(?:['’]s)? (?i:formula|dice|grid|grille|cipher)\\b)|카르다노|Input (?:\\| )?Output Global\\b(?! [Vv]alue)"
+        requires: "^(?![\\s\\S]*(?:pension|\\bLDI\\b|liability[- ]driven|fiduciary manag|trustees|Mercer|ACTIAM|al Campo|Gerolamo|Girolamo|gambl|연금|머서|지롤라모|방정식))(?=[\\s\\S]*(?:crypto(?!graph|log)|blockchain|tokeni[sz]|(?<!same )\\btokens?\\b|\\w+coins?\\b|USDC|Ethereum|Solana|Polygon|Polkadot|Hedera|\\bXRP\\b|Chainlink|Coinbase|Binance|Robinhood|(?-i:Grayscale|\\bADA\\b|\\bIOG\\b)|Hoskinson|\\bET[FPN]s?\\b|staking|\\bDeFi\\b|on-?chain|digital assets?|hard fork|\\bpay(?:ments?)?\\b|가상자산|암호화폐|블록체인|비트코인|카르다노|\\b(?:uses|using|tests|testing|taps) Cardano\\b))"
+      # Ticker ADA or Korean 에이다 with crypto context; not Ada Lovelace (에이다 러브레이스), the disabilities act (ADA lawsuits, ADA-compliant), dental/diabetes groups, district attorneys, Adacel (ASX: ADA) or aid agencies.
+      - pattern: "(?<!ASX: )\\bADA\\b(?!-[a-z]| (?:lawsuits?|suits?|claims?|complian\\w*|violations?|rules?|requir\\w*|Title|coin-op\\w*)\\b)|에이다(?! ?러브레이스)"
+        requires: "^(?![\\s\\S]*(?:disabilit|Americans with|inaccessib|wheelchair|transit|screen[- ]readers?|Dental|Diabetes|District Attorney|Antideficiency|Adacel|Development Agency))(?=[\\s\\S]*(?:crypto(?!graph|log)|blockchain|(?<!same )\\btokens?\\b|\\w*coins?\\b|Cardano|카르다노|에이다|staking|\\bDeFi\\b|on-?chain|\\bET[FPN]s?\\b|futures|exchange|\\b(?:BTC|ETH|XRP|XLM|AVAX|BNB|SHIB|PEPE)\\b|Robinhood|Coinbase|Binance|Kraken|Upbit|Bithumb|가상자산|암호화폐))"
 
   - id: rain
     kind: project
     label: Rain
     tokens: [RAIN]
-    # Rain prediction-markets protocol on Arbitrum (Rain Foundation, Panama; rain.one).
-    # Not: Rain the stablecoin card issuer (rain.xyz), the Bahrain exchange Rain,
-    # Rain Enhancement Technologies (Nasdaq: RAIN), Rain Oncology (former Nasdaq:
-    # RAIN), RAIN RFID, Rainmaker/Raindrop/Rain Coin/Rain by Virtuals ($RAIN),
-    # rainlang/Raindex, RAIN Foundation (water NGO), the RAIN mindfulness acronym
-    # or the weather. Bare "Rain" needs Enlivex (its treasury holder) or the CEO nearby.
-    # Texts about cards are skipped by rules 1, 2 (Arbitrum branch) and 4: that is
-    # the card issuer's vocabulary (Visa/Mastercard/Polymarket cards, card rewards).
+    # Rain prediction-markets protocol on Arbitrum (Rain Foundation, rain.one), the
+    # treasury asset of Enlivex (Nasdaq: ENLV). Not: the stablecoin card issuer
+    # Rain, the Bahrain exchange Rain, Rain Enhancement (Nasdaq: RAIN), Rain
+    # Oncology, Rain Industries, RAIN RFID, other RAIN tokens (Rainmaker, Raindrop,
+    # Rain Coin, Rain by Virtuals), rainlang/Raindex, the RAIN mindfulness acronym,
+    # the RAIN water foundation or the weather.
     match:
-      # Names. rainlang/Raindex used "Rain Protocol" and deploys on Arbitrum;
-      # the mindfulness "RAIN Protocol" spells out Recognize, Allow, ...;
-      # Virtuals' AI agent is also written "Rain (RAIN)". Those texts are skipped.
-      - pattern: "\\b(?:Rain|RAIN) (?:Protocol|Foundation|V2|DAO)\\b|\\bRain \\(\\$?RAIN\\)"
-        requires: "^(?![\\s\\S]*(?:Raindex|rainlang|Rain Language|Recogni[sz]e,? Allow|mindful|Virtuals|\\bcards?\\b))(?=[\\s\\S]*(?:prediction[- ]markets?|options (?:protocol|markets?)|Arbitrum|Polymarket|Kalshi|Enlivex|\\bENLV\\b|Roy Shaham|rain\\.one|\\bTVL\\b|(?-i:\\bRAIN tokens?\\b|\\$RAIN\\b)))"
-      # Bare ticker. Skipped after an exchange prefix and inside "Name (RAIN)" /
-      # "Name ($RAIN)" (except "token (RAIN)"), which is how Rainmaker, Raindrop,
-      # Rain Coin, Rain Enhancement and Rain Oncology are written ("Rain (RAIN)"
-      # is rule 1). All-caps headlines about the card issuer or the Bahrain
-      # exchange also say ARBITRUM, so Arbitrum counts only together with
-      # prediction/options markets, and not when another RAIN token is named.
-      - pattern: "(?<!Nasdaq: )(?<!NASDAQ: )(?<!Nasdaq:)(?<!NASDAQ:)(?:(?<=\\b[Tt]oken \\()|(?<=\\b[Tt]oken \\(\\$)|(?<![A-Za-z] \\()(?<![A-Za-z] \\(\\$))\\bRAIN\\b(?! RFID| Alliance| [Tt]echnology| \\((?:Rainmaker|Raindrop|Rain Coin|Rain by Virtuals))"
-        requires: "Enlivex|\\bENLV\\b|Roy Shaham|rain\\.one|^(?![\\s\\S]*(?:\\bcards?\\b|Rainmaker|Raindrop|Rain Coin|Virtuals))(?=[\\s\\S]*Arbitrum)(?=[\\s\\S]*(?:prediction|options)[- ]markets?)"
-      # Stock-mover lists put Enlivex next to Rain Enhancement / Rain Oncology.
-      - pattern: "\\bRain\\b(?! Enhancement| Oncology| Industries| Carbon| Bird)"
+      # Holder anchor (Enlivex, CEO, site): any Rain/RAIN, not "Nasdaq: RAIN", "Name (RAIN)" or other listed Rains.
+      - pattern: "(?<!(?i:nasdaq): )(?<!:)(?<![A-Za-z] \\()\\b(?:Rain|RAIN)\\b(?! Enhancement| Oncology| Industries| Therapeutics)"
         requires: "Enlivex|\\bENLV\\b|Roy Shaham|rain\\.one"
-      # Descriptive phrasings. The card issuer (Polymarket/Visa cards, Arbitrum
-      # DAO card rewards) and the Bahrain exchange (launching prediction
-      # markets) use the same words, so texts naming cards or Bahrain are skipped.
-      # "Arbitrum's Rain of ...", "Rain Check" and "Rain-..." are figurative.
-      - pattern: "\\bRain['’]s (?:decentrali[sz]ed )?(?:prediction|options)[- ]markets?|\\bRain,? (?:is |was )?(?:an?|the) (?:(?:Arbitrum-based|decentrali[sz]ed|permissionless|on-?chain|AI-powered|leading) )*(?:prediction|options)[- ]markets? (?:protocol|platform|infrastructure)|\\bRain, (?:an?|the) (?:Arbitrum-based|decentrali[sz]ed) (?:prediction|options)[- ]markets?\\b|(?:Arbitrum(?:-based|['’]s)? (?:prediction|options)[- ]markets?(?: (?:protocol|platform|project))?|(?:prediction|options)[- ]markets? (?:protocol|platform|project|token)) Rain\\b(?!-)|Arbitrum(?:-based|['’]s) Rain\\b(?!-| of\\b| [Cc]heck)"
-        requires: "^(?![\\s\\S]*(?:Bahrain|\\bcards?\\b))"
+      # Holder news that omits the name ("Enlivex Treasury Portfolio Update", "... on token gains"); not its drug news.
+      - pattern: "\\bEnlivex\\b|\\bENLV\\b"
+        requires: "token|crypto|treasury|prediction[- ]markets?"
+      # Token forms: "Rain (RAIN)", "Rain token (RAIN)", "RAIN token", "RAIN/USDT"; not other RAIN tokens.
+      - pattern: "\\bRain (?:token )?\\(\\$?RAIN\\)|\\bRAIN(?: tokens?\\b|/USDT?\\b)"
+        requires: "^(?![\\s\\S]*(?:Rainmaker|Raindrop|Rain Coin|Virtuals|Enhancement|Oncology))"
+      # Project names with crypto context; not acid rain, rainlang/Raindex, mindfulness, water or cards.
+      - pattern: "(?<!(?i:acid) )\\b(?:Rain|RAIN) (?:Protocol|Foundation|DAO|V2)\\b"
+        requires: "^(?![\\s\\S]*(?:Raindex|rainlang|Recogni[sz]e|mindful|water|\\bcards?\\b))(?=[\\s\\S]*(?:prediction|Arbitrum|Polymarket|Kalshi|crypto|tokens?|on-?chain|liquidity))"
+      # Bare ticker in exchange listing notices ("RAIN is available for trading on Kraken"); not stocks, and
+      # not a word in an all-caps phrase ("HEAVY RAIN", "RAIN CODE", "RAIN-INDUCED") other than "RAIN ETF/ETP".
+      - pattern: "(?<!(?i:nasdaq): )(?<!:)(?<![A-Za-z] \\()(?<![A-Z] )\\bRAIN\\b(?!-| (?:Foundation|Protocol|Alliance)\\b| (?!ET[FP]\\b)[A-Z]{2})"
+        requires: "^(?![\\s\\S]*(?:Rainmaker|Raindrop|Rain Coin|Virtuals|Enhancement|Oncology|Industries|RFID|Bahrain|Nasdaq|NYSE|\\bstocks?\\b|\\bshares\\b))(?=[\\s\\S]*(?:(?:available for|spot) trading|trading pairs?|(?:de)?list(?:s|ed|ing)?\\b|prediction[- ]markets? (?:protocol|token)))"
+      # Descriptions: "prediction market Rain", "Rain, the ... prediction market", "Rain's prediction markets", "Arbitrum's Rain".
+      - pattern: "\\bprediction[- ]markets? (?:protocol |platform )?Rain\\b(?!-)|\\bRain, (?:an?|the) (?:[\\w-]+ ){0,3}?prediction[- ]markets?|\\bRain['’]s (?:decentrali[sz]ed )?prediction[- ]markets?|\\bArbitrum(?:-based|['’]s) Rain\\b(?!-| of\\b| [Cc]heck)"
+        requires: "^(?![\\s\\S]*(?:Bahrain|\\bcards?\\b|weather))"
 
   # --- themes (stored for later search; no event on their own) ---------------
   - id: tokenized_deposits
