@@ -13,7 +13,7 @@ from .config import Entity, Settings, SourceConfig
 from .events import place_item
 from .fetch import FetchError, Fetcher
 from .heartbeat import Heartbeat
-from .matching import assess, match_text
+from .matching import assess, match_text, publisher_match
 from .normalize import canonical_url, content_hash
 from .notify import Alert, Notifier
 from .sources import RawItem
@@ -143,8 +143,14 @@ def _process_item(ctx: Context, source: SourceConfig, raw: RawItem, now: datetim
     canonical = canonical_url(raw.link)
     if conn.execute("SELECT 1 FROM items WHERE canonical_url = ?", (canonical,)).fetchone():
         return
+    # The excerpt is always used for matching, but stored only when the
+    # source's terms allow it (store_excerpt: false keeps title, link, date).
     text = f"{raw.title} {raw.excerpt}"
     matches = match_text(text, ctx.entities)
+    if source.publisher_entity and all(m.entity_id != source.publisher_entity
+                                       for m in matches):
+        matches.insert(0, publisher_match(source.publisher_entity, ctx.entities))
+    excerpt = raw.excerpt if source.store_excerpt else ""
     with conn:
         item_id = conn.execute(
             """INSERT INTO items (source_id, url, canonical_url, title, published_at,
@@ -152,14 +158,14 @@ def _process_item(ctx: Context, source: SourceConfig, raw: RawItem, now: datetim
                                   matched_entities, baseline)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (source.id, raw.link, canonical, raw.title, to_iso(raw.published_at),
-             to_iso(raw.updated_at), to_iso(now), content_hash(raw.title), raw.excerpt,
+             to_iso(raw.updated_at), to_iso(now), content_hash(raw.title), excerpt,
              ",".join(m.entity_id for m in matches), int(baseline)),
         ).lastrowid
     outcome.items_new += 1
 
     assessment = assess(matches, source.publisher_kind)
-    if not (assessment.institutions or assessment.projects):
-        return  # theme-only or no match: kept in items for later search
+    if not assessment.makes_event:
+        return  # kept in items (with matched_entities) for later search
     token_mention = "yes" if any(
         re.search(rf"\b{re.escape(t)}\b", text) for t in assessment.tokens) else "unknown"
     placement = place_item(conn, item_id=item_id, title=raw.title,

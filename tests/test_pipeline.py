@@ -172,3 +172,38 @@ def test_sitemap_source(harness):
     assert outcome.items_new == 1 and outcome.events_new == 1
     entities = {r["entity_id"] for r in ctx.conn.execute("SELECT entity_id FROM event_entities")}
     assert {"dtcc", "ondo"} <= entities
+
+
+def test_institution_name_alone_is_not_an_event(harness):
+    ctx, fetcher, notifier, clock, register = harness
+    source = make_source("wire", "https://wire.example/rss")
+    register(source)
+    fetcher.set(source.url, rss())
+    run_source(ctx, source)
+    fetcher.set(source.url, rss(
+        ("DTCC Launches Centralized Hub to Simplify Client Onboarding",
+         "https://wire.example/dtcc-hub", "Thu, 24 Sep 2026 20:00:00 GMT", ""),
+        ("DTCC Outlines Tokenization Roadmap for Collateral",
+         "https://wire.example/dtcc-tokenization", "Thu, 24 Sep 2026 21:00:00 GMT", "")))
+    outcome = run_source(ctx, source)
+    assert outcome.items_new == 2 and outcome.events_new == 1   # only the one with a theme
+    event = ctx.conn.execute("SELECT * FROM events").fetchone()
+    assert event["title"].startswith("DTCC Outlines Tokenization") and event["level"] is None
+    assert notifier.alerts == []
+
+
+def test_publisher_entity_turns_project_mention_into_high(harness):
+    ctx, fetcher, notifier, clock, register = harness
+    source = make_source("dtcc", "https://dtcc.example/rss", publisher_kind="institution",
+                         publisher_entity="dtcc", store_excerpt=False)
+    register(source)
+    fetcher.set(source.url, rss())
+    run_source(ctx, source)
+    fetcher.set(source.url, rss(
+        ("Collateral AppChain Integrates Chainlink Runtime Environment",
+         "https://dtcc.example/appchain", "Thu, 24 Sep 2026 20:00:00 GMT",
+         "A longer excerpt that must not be stored.")))
+    run_source(ctx, source)
+    assert [a.level for a in notifier.alerts] == ["high"]
+    item = ctx.conn.execute("SELECT excerpt, matched_entities FROM items").fetchone()
+    assert item["excerpt"] == "" and item["matched_entities"].startswith("dtcc,")

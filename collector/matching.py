@@ -43,6 +43,15 @@ def match_text(text: str, entities: list[Entity]) -> list[Match]:
     return matches
 
 
+def publisher_match(entity_id: str, entities: list[Entity]) -> Match:
+    """A feed published by an institution speaks for that institution."""
+    for entity in entities:
+        if entity.id == entity_id:
+            return Match(entity.id, entity.kind, entity.label, entity.tokens, "(publisher)",
+                         entity.control)
+    raise KeyError(f"publisher_entity {entity_id!r} is not in the entity list")
+
+
 @dataclass(frozen=True)
 class Assessment:
     institutions: tuple[str, ...]
@@ -50,6 +59,15 @@ class Assessment:
     themes: tuple[str, ...]
     tokens: tuple[str, ...]
     level: str | None  # "high", "medium" or None (record only)
+
+    @property
+    def makes_event(self) -> bool:
+        """Projects always; institutions only together with a theme.
+
+        An institution name alone (e.g. every post in DTCC's own feed) is kept
+        as an item but does not become an event.
+        """
+        return bool(self.projects or (self.institutions and self.themes))
 
 
 def assess(matches: list[Match], publisher_kind: str) -> Assessment:

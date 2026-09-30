@@ -2,6 +2,7 @@
 #
 # AGENTS.md: a source is added only after its terms of use were checked
 # (docs/collector-spec.md section 3). `terms_checked` records where and when.
+# Terms review: research/2026-09-30-claude-data-source-check/README.md
 #
 # Fields:
 #   id, name, url
@@ -12,6 +13,66 @@
 #                 (its value is also sent as the User-Agent)
 #   url_filter: sitemap only, regex applied to <loc>
 #   max_age_days: sitemap only, ignore entries whose lastmod is older
+#   store_excerpt: false keeps only title, link and dates in the database
+#   publisher_entity: entity id of the institution that publishes the feed;
+#                     every item counts as that institution speaking
 #   enabled: false to keep an entry without polling it
 
-sources: []
+sources:
+  # SEC: public information, free to reuse; cite the SEC. Fair access policy:
+  # declared User-Agent with a contact e-mail, <= 10 requests/second in total.
+  - id: sec-press
+    name: SEC press releases
+    kind: feed
+    url: https://www.sec.gov/news/pressreleases.rss
+    interval_sec: 300
+    publisher_kind: regulator
+    requires_env: SEC_USER_AGENT
+    terms_checked: "2026-09-30 sec.gov privacy/security policy and EDGAR fair access policy"
+
+  - id: sec-speeches
+    name: SEC speeches and statements
+    kind: feed
+    url: https://www.sec.gov/news/speeches-statements.rss
+    interval_sec: 600
+    publisher_kind: regulator
+    requires_env: SEC_USER_AGENT
+    terms_checked: "2026-09-30 sec.gov privacy/security policy and EDGAR fair access policy"
+
+  # Federal Reserve Board: public domain unless marked; cite the Board.
+  - id: fed-press
+    name: Federal Reserve Board press releases
+    kind: feed
+    url: https://www.federalreserve.gov/feeds/press_all.xml
+    interval_sec: 600
+    publisher_kind: regulator
+    terms_checked: "2026-09-30 federalreserve.gov disclaimer (public domain) and RSS page"
+
+  # DTCC: RSS subscriptions are invited; the site licence is personal and
+  # forbids compiling content into a database, so only title, link and date
+  # are kept, privately. The RSS list has no press-release feed.
+  - id: dtcc-insights
+    name: DTCC Insights
+    kind: feed
+    url: https://www.dtcc.com/rss-feeds/dtcc-news-and-insight/dtcc-news-and-insight-connection.xml
+    interval_sec: 900
+    publisher_kind: institution
+    publisher_entity: dtcc
+    store_excerpt: false
+    terms_checked: "2026-09-30 dtcc.com terms (2026-03-11) and RSS page"
+
+  # DTCC press releases are listed only in the sitemap. The terms forbid
+  # systematic extraction; reading sitemap entries needs the user's decision
+  # (docs/open-questions.md Q10). Kept disabled.
+  - id: dtcc-press-sitemap
+    name: DTCC press releases (sitemap)
+    kind: sitemap
+    url: https://www.dtcc.com/sitemap.xml
+    url_filter: "/press-releases/"
+    max_age_days: 30
+    interval_sec: 1800
+    publisher_kind: institution
+    publisher_entity: dtcc
+    store_excerpt: false
+    enabled: false
+    terms_checked: "2026-09-30 dtcc.com terms: unclear for sitemap reading; disabled"

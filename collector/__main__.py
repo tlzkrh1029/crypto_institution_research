@@ -5,13 +5,14 @@ from __future__ import annotations
 import argparse
 import logging
 import logging.handlers
+import os
 import sys
 import time
 from datetime import timedelta
 from pathlib import Path
 
 from . import db
-from .config import ConfigError, load_entities, load_settings, load_sources
+from .config import ConfigError, load_entities, load_settings, load_sources, validate
 from .fetch import Fetcher
 from .heartbeat import Heartbeat
 from .notify import make_notifier
@@ -39,6 +40,7 @@ def _load(root: Path):
     settings = load_settings(root)
     sources = load_sources(root / "config" / "sources.yaml")
     entities = load_entities(root / "config" / "entities.yaml")
+    validate(sources, entities)
     return settings, sources, entities
 
 
@@ -222,6 +224,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"config error: {exc}", file=sys.stderr)
         return 2
     except KeyboardInterrupt:
+        return 0
+    except BrokenPipeError:  # output piped into head/less that closed early
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
         return 0
 
 

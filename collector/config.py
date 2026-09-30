@@ -99,6 +99,8 @@ class SourceConfig:
     requires_env: str | None = None
     url_filter: re.Pattern | None = None
     max_age_days: int | None = None
+    store_excerpt: bool = True
+    publisher_entity: str | None = None
 
 
 def load_sources(path: Path) -> list[SourceConfig]:
@@ -132,11 +134,21 @@ def load_sources(path: Path) -> list[SourceConfig]:
                 requires_env=raw.get("requires_env"),
                 url_filter=re.compile(url_filter) if url_filter else None,
                 max_age_days=raw.get("max_age_days"),
+                store_excerpt=bool(raw.get("store_excerpt", True)),
+                publisher_entity=raw.get("publisher_entity"),
             ))
             seen.add(sid)
         except KeyError as exc:
             raise ConfigError(f"source entry missing field {exc}: {raw}") from exc
     return sources
+
+
+def validate(sources: list[SourceConfig], entities: list["Entity"]) -> None:
+    known = {e.id for e in entities}
+    for s in sources:
+        if s.publisher_entity and s.publisher_entity not in known:
+            raise ConfigError(f"{s.id}: publisher_entity {s.publisher_entity!r} "
+                              "is not in config/entities.yaml")
 
 
 # --- entities ---------------------------------------------------------------
