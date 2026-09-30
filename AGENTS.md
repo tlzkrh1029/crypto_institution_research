@@ -30,7 +30,7 @@
 | [docs/writing-style-ko.md](docs/writing-style-ko.md) | 한국어 문서 작성 지침 (사용자 원문) | 수정·요약 금지 |
 | [research/](research/) | 날짜별 조사 기록과 원자료 | 새 폴더를 추가만 하고, 기존 기록은 고치지 않음 |
 
-처음 작업하는 AI는 이 파일, research-principles.md, open-questions.md, [README.md](README.md)의 "조사 기록" 표에서 날짜가 가장 늦은 폴더의 README.md 순서로 읽는다. 조사 작업을 하면 hypotheses.md와 institution-map.md를 추가로 읽고, 한국어 문서를 쓰면 writing-style-ko.md를 전문으로 읽는다.
+처음 작업하는 AI는 이 파일, research-principles.md, open-questions.md, [README.md](README.md)의 "조사 기록" 표에서 날짜가 가장 늦은 폴더의 README.md(같은 날짜의 폴더가 여러 개면 그 폴더들의 README.md 모두) 순서로 읽는다. 조사 작업을 하면 hypotheses.md와 institution-map.md를 추가로 읽고, 한국어 문서를 쓰면 writing-style-ko.md를 전문으로 읽는다.
 
 ## 작업 규칙
 

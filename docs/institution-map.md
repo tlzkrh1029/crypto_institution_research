@@ -21,7 +21,7 @@
 | BVNK | Stellar | XLM | 직접 (BVNK 고객에게는 간접) | 가동 | 2026-09-22 |
 | U.S. Bank | Stellar | XLM | 직접 | 시험 | 2026-09-09 |
 | Bybit, Franklin Templeton | Benji 플랫폼, Mantle | 없음 | 직접 (Bybit와 Benji 사이) | 가동 (담보 프로그램) | 2026-09-28 21:00 KST |
-| LF Decentralized Trust | Hedera (CLPR) | HBAR | 직접 (코드 기여 수용) | 선정·협약 전 | 2026-09-24 |
+| LF Decentralized Trust | Hedera (CLPR) | HBAR | 확인 필요 (LFDT의 코드 기여 수용, 네트워크 선정·사용 아님) | 선정·협약 전 | 2026-09-24 |
 | IBM | Hedera (THG IDTrust) | HBAR | 간접 | 가동 (카탈로그 등재) | 2026-09-23 23:02 KST |
 | Bank of England Synchronisation Lab | Stellar (Nuvanté 시제품) | XLM | 프로젝트 측 발표 | 시험 | 2026-09-03 |
 
@@ -115,7 +115,7 @@
 
 - 업무: 브리지 없는 교차 원장 프로토콜 CLPR의 코드를 LFDT Labs 과제로 받아 공개 개발한다. LFDT는 코드를 맡아 공개 개발하는 오픈소스 재단이며, Hedera 네트워크를 사용하는 기관이 아니다. Hedera는 LFDT의 창립 Premier 회원이다. CLPR 개발사는 Hashgraph이며, Hashgraph가 테스트넷 조기 도입 프로그램(국가 간 결제와 외환, 교차 원장 결제, 담보 이동) 참가자를 모집하고 있다.
 - 발표 주체: 프로젝트 (Hedera)와 기관 (LFDT)이 같은 날 각각 발표했다.
-- 연결 등급: 직접 (LFDT가 CLPR lab 추가를 스스로 발표). 관계의 내용은 코드 기여이며, Hedera 네트워크 사용이 아니다.
+- 연결 등급: 확인 필요. LFDT가 CLPR lab 추가를 스스로 발표했지만, 관계의 내용은 코드 기여이며 Hedera의 선정이나 네트워크 사용이 아니므로 research-principles.md 2절의 "직접" 기준에 맞지 않는다.
 - 사업 단계: 선정·협약 전. LFDT Labs 단계의 초기 코드 공개이며, 기관의 시험은 아직 시작되지 않았다.
 - 토큰 언급: 없음
 - 발표일: 2026-09-24

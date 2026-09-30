@@ -70,6 +70,6 @@
 
 - 날짜: 2026-09-30
 - 상태: 잠정 (계획안에 들어 있지 않았다)
-- 내용: 첫 커밋(dc05f77) 이후 같은 날, 사용자가 검토하기 전에 사실 확인에서 발견한 오류를 research/와 docs/의 원 파일에서 직접 고쳤다. 고친 파일과 이유는 [research/2026-09-30-claude-fact-check/](../research/2026-09-30-claude-fact-check/)에 기록했다. 고치기 전 내용은 git 이력에 있다. 이후에는 AGENTS.md의 규칙대로 기존 기록을 고치지 않는다.
+- 내용: 첫 커밋(dc05f77) 이후 같은 날, 사용자가 검토하기 전에 사실 확인에서 발견한 오류를 research/, docs/, AGENTS.md, README.md의 원 파일에서 직접 고치고 GEMINI.md를 추가했다. 지침 성격의 문서(AGENTS.md, research-principles.md, decisions.md)도 이때는 PR을 거치지 않고 고쳤다. 고친 파일과 이유는 [research/2026-09-30-claude-fact-check/](../research/2026-09-30-claude-fact-check/)에 기록했다. 고치기 전 내용은 git 이력에 있다. 이후에는 AGENTS.md의 규칙대로 기존 기록을 고치지 않고, 지침 성격의 문서는 별도 브랜치와 PR로 바꾼다.
 - 이유: 틀린 수치와 출처(ETF 유입 기간, 제외 목록)가 담긴 문서를 다른 AI가 먼저 읽으면, 정정 기록을 함께 읽지 않는 한 오류가 퍼진다. 사용자가 아직 검토하지 않은 첫날 초안이므로, 원 파일을 고치고 정정 내역을 남기는 편이 오류가 퍼질 위험이 적다고 판단했다.
 - 제안: Claude Code.

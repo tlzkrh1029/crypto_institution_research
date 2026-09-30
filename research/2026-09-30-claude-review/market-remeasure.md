@@ -2,11 +2,11 @@
 
 > 이번 측정의 순위, 수익률, 거래량은 CoinGecko API 데이터다. Powered by [CoinGecko API](https://www.coingecko.com/en/api/). 2026-09-29 값은 Codex 문서(CMC 기준)에서 옮겼고, 업비트 거래대금은 업비트 `/v1/ticker` API 값이다.
 
-Codex 문서(2026-09-29 12:26~12:27 KST 기준)의 순위 구간 비교를 하루 뒤에 같은 방식으로 다시 계산했다. 계산 스크립트는 [remeasure.py](remeasure.py)다. [snapshot-2026-09-30-1239kst.csv](snapshot-2026-09-30-1239kst.csv)에는 관심 종목 12개의 CoinGecko 값만 있다. 이 파일은 `--no-upbit` 옵션으로 만들었으므로 upbit_listed, upbit_volume_usd, upbit_share_pct 열은 비어 있다. 순위 구간 계산에 쓴 CoinGecko 전체 응답(150개)과 업비트 응답은 저장하지 않았으므로, 아래 구간 표와 업비트 표는 이 저장소의 자료만으로는 다시 계산할 수 없다.
+Codex 문서(2026-09-29 12:26~12:27 KST 기준)의 순위 구간 비교를 하루 뒤에 같은 방식으로 다시 계산했다. 계산 스크립트는 [remeasure.py](remeasure.py)다. [snapshot-2026-09-30-1239kst.csv](snapshot-2026-09-30-1239kst.csv)에는 관심 종목 12개의 CoinGecko 값만 있다. 이 파일은 `--no-upbit` 옵션으로 만들었으므로 upbit_listed, upbit_volume_usd, upbit_share_pct 열은 비어 있다. 순위 구간 계산에 쓴 CoinGecko 전체 응답(150개)과 업비트 응답은 이 저장소에 넣지 않았으므로, 아래 구간 표와 업비트 표는 이 저장소의 자료만으로는 다시 계산할 수 없다.
 
 ## 정정 (2026-09-30)
 
-첫 커밋(dc05f77)의 제외 목록은 스테이블코인과 펀드·RWA 토큰 10개(FIGR_HELOC, USDY, USDD, U, EURSAFO, BFUSD, USDGO, BCAP, USTB, EUTBL)를 거르지 못했고, 거버넌스 토큰 ETHFI를 잘못 제외했다. 같은 날 스크립트를 고치고 저장해 둔 CoinGecko 응답으로 구간 표를 다시 계산했다. 관심 종목 표와 CSV는 바뀌지 않았다. 정정 내역 전체는 [research/2026-09-30-claude-fact-check/](../2026-09-30-claude-fact-check/)에 있다.
+첫 커밋(dc05f77)의 제외 목록은 스테이블코인과 펀드·RWA 토큰 10개(FIGR_HELOC, USDY, USDD, U, EURSAFO, BFUSD, USDGO, BCAP, USTB, EUTBL)를 거르지 못했고, 거버넌스 토큰 ETHFI를 잘못 제외했다. 같은 날 스크립트를 고치고, 작업 환경에 저장해 둔 CoinGecko 응답(이 저장소에는 없음)으로 구간 표를 다시 계산했다. 관심 종목 표와 CSV는 바뀌지 않았다. 정정 내역 전체는 [research/2026-09-30-claude-fact-check/](../2026-09-30-claude-fact-check/)에 있다.
 
 ## 측정 조건
 

@@ -50,7 +50,7 @@
 
 ## Q5. 기준 브랜치(main) 생성
 
-- 현황: 이 저장소는 2026-09-30에 비어 있는 상태로 만들어졌고, 첫 푸시는 Claude Code 작업 브랜치(`claude/blissful-cerf-rr8n08`)로 이루어졌다. 브랜치가 하나뿐이므로 현재 GitHub 기본 브랜치도 이 브랜치다 (2026-09-30 [GitHub API](https://api.github.com/repos/tlzkrh1029/crypto_institution_research)로 확인). 다른 도구도 지금 이 내용을 읽을 수 있다. 다만 이름이 임시 작업 브랜치이고 Claude Code 세션이 이 브랜치에 계속 푸시하므로, 기준 브랜치로 계속 쓰기에는 불안정하다.
+- 현황: 이 저장소는 2026-09-30에 비어 있는 상태로 만들어졌고, 첫 푸시는 Claude Code 작업 브랜치(`claude/blissful-cerf-rr8n08`)로 이루어졌다. 브랜치가 하나뿐이므로 현재 GitHub 기본 브랜치도 이 브랜치다 (2026-09-30 [GitHub API](https://api.github.com/repos/tlzkrh1029/crypto_institution_research)로 확인). 다른 도구도 지금 이 내용을 읽을 수 있다. 다만 이 브랜치는 이름에서 드러나듯 임시 작업 브랜치이고 Claude Code 세션이 이 브랜치에 계속 푸시하므로, 기준 브랜치로 계속 쓰기에는 불안정하다.
 - 선택지: 작업 브랜치의 내용으로 main을 만들고 기본 브랜치로 지정한다. 또는 사용자가 GitHub에서 직접 처리한다.
 - 주의: 어떤 도구도 사용자의 명시적인 허락 없이 다른 도구의 작업 브랜치에 푸시하지 않는다. 현재 기본 브랜치는 Claude Code 작업 브랜치이므로, 다른 도구는 새 브랜치에서 작업하고 이 브랜치를 대상으로 PR을 연다.
 
@@ -58,7 +58,7 @@
 
 - 파일: `market/README.md`, `market/summary.json`, `catalyst-audit.md`. 이 파일들은 사용자의 Windows 노트북에 있는 Codex 프로젝트 폴더에 있다.
 - 선택지: 사용자가 파일을 첨부한다. Codex에서 이 저장소로 직접 푸시한다. 올리지 않는다.
-- 추가 위치: 원본 문서의 상대 링크가 작동하도록 `research/2026-09-29-codex-meta-ideas/market/README.md`, `research/2026-09-29-codex-meta-ideas/market/summary.json`, `research/2026-09-29-codex-meta-ideas/catalyst-audit.md`에 원본 그대로 추가한다. 이는 기존 기록 폴더에 파일을 추가하는 예외다. 같은 PR에서 고칠 수 있는 기존 파일은 그 폴더 README.md의 "누락된 딸린 파일" 절 하나이며, 이 절에는 파일을 추가한 날짜와 도구를 적는다. 파일에 로컬 경로나 개인 정보처럼 공개하면 안 되는 내용이 있으면, 추가하기 전에 사용자에게 알린다.
+- 추가 위치: 원본 문서의 상대 링크가 작동하도록 `research/2026-09-29-codex-meta-ideas/market/README.md`, `research/2026-09-29-codex-meta-ideas/market/summary.json`, `research/2026-09-29-codex-meta-ideas/catalyst-audit.md`에 원본 그대로 추가한다. 이는 기존 기록 폴더에 파일을 추가하는 예외다. 같은 PR에서 고칠 수 있는 기존 내용은 그 폴더 README.md의 "누락된 딸린 파일" 절 하나뿐이며, 이 절에는 파일을 추가한 날짜와 도구를 적는다. 파일에 로컬 경로나 개인 정보처럼 공개하면 안 되는 내용이 있으면, 추가하기 전에 사용자에게 알린다.
 - 영향: 올리지 않으면 [원본 문서](../research/2026-09-29-codex-meta-ideas/research-and-ideas.md)의 해당 링크가 작동하지 않는다.
 
 ## Q7. 고정 비교 대상 종목과 대조군
@@ -86,6 +86,6 @@
 
 ## Q11. CoinGecko 스냅숏 CSV의 공개
 
-- 현황: research/2026-09-30-claude-review/에 관심 종목 12개의 CoinGecko 값을 담은 CSV가 있다. CoinGecko API 약관은 데이터 저장을 권장하지 않고, 약관이 허용한 범위 밖의 복제와 저장을 금지하며, 표시할 때 출처 표기를 요구한다.
+- 현황: research/2026-09-30-claude-review/에 관심 종목 12개의 CoinGecko 값을 담은 CSV가 있다. CoinGecko API 약관은 데이터 저장을 권장하지 않고, 약관이 허용한 범위 밖의 복제와 저장을 금지하며, 표시할 때 출처 표기를 요구한다 ([CoinGecko API 약관](https://www.coingecko.com/en/api_terms), 2026-09-30 확인).
 - 선택지: 출처 표기와 함께 유지한다. 삭제하고 계산 결과만 남긴다 (스크립트로 새 스냅숏은 다시 만들 수 있다).
 - 임시 기본값: 출처 표기와 함께 유지한다. 재현에 필요한 소량의 연구용 스냅숏이기 때문이다.

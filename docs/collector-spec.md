@@ -43,7 +43,7 @@ flowchart LR
 
 ## 3. 수집원
 
-v1은 무료 출처만 쓴다. "확인" 열은 무엇을 확인했는지 적는다. "작동 확인"은 요청이 정상 응답을 받았다는 뜻이고, 이용 조건까지 확인했다는 뜻은 아니다. 이용 조건을 확인하지 않은 출처는 구현 전에 확인한다.
+v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적는다. "작동 확인"은 요청이 정상 응답을 받았다는 뜻이고, 이용 조건까지 확인했다는 뜻은 아니다. 이용 조건을 확인하지 않은 출처는 구현 전에 확인한다.
 
 | 수집원 | 용도 | 방식 | 조건과 주의 | 확인 |
 |---|---|---|---|---|
@@ -56,18 +56,18 @@ v1은 무료 출처만 쓴다. "확인" 열은 무엇을 확인했는지 적는�
 | 프로젝트 공식 블로그 (Chainlink, Hedera, Stellar, Quant, Ondo 등) | 프로젝트 발표 | RSS 우선, 없으면 공개 페이지 변경 확인 | robots.txt와 이용 조건을 확인한다 | 미확인 |
 | 업비트 | 국내 가격과 거래대금, 김치 프리미엄 | 공개 API (키 불필요) | 요청 한도를 지킨다 | 2026-09-30 작동 확인, 이용 조건 미확인 |
 | 코인베이스 | 미국 거래 비중과 가격 프리미엄 | `https://api.exchange.coinbase.com/products/{id}/ticker`, `https://api.coinbase.com/api/v3/brokerage/market/products/{id}` (인증 불필요) | | 2026-09-30 작동 확인, 이용 조건 미확인 |
-| CoinGecko | 전체 가격, 시총, 거래량 | 공개 API | 키 없이 호출하면 IP 단위로 제한된다. 무료 Demo 키(`x-cg-demo-api-key`)를 `.env`에 두고 쓴다. Demo 한도는 분당 100회, 월 10,000회다. 5분마다 1회만 호출해도 30일에 8,640회이므로, 빠른 경로의 가격 감시는 업비트와 코인베이스 공개 API로 하고 CoinGecko는 15분~1시간 주기의 전체 시장 집계에 쓴다. API 약관에 따라 이 데이터를 보여 주는 대시보드, 보고서, 문서에는 "Powered by CoinGecko"를 표시한다. 약관은 데이터 저장을 권장하지 않으므로(저장한다면 24시간마다 갱신하고 보안 조치를 한다), 원자료는 로컬 `data/`에만 둔다 | 2026-09-30 키 없는 호출의 제한, 한도, 약관 확인 |
+| CoinGecko | 전체 가격, 시총, 거래량 | 공개 API | 키 없이 호출하면 IP 단위로 제한된다. 무료 Demo 키(`x-cg-demo-api-key`)를 `.env`에 두고 쓴다. Demo 한도는 분당 100회, 월 10,000회다. 5분마다 1회만 호출해도 30일에 8,640회이므로, 빠른 경로의 가격 감시는 업비트와 코인베이스 공개 API로 하고 CoinGecko는 15분~1시간 주기의 전체 시장 집계에 쓴다. [API 약관](https://www.coingecko.com/en/api_terms)에 따라 이 데이터를 보여 주는 대시보드, 보고서, 문서에는 "Powered by CoinGecko"를 표시한다. 약관은 데이터 저장을 권장하지 않으므로(저장한다면 24시간마다 갱신하고 보안 조치를 한다), 원자료는 로컬 `data/`에만 둔다 | 2026-09-30 키 없는 호출의 제한, 한도, 약관 확인 |
 | 무기한 선물 거래소 (바이낸스, 바이빗 등) | 미결제약정, 펀딩비 | 공개 API | 접속 지역 제한이 있다. 2026-09-30 미국 소재 클라우드 환경에서 바이낸스 API는 이용약관의 "b. Eligibility" 조항을 근거로 거부(HTTP 451)했고, 바이빗 API도 국가 단위로 차단(HTTP 403)했다. 설치 장소에서 접속되는지와 함께, 그 지역이 약관상 제한 지역인지도 확인한다 | 일부 확인 |
 | ETF 흐름 | 토큰 직접 수요 | 운용사 공개 보유량, 집계 사이트 | 출처별 이용 조건을 확인한다 | 미확인 |
 
 제외하거나 보류한 수집원은 다음과 같다.
 
-- X 웹 스크래핑과 비공식 수집기(twscrape 등): [X 이용약관](https://x.com/en/tos)은 사전 서면 동의 없는 크롤링과 스크래핑을 금지한다 (2026-09-30 확인). 로그인에 쓴 계정이 정지될 위험도 있다. 비공식 수집은 AGENTS.md의 규칙에 따라 구현하지 않는다. X를 v1에서 어떻게 보완할지(휴대전화 알림 또는 공식 유료 API)는 [open-questions.md](open-questions.md) Q4에서 다룬다.
+- X 웹 스크래핑과 비공식 수집기(twscrape 등): [X 이용약관](https://x.com/en/tos)은 사전 서면 동의 없는 크롤링과 스크래핑을 금지한다 (2026-09-30 확인). 로그인에 쓴 계정이 정지될 위험도 있다. 비공식 수집은 AGENTS.md의 규칙에 따라 구현하지 않는다. v1에서 X 게시물을 어떤 방식으로 확인할지(휴대전화 알림 또는 공식 유료 API)는 [open-questions.md](open-questions.md) Q4에서 다룬다.
 - X 공식 API: 유료다. 2026-09-30 X 공식 문서 기준으로 게시물 읽기 1건당 $0.005다. 1~2주 운영한 뒤 놓친 뉴스가 X에 집중되어 있을 때만, 소수 계정을 공식 API로 수집하는 방안을 검토한다.
 - FinancialJuice: [이용약관](https://www.financialjuice.com/tos.aspx)(2026-09-30 확인)은 개인적 이용만 허락하고, FinancialJuice의 서면 허락 없이 데이터 마이닝, 로봇, 스파이더 같은 자동 수집 도구를 쓰거나 콘텐츠를 수집, 집계하는 것을 금지한다. 홈페이지에는 공식 RSS(https://www.financialjuice.com/feed.ashx?xy=rss) 링크가 있지만, 약관에 RSS에 관한 별도 조항이 없으므로 RSS도 위의 금지 조항을 적용받는 것으로 본다. 서면 허락을 받기 전에는 RSS를 포함해 자동으로 수집하지 않는다.
 - 텔레그램 공개 채널 (Telethon처럼 사용자 계정으로 로그인하는 API 클라이언트): [텔레그램 API 약관](https://core.telegram.org/api/terms) 1.5항과 [콘텐츠 이용 약관](https://telegram.org/tos/content-licensing)은 텔레그램에서 얻은 데이터를 AI의 학습, 개발, 배포에 쓰는 것을 금지하고, 사용자로서의 통상적인 이용을 벗어난 콘텐츠 접근을 금지한다. 비공식 API 클라이언트로 로그인한 계정은 자동으로 감시 대상이 되고, 도배성 요청을 하면 영구 정지된다 (2026-09-30 확인). 사건 기록 저장과 느린 경로의 AI 해석이 이 조건에 맞는지 사용자가 정하기 전에는 구현하지 않는다 ([open-questions.md](open-questions.md) Q10). 구현하게 되면 api_hash와 `.session` 파일을 비밀 값으로 다룬다. api_hash는 폐기할 수 없고, `.session` 파일을 가진 사람은 그 계정으로 로그인할 수 있다.
 - Google News RSS 검색: 엔드포인트(`https://news.google.com/rss/search?q=...&hl=en-US&gl=US&ceid=US:en`)는 작동한다. 그러나 피드 자체에 개인 피드 리더에서 개인적·비상업적으로 표시하는 용도 외의 사용은 금지한다는 조건이 적혀 있다 (2026-09-30 확인). 자동 저장, 분류, AI 전달이 이 조건에 맞는지 사용자가 정하기 전에는 구현하지 않는다 ([open-questions.md](open-questions.md) Q10). 또한 항목 링크가 원문 주소가 아니라 news.google.com 중계 주소이므로, 원문 주소를 따로 확인해야 중복을 제거할 수 있다.
-- CoinMarketCap 웹페이지 HTML 파싱: [Codex 원본 문서](../research/2026-09-29-codex-meta-ideas/research-and-ideas.md)는 CMC 공개 HTML의 숫자를 읽어 계산했다. CMC 이용약관(2025-11-24 갱신)의 금지 행위 항목은 스크래핑과 자동 수집, 제3자에게 제공하기 위한 데이터 집적을 금지하므로 이 방법을 쓰지 않는다. CMC 데이터가 필요하면 공식 API(https://coinmarketcap.com/api/)를 쓴다.
+- CoinMarketCap 웹페이지 HTML 파싱: [Codex 원본 문서](../research/2026-09-29-codex-meta-ideas/research-and-ideas.md)는 CMC 공개 HTML의 숫자를 읽어 계산했다. [CMC 이용약관](https://coinmarketcap.com/terms/)(2025-11-24 갱신, 2026-09-30 확인)의 금지 행위 항목은 스크래핑과 자동 수집, 제3자에게 제공하기 위한 데이터 집적을 금지하므로 이 방법을 쓰지 않는다. CMC 데이터가 필요하면 공식 API(https://coinmarketcap.com/api/)를 쓴다.
 
 ## 4. 수집 규칙
 
@@ -115,7 +115,7 @@ v1은 무료 출처만 쓴다. "확인" 열은 무엇을 확인했는지 적는�
 
 - 빠른 경로에서는 AI를 쓰지 않고, 규칙과 연결표로 처리한다.
 - 느린 경로의 해석 작업은 다음 방식 가운데 하나로 처리한다. 선택은 [open-questions.md](open-questions.md) Q8에서 정한다.
-  - 구독 계정으로 로그인한 CLI를 비대화형으로 실행한다 (예: Claude Code의 `claude -p`, Codex CLI의 `codex exec`). 2026-09-30 확인 기준으로 추가 비용은 없다. `claude -p`는 Claude와 Claude Code가 함께 쓰는 구독 사용 한도에서 차감되고, `codex exec`는 저장된 ChatGPT 로그인을 그대로 써서 요금제의 Codex 사용 한도에서 차감된다. Anthropic은 `claude -p` 사용량을 별도의 월간 크레딧으로 옮기는 변경을 2026-06-15부터 시행한다고 발표했다가 같은 날 보류했고, 시행 전에 다시 알리겠다고 밝혔다. OpenAI 문서는 자동화에는 API 키를 기본으로 권한다. 따라서 구현 직전에 다시 확인한다 ([Anthropic 안내](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan), [Codex 비대화형 모드](https://learn.chatgpt.com/docs/non-interactive-mode)).
+  - 구독 계정으로 로그인한 CLI를 비대화형으로 실행한다 (예: Claude Code의 `claude -p`, Codex CLI의 `codex exec`). 2026-09-30 확인 기준으로 추가 비용은 없다. `claude -p` 사용량은 Claude와 Claude Code가 함께 쓰는 구독 사용 한도에서 차감된다. `codex exec`는 저장된 ChatGPT 로그인을 그대로 쓰며, 그 사용량은 요금제의 Codex 사용 한도에서 차감된다. Anthropic은 `claude -p` 사용량을 별도의 월간 크레딧으로 옮기는 변경을 2026-06-15부터 시행한다고 발표했으나, 시행 예정일인 2026-06-15에 이 변경을 보류했고, 시행 전에 다시 알리겠다고 밝혔다. OpenAI 문서는 자동화에는 API 키를 기본으로 권한다. 따라서 구현 직전에 다시 확인한다 ([Anthropic 안내](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan), [Codex 비대화형 모드](https://learn.chatgpt.com/docs/non-interactive-mode)).
   - API를 쓴다. 사용한 만큼 과금되므로 월 지출 상한을 설정한다.
   - 로컬 모델을 쓴다. 맥북 사양에 따라 가능 여부와 속도가 달라진다.
 - 어떤 방식이든 호출 횟수에 상한을 두고, 상한에 도달하면 대시보드에 표시한다.
