@@ -129,6 +129,6 @@
   - Apple Silicon 맥북에 macOS Tahoe 26.4 이상이 설치되어 있으므로 충전 한도 기능을 쓸 수 있다 ([collector-spec.md](collector-spec.md) 8절).
   - Apple Silicon 맥북은 꺼진 상태에서 전원이 연결되면 자동으로 켜진다. 그러나 FileVault 잠금 화면에서 멈추므로, 로그인하기 전까지 수집은 시작되지 않는다.
   - 메모리 16GB에서 로컬 AI 모델을 쓸 수 있는지와 그 속도는 [open-questions.md](open-questions.md) Q8을 정할 때 직접 시험한다.
-- 미확인: 설치 장소에서 거래소 API(바이낸스 등)에 접속되는지
+- 거래소 API: 사용자가 설치 장소에서 바이낸스 API(`api.binance.com/api/v3/ping`)를 호출해 HTTP 200을 받았다 (2026-09-30). 설치 장소가 바이낸스 약관상 이용 가능한 지역인지는 확인하지 못했다 ([2026-09-30 프로젝트 피드 점검](../research/2026-09-30-claude-project-feed-check/README.md)).
 - 공개 저장소 주의: 사양은 운영 방식을 정하는 데 필요한 수준만 적었다.
 - 제안: Claude Code. 사양 확인: 사용자 (2026-09-30).
