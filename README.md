@@ -57,3 +57,4 @@ research/                 날짜별 조사 기록과 원자료 (추가만 하고
 | [research/2026-09-30-claude-fact-check/](research/2026-09-30-claude-fact-check/) | Claude Code | 원문 사실 확인, 수집원 이용 조건 확인, 첫 커밋 이후 정정 내역 |
 | [research/2026-09-30-claude-data-source-check/](research/2026-09-30-claude-data-source-check/) | Claude Code | Yahoo Finance와 뉴스·시장 데이터 출처의 이용 조건 점검 |
 | [research/2026-09-30-claude-project-feed-check/](research/2026-09-30-claude-project-feed-check/) | Claude Code | 프로젝트 공식 피드 6곳의 이용 조건 점검, 바이낸스 접속 확인 |
+| [research/2026-09-30-claude-connection-errors/](research/2026-09-30-claude-connection-errors/) | Claude Code | 맥북 첫 운영에서 나온 수집 오류의 원인 추정과 조치 |

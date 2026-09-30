@@ -116,7 +116,7 @@ SEC_USER_AGENT="Hong Gildong personal-research gildong@example.com"
 ```sh
 .venv/bin/python -m collector check-config   # 수집원, 엔터티, 시장 데이터 설정 확인
 .venv/bin/python -m collector once           # 모든 뉴스 수집원을 한 번씩 확인
-.venv/bin/python -m collector status         # 수집원별 마지막 정상 확인 시각과 오류
+.venv/bin/python -m collector status         # 수집원과 시세 거래소별 마지막 정상 확인 시각과 오류
 .venv/bin/python -m collector events --days 7
 .venv/bin/python -m collector market         # 업비트와 Kraken 시세를 한 번 확인
 .venv/bin/python -m collector reactions      # 최근 사건의 가격 반응 계산
@@ -150,7 +150,7 @@ launchctl kickstart -k gui/$(id -u)/com.crypto-institution-research.collector
 tail -f data/collector.log
 ```
 
-일주일 동안의 운영 결과는 다음 명령으로 한 번에 볼 수 있다. 수집원별 오류, 수집이 멈췄던 구간, 새 사건과 가격 반응, 알림 내역이 나온다. 이 출력에는 `.env`의 값이 들어가지 않으므로, AI와 대화할 때 그대로 붙여 넣어도 된다.
+일주일 동안의 운영 결과는 다음 명령으로 한 번에 볼 수 있다. 수집원별 오류, 시세 거래소별 조회 오류, 수집이 멈췄던 구간(맥북이 잠자기에 들어갔거나 인터넷 연결이 끊겨 수집하지 못한 구간 포함), 새 사건과 가격 반응, 알림 내역이 나온다. 이 출력에는 `.env`의 값이 들어가지 않으므로, AI와 대화할 때 그대로 붙여 넣어도 된다.
 
 ```sh
 .venv/bin/python -m collector report --days 7

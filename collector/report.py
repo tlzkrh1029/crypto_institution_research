@@ -3,6 +3,8 @@
 Plain text meant to be pasted into a chat with the user or an AI. It holds no
 secrets: source ids, titles, links, error texts and return percentages only.
 Raw prices are not printed (market data terms, docs/open-questions.md Q11).
+Market ticker polls appear in the sources section as 'market:<venue>' rows
+(counts and errors only).
 """
 
 from __future__ import annotations
@@ -82,14 +84,60 @@ def _sources(conn: sqlite3.Connection, since: str) -> list[str]:
             f"{s['id']:<24} {runs.get('ok', 0):>5} {runs.get('not_modified', 0):>5} "
             f"{runs.get('error', 0):>4} {runs.get('skipped', 0):>5} {new:>5} "
             f"{p50:>9} {worst:>7}  {error}")
+    lines.extend(_market_sources(conn, since))
     return lines
+
+
+def _market_sources(conn: sqlite3.Connection, since: str) -> list[str]:
+    """Ticker polls per venue (runs rows 'market:<venue>'). Columns that only
+    apply to news sources show '-'; the error is the last one in the period,
+    with its time, even if later polls succeeded."""
+    lines = []
+    ids = [r[0] for r in conn.execute(
+        """SELECT DISTINCT source_id FROM runs WHERE source_id GLOB 'market:*'
+               AND started_at >= ? ORDER BY source_id""", (since,))]
+    for source_id in ids:
+        runs = dict(conn.execute(
+            """SELECT status, COUNT(*) FROM runs WHERE source_id = ? AND started_at >= ?
+               GROUP BY status""", (source_id, since)).fetchall())
+        last = conn.execute(
+            """SELECT started_at, error FROM runs WHERE source_id = ? AND started_at >= ?
+                   AND status = 'error' ORDER BY started_at DESC, id DESC LIMIT 1""",
+            (source_id, since)).fetchone()
+        error = ""
+        if last:
+            error = f"{fmt_kst(last['started_at'])} {(last['error'] or '')[:ERROR_CHARS]}"
+        lines.append(
+            f"{source_id:<24} {runs.get('ok', 0):>5} {'-':>5} {runs.get('error', 0):>4} "
+            f"{'-':>5} {'-':>5} {'-':>9} {'-':>7}  {error}".rstrip())
+    return lines
+
+
+def market_status(conn: sqlite3.Connection, venue: str) -> dict:
+    """Latest health of one venue's ticker polls, for `collector status`."""
+    source_id = f"market:{venue}"
+    last_ok = conn.execute(
+        "SELECT MAX(started_at) FROM runs WHERE source_id = ? AND status = 'ok'",
+        (source_id,)).fetchone()[0]
+    failures = conn.execute(
+        """SELECT COUNT(*) FROM runs WHERE source_id = ? AND status = 'error'
+               AND started_at > ?""", (source_id, last_ok or "")).fetchone()[0]
+    last_error = conn.execute(
+        """SELECT error FROM runs WHERE source_id = ? AND status = 'error'
+           ORDER BY started_at DESC, id DESC LIMIT 1""", (source_id,)).fetchone()
+    return {"id": source_id, "last_ok_at": last_ok, "failures": failures,
+            "last_error": last_error[0] if last_error else None}
 
 
 def _gaps(conn: sqlite3.Connection, since: datetime, now: datetime,
           gap: timedelta) -> list[str]:
-    """Periods with no activity at all: the collector was stopped, asleep or offline."""
+    """Periods in which nothing was collected: the collector was stopped, asleep
+    or offline. Only successful work counts (runs that ended ok or 304, stored
+    market snapshots). Failed runs do not: market polls write an error row
+    every 5 minutes, which would hide an offline period."""
     stamps = sorted({from_iso(r[0]) for r in conn.execute(
-        """SELECT started_at FROM runs WHERE started_at >= ?
+        """SELECT started_at FROM runs
+            WHERE started_at >= ? AND status IN ('ok', 'not_modified')
            UNION SELECT ts FROM market_snapshots WHERE ts >= ?""",
         (to_iso(since), to_iso(since)))})
     lines = ["## coverage"]

@@ -10,7 +10,7 @@ from typing import Protocol
 
 import requests
 
-from ..fetch import FetchError
+from ..fetch import CONNECT_TIMEOUT_SEC, FetchError, IdleReset, describe_error, make_session
 
 
 @dataclass(frozen=True)
@@ -43,14 +43,19 @@ class VenueClient(Protocol):
 
 
 class RateLimitedJSON:
-    """GET JSON with a descriptive User-Agent and a minimum gap between requests."""
+    """GET JSON with a descriptive User-Agent and a minimum gap between requests.
+
+    Connections follow collector/fetch.py: limited retries and a reset of
+    connections that sat idle between ticker polls.
+    """
 
     def __init__(self, user_agent: str, min_gap_sec: float,
                  session: requests.Session | None = None, sleep=time.sleep,
-                 monotonic=time.monotonic):
+                 monotonic=time.monotonic, clock=time.time):
         self.user_agent = user_agent
         self.min_gap_sec = min_gap_sec
-        self.session = session or requests.Session()
+        self.session = session or make_session()
+        self.idle = IdleReset(self.session, clock)
         self._sleep = sleep
         self._monotonic = monotonic
         self._last = float("-inf")
@@ -60,12 +65,16 @@ class RateLimitedJSON:
         if wait > 0:
             self._sleep(wait)
         self._last = self._monotonic()
+        self.idle.before(url)
+        timeout = (CONNECT_TIMEOUT_SEC, 20)
         try:
-            resp = self.session.get(url, params=params, timeout=20,
+            resp = self.session.get(url, params=params, timeout=timeout,
                                     headers={"User-Agent": self.user_agent,
                                              "Accept": "application/json"})
         except requests.RequestException as exc:
-            raise FetchError(f"{type(exc).__name__}: {exc}") from exc
+            raise FetchError(describe_error(exc, timeout)) from exc
+        finally:
+            self.idle.used(url)
         if resp.status_code != 200:
             raise FetchError(f"HTTP {resp.status_code}", resp.status_code)
         try:

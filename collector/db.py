@@ -145,6 +145,10 @@ MIGRATIONS: list[str] = [
     ALTER TABLE alerts ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0;
     CREATE INDEX alerts_undelivered ON alerts(delivered_at, created_at);
     """,
+    # 4: market ticker polls are recorded in runs as 'market:<venue>' too
+    """
+    CREATE INDEX runs_source_started ON runs(source_id, started_at);
+    """,
 ]
 
 

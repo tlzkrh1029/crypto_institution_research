@@ -13,14 +13,14 @@ from pathlib import Path
 
 from . import db
 from .config import ConfigError, load_entities, load_settings, load_sources, validate
-from .fetch import Fetcher
+from .fetch import SECRET_FILTER, Fetcher
 from .heartbeat import Heartbeat
 from .market.jobs import load_market_config
 from .market.runner import MarketRunner, make_clients
 from .notify import Alert, NotifierConfigError, make_notifier, telegram_chats
 from .pipeline import (Context, deliver_alert, due_sources, retry_undelivered, run_source,
                        sync_sources)
-from .report import build_report, reaction_lines
+from .report import build_report, market_status, reaction_lines
 from .review import ReviewError, review_event
 from .timeutil import fmt_kst, to_iso, utcnow
 
@@ -29,16 +29,24 @@ TICK_SEC = 30
 RETRY_EVERY = timedelta(minutes=5)
 
 
-def _setup_logging(log_path: Path, verbose: bool) -> None:
+def _log_handlers(log_path: Path) -> list[logging.Handler]:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     handlers: list[logging.Handler] = [
         logging.handlers.RotatingFileHandler(log_path, maxBytes=1_000_000, backupCount=5,
                                              encoding="utf-8"),
         logging.StreamHandler(sys.stderr),
     ]
+    for handler in handlers:
+        # Tokens and ping URLs registered by the notifier and heartbeat never reach
+        # the log, whichever logger (ours or urllib3's) writes the record.
+        handler.addFilter(SECRET_FILTER)
+    return handlers
+
+
+def _setup_logging(log_path: Path, verbose: bool) -> None:
     logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-                        handlers=handlers)
+                        handlers=_log_handlers(log_path))
 
 
 def _load(root: Path):
@@ -200,6 +208,11 @@ def cmd_status(args) -> int:
             continue
         print(f"{r['id']:<24} {fmt_kst(r['last_ok_at']):<22} {r['consecutive_failures']:>5}  "
               f"{r['last_error'] or ''}")
+    # Ticker polls of the enabled market venues, from the runs table.
+    for venue in load_market_config(args.root / "config" / "market.yaml").enabled_venues:
+        m = market_status(conn, venue.name)
+        print(f"{m['id']:<24} {fmt_kst(m['last_ok_at']):<22} {m['failures']:>5}  "
+              f"{m['last_error'] or ''}")
     counts = conn.execute(
         "SELECT (SELECT COUNT(*) FROM items), (SELECT COUNT(*) FROM events), "
         "(SELECT COUNT(*) FROM alerts)").fetchone()
