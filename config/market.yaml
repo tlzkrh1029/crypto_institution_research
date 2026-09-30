@@ -2,21 +2,34 @@
 # research/2026-09-30-claude-data-source-check/README.md
 #
 # Raw prices stay in the local database (data/). Do not commit them.
+# Each symbol is priced on exactly one venue, against that venue's reference
+# symbol, so a return never mixes currencies or venues.
 
-upbit:
-  enabled: true
-  terms_checked: "2026-09-30 Upbit Open API 이용약관 (2024-10-30) and rate-limit docs"
-  quote: KRW
-  reference: BTC
-  # Watch sample and control (docs/open-questions.md Q7). QNT is not listed on
-  # Upbit, so it has no price here (docs/open-questions.md Q12).
-  symbols: [LINK, XLM, HBAR, QNT, ONDO, XRP]
-  ticker_interval_sec: 300
+venues:
+  upbit:
+    enabled: true
+    terms_checked: "2026-09-30 Upbit Open API 이용약관 (2024-10-30) and rate-limit docs"
+    quote: KRW
+    reference: BTC
+    # Watch sample and control (docs/open-questions.md Q7).
+    symbols: [LINK, XLM, HBAR, ONDO, XRP]
+    ticker_interval_sec: 300
+
+  kraken:
+    # QNT is not listed on Upbit or Bithumb (docs/decisions.md D-012).
+    # Public OHLC gives only the last 720 hourly candles (30 days).
+    enabled: true
+    terms_checked: "2026-09-30 Kraken API notice (personal use of public endpoints) and ToS"
+    quote: USD
+    reference: BTC
+    symbols: [QNT]
+    ticker_interval_sec: 300
 
 anomaly:
-  # Alert when a symbol moves this much more (or less) than BTC over the window.
+  # Alert when a symbol moves this much more (or less) than BTC over the window
+  # (docs/decisions.md D-011).
   window_minutes: 60
-  excess_return_pct: 5.0
+  excess_return_pct: 3.0
   cooldown_hours: 6
 
 reactions:

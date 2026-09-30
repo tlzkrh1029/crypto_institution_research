@@ -25,6 +25,8 @@ log = logging.getLogger("collector.pipeline")
 
 STALE_AFTER = timedelta(days=3)       # older items are recorded but not alerted
 MAX_BACKOFF_SEC = 6 * 3600
+RETRY_MAX_ATTEMPTS = 12   # retried every 5 minutes: about one hour of outage
+RETRY_WINDOW = timedelta(hours=24)
 
 
 @dataclass
@@ -199,15 +201,40 @@ def deliver_alert(ctx: Context, alert: Alert, now: datetime) -> None:
             (to_iso(now), alert.level, alert.event_id, alert.source_id, alert.message,
              alert.url),
         ).lastrowid
+    _send(ctx, alert_id, alert, now)
+
+
+def _send(ctx: Context, alert_id: int, alert: Alert, now: datetime) -> bool:
     try:
         delivered = ctx.notifier.send(alert)
     except Exception:  # a broken channel must not stop collection
         log.exception("notifier %s failed", ctx.notifier.name)
         delivered = False
-    if delivered:
-        with conn:
-            conn.execute("UPDATE alerts SET delivered_via = ?, delivered_at = ? WHERE id = ?",
-                         (ctx.notifier.name, to_iso(now), alert_id))
+    with ctx.conn:
+        ctx.conn.execute("UPDATE alerts SET attempts = attempts + 1 WHERE id = ?", (alert_id,))
+        if delivered:
+            ctx.conn.execute(
+                "UPDATE alerts SET delivered_via = ?, delivered_at = ? WHERE id = ?",
+                (ctx.notifier.name, to_iso(now), alert_id))
+    return delivered
+
+
+def retry_undelivered(ctx: Context, now: datetime, max_attempts: int = RETRY_MAX_ATTEMPTS,
+                      within: timedelta = RETRY_WINDOW) -> int:
+    """Resend alerts that failed to go out (e.g. the network was down)."""
+    rows = ctx.conn.execute(
+        """SELECT * FROM alerts WHERE delivered_at IS NULL AND attempts < ?
+               AND created_at >= ? ORDER BY id""",
+        (max_attempts, to_iso(now - within))).fetchall()
+    sent = 0
+    for r in rows:
+        alert = Alert(level=r["level"], message=r["message"], url=r["url"],
+                      event_id=r["event_id"], source_id=r["source_id"])
+        if _send(ctx, r["id"], alert, now):
+            sent += 1
+        else:
+            break  # the channel is still down; try again on the next tick
+    return sent
 
 
 def _finish(conn: sqlite3.Connection, run_id: int, source: SourceConfig, now: datetime,

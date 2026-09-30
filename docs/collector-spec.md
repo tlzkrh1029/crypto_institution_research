@@ -58,7 +58,7 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 | 코인베이스 | 미국 거래 비중과 가격 프리미엄 | `https://api.exchange.coinbase.com/products/{id}/ticker`, `https://api.coinbase.com/api/v3/brokerage/market/products/{id}` (인증 불필요) | 시장 데이터 약관은 개인·연구 목적 이용만 허락하고, 서면 동의 없이 파생 결과를 외부에 배포하거나 데이터를 AI 기술에 쓰는 것을 금지한다. 공개 저장소와 AI에 쓰지 않는 개인 확인용으로만 쓸 수 있다 (Q12) | 2026-09-30 작동과 이용 조건 확인. 제한, 미구현 |
 | CoinGecko | 전체 가격, 시총, 거래량 | 공개 API | 키 없이 호출하면 IP 단위로 제한된다. 무료 Demo 키(`x-cg-demo-api-key`)를 `.env`에 두고 쓴다. Demo 한도는 분당 100회, 월 10,000회다. 5분마다 1회만 호출해도 30일에 8,640회이므로, 빠른 경로의 가격 감시는 업비트와 코인베이스 공개 API로 하고 CoinGecko는 15분~1시간 주기의 전체 시장 집계에 쓴다. [API 약관](https://www.coingecko.com/en/api_terms)에 따라 이 데이터를 보여 주는 대시보드, 보고서, 문서에는 "Powered by CoinGecko"를 표시한다. 약관은 데이터 저장을 권장하지 않으므로(저장한다면 24시간마다 갱신하고 보안 조치를 한다), 원자료는 로컬 `data/`에만 둔다. Demo는 과거 데이터를 최근 365일까지만 준다 | 2026-09-30 키 없는 호출의 제한, 한도, 약관 확인. 미구현 |
 | 빗썸 | 국내 가격 (업비트 보조) | 공개 API (키 불필요): `/v1/ticker`, `/v1/candles/...` (요청당 200개) | 비영리 이용이 가능하다. 분류별 초당 150회 이하로 요청한다. 데이터를 타인에게 양도하거나 복제·유통하는 것을 금지하므로, 파생 결과의 공개는 Q11에서 정한다. QNT는 상장되어 있지 않다 | 2026-09-30 작동과 이용 조건 확인. 미구현 |
-| Kraken | QNT 등 해외 가격 | 공개 API `/0/public/Ticker`, `/0/public/OHLC` (최근 720개) | API 안내는 공개 엔드포인트의 개인적 이용을 허용하지만, 일반 약관은 자동화 도구를 금지해 서로 충돌한다. 파생 결과 공개에 대한 조항이 없다 (Q12) | 2026-09-30 작동과 이용 조건 확인. 미구현 |
+| Kraken | QNT 가격 (업비트와 빗썸에 상장되지 않음) | 공개 API `/0/public/Ticker`, `/0/public/OHLC` (시간봉 최근 720개) | API 안내는 공개 엔드포인트의 개인적 이용을 허용하지만, 일반 약관 9항은 자동화 도구를 금지해 서로 충돌한다. 사용자가 QNT 가격 출처로 정했고, 이 충돌은 결정 뒤에 사용자에게 알렸다 (D-012). 초당 1회 미만으로 요청한다(수집기는 1.1초 간격). 파생 결과의 공개는 Q11을 따른다 | 2026-09-30 작동과 이용 조건 확인. v0.1에 구현 |
 | CoinMarketCap API (무료 Basic) | 최신 시세 | 공식 API (키 필요) | 약관이 캐시 외의 저장과 파생 저작물을 금지하고, 과거 데이터와 캔들을 제공하지 않는다. 출처 표기가 필요하다 | 2026-09-30 이용 조건 확인. 제한, 미구현 |
 | 무기한 선물 거래소 (바이낸스, 바이빗 등) | 미결제약정, 펀딩비 | 공개 API | 접속 지역 제한이 있다. 2026-09-30 미국 소재 클라우드 환경에서 바이낸스 API는 이용약관의 "b. Eligibility" 조항을 근거로 거부(HTTP 451)했고, 바이빗 API도 국가 단위로 차단(HTTP 403)했다. 설치 장소에서 접속되는지와 함께, 그 지역이 약관상 제한 지역인지도 확인한다 | 일부 확인 |
 | ETF 흐름 | 토큰 직접 수요 | 운용사 공개 보유량, 집계 사이트 | 출처별 이용 조건을 확인한다 | 미확인 |
@@ -97,10 +97,10 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 | event_items | 사건과 자료의 연결 | event_id, item_id, role (origin, duplicate, rerun) | 있음 |
 | event_entities | 사건에 등장한 기관·프로젝트·테마 | event_id, entity_id, kind | 있음 |
 | event_assets | 사건과 토큰의 연결 | event_id, symbol, directness (unknown, direct, project_claim, indirect, association), evidence_quote, evidence_url | 있음 |
-| alerts | 알림 기록 | id, created_at, level, event_id, source_id, message, url, delivered_via, delivered_at | 있음 |
+| alerts | 알림 기록 | id, created_at, level, event_id, source_id, message, url, delivered_via, delivered_at, attempts | 있음 |
 | runs | 수집 실행 기록 | id, source_id, started_at, finished_at, status (ok, not_modified, error, skipped), http_status, items_seen, items_new, error | 있음 |
 | price_reactions | 가격 반응 | event_id, symbol, window_name (pre_24h, 1h, 6h, 24h, 3d, 7d), venue, t_start, t_end, asset_return, btc_return, excess_return, bucket_median_return, status (measured, pending, no_market, no_data) | 있음 (bucket_median_return은 비어 있음) |
-| market_snapshots | 시세 기록 (로컬 전용) | venue, symbol, quote, ts, price, acc_trade_value_24h | 있음 |
+| market_snapshots | 시세 기록 (로컬 전용, 거래소별) | venue, symbol, quote, ts, price, acc_trade_value_24h | 있음 |
 | candles | 시간봉 캐시 (로컬 전용) | venue, market, unit_min, start_at, open, high, low, close, volume | 있음 |
 | venue_shares | 거래소별 비중 | ts, symbol, venue, volume_usd, share, premium | 없음 |
 | derivatives | 선물 지표 | ts, symbol, venue, open_interest_usd, funding_rate, source_url | 없음 |
@@ -123,14 +123,15 @@ v1은 무료 출처만 쓴다. "확인" 열에는 무엇을 확인했는지 적�
 - 감시 종목의 가격이나 거래소 비중에서 나타난 이상 (기준값은 운영하면서 정한다)
 - 수집 장애 (한 출처가 정해진 시간 이상 계속 확인에 실패한 경우)
 
-재확산으로 분류된 사건과 연상 등급만 있는 사건은 알림을 보내지 않고 대시보드에만 표시한다. 알림 채널은 [open-questions.md](open-questions.md) Q3에서 정한다.
+재확산으로 분류된 사건과 연상 등급만 있는 사건은 알림을 보내지 않고 대시보드에만 표시한다. 알림은 텔레그램 봇으로 보낸다 ([decisions.md](decisions.md) D-010).
 
-v0.1 코드는 이 가운데 첫 번째와 두 번째 기준을 다음과 같이 구현했다 ([collector/matching.py](../collector/matching.py), [collector/pipeline.py](../collector/pipeline.py)).
+v0.1 코드는 이 가운데 첫 번째부터 세 번째 기준까지를 다음과 같이 구현했다 ([collector/matching.py](../collector/matching.py), [collector/pipeline.py](../collector/pipeline.py), [collector/market/jobs.py](../collector/market/jobs.py)).
 
 - high: 한 자료에 기관과 프로젝트가 함께 대조되었다.
 - medium: 기관이나 규제기관이 직접 낸 수집원의 자료에서 프로젝트가 대조되었다.
 - 다음 경우에는 사건만 기록하고 알림을 보내지 않는다: 수집원을 처음 확인할 때 이미 있던 자료(기준선), 발표된 지 3일이 지난 자료, 기존 사건에 묶인 자료(중복과 재확산).
-- 알림 채널이 정해지기 전까지 알림은 로그 파일과 alerts 테이블에만 남는다.
+- 시세 이상: 60분 동안 한 종목의 수익률이 같은 거래소의 BTC 수익률보다 3%p 이상 높거나 낮으면 medium 알림을 보낸다. 같은 종목은 6시간에 한 번만 알린다 ([decisions.md](decisions.md) D-011).
+- 알림은 항상 로그 파일과 alerts 테이블에 남는다. `NOTIFIER=telegram`이면 텔레그램 봇으로도 보낸다. 전송에 실패한 알림은 5분마다 다시 보내며, 만든 지 24시간 안의 알림을 최대 12번까지 시도한다 ([collector/notify.py](../collector/notify.py)).
 
 ## 7. AI 사용
 
@@ -146,11 +147,11 @@ v0.1 코드는 이 가운데 첫 번째와 두 번째 기준을 다음과 같이
 
 ## 8. 실행 환경 (맥북 기준 초안)
 
-맥북 모델과 macOS 버전은 아직 확인하지 못했다 ([open-questions.md](open-questions.md) Q2).
+맥북 모델과 macOS 버전은 아직 확인하지 못했다 ([open-questions.md](open-questions.md) Q2). 확인할 위치는 [setup-macos.md](setup-macos.md) 1절에 있다.
 
 - Python 3.11 이상, 가상환경, SQLite를 쓴다. v1은 Docker 없이 구성한다.
 - 수집 데이터와 SQLite 파일은 저장소 루트의 `data/`에 둔다. `data/`와 `*.db`, `*.sqlite`는 .gitignore로 제외되어 있으므로, 다른 경로에 수집 데이터를 저장하지 않는다.
-- 비밀 값은 `.env` 파일에, 파일 형태의 인증 정보(카카오 토큰 JSON 등)는 `secrets/` 폴더에 두고, 둘 다 커밋하지 않는다.
+- 비밀 값(`SEC_USER_AGENT`에 넣는 이메일, 텔레그램 봇 토큰, 감시 서비스의 신호 주소 등)은 `.env` 파일에, 파일 형태의 인증 정보는 `secrets/` 폴더에 두고, 둘 다 커밋하지 않는다.
 - launchd의 LaunchAgent로 자동 실행과 재시작을 관리한다.
 - 전원이 연결된 상태에서 시스템 잠자기를 끈다. 외부 모니터 없이 덮개를 닫으면 잠자기에 들어가므로, 덮개를 열어 두거나 별도 설정을 한다.
 - LaunchAgent는 사용자가 로그인한 뒤에만 실행된다. 따라서 재부팅 뒤 수집이 저절로 다시 시작되려면 자동 로그인이 켜져 있어야 한다. FileVault가 켜져 있으면 자동 로그인을 쓸 수 없으므로, 누군가 FileVault 잠금 화면에서 암호를 입력하기 전까지 수집이 멈춘다. 반대로 FileVault를 끄면 디스크가 암호화되지 않으므로 `.env`에 둔 비밀 값의 보호 수준도 함께 고려한다. 맥북은 배터리가 있어 짧은 정전에는 꺼지지 않는다. Apple Silicon 맥북은 꺼진 상태에서 전원에 연결되면 자동으로 켜지며, macOS Sequoia 15 이상에서는 이 동작을 끌 수 있다. 배터리가 모두 닳은 뒤 전원이 돌아왔을 때도 켜지는지는 설치 뒤 직접 시험한다. 운영 방식은 [open-questions.md](open-questions.md) Q2에서 FileVault 사용 여부와 함께 정한다 ([Apple: 자동 로그인](https://support.apple.com/ko-kr/102316), [Apple: 맥북 자동 켜짐](https://support.apple.com/ko-kr/120622), [Apple: launchd 작업](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html), 2026-09-30 확인).
@@ -183,9 +184,9 @@ v0.1 코드는 이 가운데 첫 번째와 두 번째 기준을 다음과 같이
 |---|---|
 | 뉴스 수집 (RSS, Atom, 사이트맵) | 구현. 켜진 수집원은 SEC 보도자료와 발언(`SEC_USER_AGENT` 필요), 연준 보도자료, DTCC Insights다 ([config/sources.yaml](../config/sources.yaml)) |
 | 엔터티 대조, 사건 묶기, 재확산 표시 | 구현 ([config/entities.yaml](../config/entities.yaml)) |
-| 알림 | 로그 파일과 alerts 테이블에만 남긴다. 채널은 Q3에서 정한다 |
-| 업비트 시세 감시와 이상 감지 | 구현. 5분마다 시세를 기록하고, 60분 동안 BTC보다 5%p 이상 더 움직인 종목을 알린다 ([config/market.yaml](../config/market.yaml)) |
-| 가격 반응 | 구현. 사건의 최초 발표 시각을 기준으로, 업비트 시간봉 종가로 계산한다. 기준 시각의 가격은 그 시각 직전에 끝난 시간봉의 종가다. BTC 대비 초과 수익률을 함께 저장한다. 같은 시총 구간 중앙값은 아직 계산하지 않는다 |
+| 알림 | 구현. 로그 파일과 alerts 테이블에 남기고, 설정하면 텔레그램 봇으로 보낸다. 실패한 알림은 다시 보낸다 (D-010, [setup-macos.md](setup-macos.md) 4-2절) |
+| 시세 감시와 이상 감지 | 구현. 업비트(LINK, XLM, HBAR, ONDO, XRP)와 Kraken(QNT)의 시세를 5분마다 기록하고, 60분 동안 같은 거래소의 BTC보다 3%p 이상 더 움직인 종목을 알린다 ([config/market.yaml](../config/market.yaml), D-011, D-012) |
+| 가격 반응 | 구현. 사건의 최초 발표 시각을 기준으로, 종목마다 정해진 거래소(업비트 또는 Kraken)의 시간봉 종가로 계산한다. Kraken은 최근 30일(720시간)의 시간봉만 주므로, 그보다 오래된 사건의 QNT 반응은 no_data가 된다. 기준 시각의 가격은 그 시각 직전에 끝난 시간봉의 종가다. BTC 대비 초과 수익률을 함께 저장한다. 같은 시총 구간 중앙값은 아직 계산하지 않는다 |
 | 사건 검토 기록 | 구현 (`collector review`) |
 | 외부 감시 신호 | 구현 (`HEARTBEAT_URL`) |
 | 대시보드, 주간 보고 | 미구현. 지금은 `status`, `events`, `items` 명령으로 확인한다 |
