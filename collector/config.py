@@ -15,6 +15,8 @@ DEFAULT_USER_AGENT = (
 )
 SOURCE_KINDS = {"feed", "sitemap"}
 ENTITY_KINDS = {"institution", "project", "theme"}
+INSTITUTION_CATEGORIES = {"asset_manager", "exchange_broker", "payments_stablecoin", "bank",
+                          "market_infrastructure", "custody_infra", "central_bank", "other"}
 MIN_INTERVAL_SEC = 60
 
 
@@ -167,6 +169,7 @@ class Entity:
     rules: tuple[MatchRule, ...]
     tokens: tuple[str, ...] = field(default_factory=tuple)
     control: bool = False
+    category: str | None = None   # institutions only, see INSTITUTION_CATEGORIES
 
 
 def _compile(pattern: str, ignore_case: bool) -> re.Pattern:
@@ -199,6 +202,11 @@ def load_entities(path: Path) -> list[Entity]:
                 raise ConfigError(f"{eid}: bad regex: {exc}") from exc
         if not rules:
             raise ConfigError(f"{eid}: at least one match rule is required")
+        category = raw.get("category")
+        if category is not None and (kind != "institution"
+                                     or category not in INSTITUTION_CATEGORIES):
+            raise ConfigError(f"{eid}: category {category!r} is only for institutions, one of "
+                              f"{sorted(INSTITUTION_CATEGORIES)}")
         entities.append(Entity(
             id=eid,
             kind=kind,
@@ -206,6 +214,7 @@ def load_entities(path: Path) -> list[Entity]:
             rules=tuple(rules),
             tokens=tuple(raw.get("tokens", [])),
             control=bool(raw.get("control", False)),
+            category=category,
         ))
         seen.add(eid)
     return entities

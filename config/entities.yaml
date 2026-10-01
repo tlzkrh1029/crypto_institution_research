@@ -16,12 +16,25 @@
 x-context:
   finance: &fin "tokeni[sz]|blockchain|crypto|digital asset|stablecoin|on-?chain|ledger|\\bDLT\\b|deposit token|settlement"
   payments: &pay "bank|payment|ledger|blockchain|Sibos|tokeni[sz]|messag|interbank|cross-border|ISO 20022|stablecoin|settlement"
+  # Validated on the etf group's real headlines (research/2026-10-01-claude-institution-entities).
+  crypto_asset: &crypto_asset "\\bcrypto(?!graph)|bitcoin|(?<!into the )\\bether\\b|ethereum|solana|\\bXRP\\b|dogecoin|cardano (?:ETFs?|blockchain|network|ecosystem|staking|\\(ADA)|chainlink|stellar lumens|hedera|\\bHBAR\\b|litecoin|avalanche (?:network|blockchain|ETF)|\\bAVAX\\b|polkadot|(?-i:\\b(?:BTC|ETH|SOL|BNB|SUI|USD[CT])\\b)|stablecoin|tokeni[sz]|(?<!same )(?<!AI )(?<!inference )\\btokens?\\b(?! gesture| per second)|\\bDeFi\\b|blockchain|on-?chain|distributed ledger|\\bDLT\\b|digital (?:assets?|currenc)|\\bCBDC|altcoin|meme ?coin|\\bNFTs?\\b|web3|\\bhodl\\b|coinbase|binance|\\bspot (?!gold|silver|oil)(?:[\\w-]+ ){0,2}?ET[FP]s?\\b"
+  # Validated on the exchange group's real headlines (research/2026-10-01-claude-institution-entities).
+  # Crypto context for institutions whose other news is not crypto: crypto words; any "...coin(s)" (bitcoin, dogecoin, litecoin, stablecoin, altcoin, memecoin); major asset names and tickers, and altcoin ETF names ("NEAR ETF"); tokens and tokenized assets; staking, DeFi, NFTs, perps; crypto laws and licences; Korean terms. Not "settlement" or "ledger" (legal settlements, general ledgers).
+  crypto_exchange: &crypto_exchange "crypto(?!graph)|\\w+coins?\\b|\\bether(?:eum)?\\b|solana|\\bXRP\\b|cardano|chainlink|stellar lumens|hedera|\\bHBAR\\b|\\bAVAX\\b|polkadot|shiba inu|monero|zcash|(?-i:Hyperliquid|\\b(?:BTC|ETH(?! Z)|SOL|XLM|BNB|TRX|SUI|USD[CT])\\b|\\bMiCAR?\\b)|\\btokens?\\b|tokeni[sz]|blockchain|on-?chain|digital (?:assets?|currenc)|virtual (?:assets?|currenc)|\\bDeFi\\b|\\bNFTs?\\b|\\bweb3\\b|perpetual futures|\\bperps?\\b|BitLicense|xStocks|(?:GENIUS|CLARITY) Act|\\bstaking\\b|(?-i:\\b(?:HYPE|NEAR|SUI|DOGE|LTC|ADA|DOT|LINK|SEI|APT|INJ) ET[FP]s?\\b)|가상자산|암호화폐|코인|토큰|블록체인|이더리움|솔라나|카르다노|체인링크|스텔라"
+  # Validated on the payments group's real headlines (research/2026-10-01-claude-institution-entities).
+  # Crypto context: crypto words, coin and stablecoin names (also USDT0, USDCx, PYUSDx, USD₮), and a few crypto-only firms and networks.
+  # Left out on purpose: bare "token(ization)" (card tokens), "settlement" (lawsuits), "wallet" (PayPal/Apple wallets), "ledger", plain "Stellar" (the adjective).
+  crypto_payments: &crypto_payments "crypto(?!graph)|bitcoin|\\bBTC\\b|\\bether(?:eum)?\\b|\\bETH\\b|solana|\\bXRP\\b|\\bXLM\\b|Stellar (?:network|blockchain|Development Foundation)|dogecoin|litecoin|altcoin|meme ?coin|stablecoin|\\b(?:USD[CT]|PYUSD|USDG|RLUSD|EURC|USD1|OUSD)(?:x|0)?\\b|USD₮|Open USD|blockchain|on-?chain|mainnet|testnet|\\bDeFi\\b|web3|\\bNFTs?\\b|smart contract|self.?custod|proof.of.reserves|tokeni[sz]ed (?:deposit|asset|fund|treasur|stock|equit|securit|bond|money|gold|real|bank|share|dollar|cash)|deposit tokens?|digital (?:asset|currenc|dollar|euro|pound)|virtual (?:asset|currenc)|\\bVASPs?\\b|\\bCBDCs?\\b|distributed ledger|\\bDLT\\b|(?-i:\\bMiCA\\b)|GENIUS Act|CLARITY Act|BitLicense|Lightning Network|Canton Network|Coinbase|Binance|\\bBVNK\\b|zero ?hash|MoonPay|Fireblocks|Anchorage Digital"
+  # Validated on the banks group's real headlines (research/2026-10-01-claude-institution-entities).
+  # Crypto/tokenized-money words and major asset names for bank and other big-name institutions. Not "settlement" or bare "ledger" (lawsuits, general ledger), nor the adjective "stellar" or "ripple effect".
+  crypto_bank: &crypto_bank "crypto(?!graph)|bitcoin|\\bBTC\\b|\\bether(?:eum)?\\b|solana|\\bXRP\\b|\\bXLM\\b|stellar (?:network|blockchain|lumens|development)|\\b(?:selects|picks|taps|uses|joins|via) stellar\\b|\\bon stellar(?![ -]\\w)|(?-i:\\bRipple\\b)(?! effects?)|\\bHedera\\b|chainlink|\\bUSD[CT]\\b|coinbase|binance|stable ?coin|tokeni[sz]|deposit tokens?|security tokens?|digital (?:assets?|bonds?|securities|currenc|money|euro|pound|dollar)|virtual assets?|\\bCBDC|blockchain|distributed ledger|\\bDLT\\b|\\bon-?chain|smart contract|\\bweb ?3\\b|\\bDeFi\\b|decentrali[sz]ed (?:exchange|finance)|\\bDEXs?\\b|\\bNFTs?\\b|Canton Network|Project Agora|Agorá"
 
 entities:
   # --- institutions in docs/institution-map.md --------------------------------
   - id: tch
     kind: institution
     label: The Clearing House
+    category: market_infrastructure
     match:
       - pattern: "The Clearing House"
       - pattern: "\\bTCH\\b"
@@ -30,12 +43,14 @@ entities:
   - id: dtcc
     kind: institution
     label: DTCC
+    category: market_infrastructure
     match:
       - pattern: "\\bDTCC\\b|Fund/?SERV|Depository Trust"
 
   - id: swift
     kind: institution
     label: Swift
+    category: market_infrastructure
     match:
       - pattern: "\\bSWIFT\\b|(?<!Taylor )\\bSwift\\b"
         requires: *pay
@@ -43,38 +58,53 @@ entities:
   - id: us_bank
     kind: institution
     label: U.S. Bank
+    category: bank
     match:
-      - pattern: "U\\.S\\. Bank\\b|U\\.S\\. Bancorp|US Bancorp|\\bUSBDC\\b"
+      # U.S. Bank / US Bank / U.S. Bancorp in crypto context; not the stadium or title-case "U.S. Bank Regulators/Stocks/Deposits".
+      - pattern: "\\bU\\.?S\\.? Bank\\b(?! (?:Stadium|Regulators?|Stocks?|Shares|Deposits|Lobby|Charters?|Industry)\\b)|\\bU\\.?S\\.? Bancorp\\b"
+        requires: *crypto_bank
+      # Its stablecoin is crypto by name.
+      - pattern: "\\bUSBDC\\b"
 
   - id: bvnk
     kind: institution
     label: BVNK
+    category: payments_stablecoin
     match:
       - pattern: "\\bBVNK\\b"
 
   - id: bybit
     kind: institution
     label: Bybit
+    category: exchange_broker
     match:
       - pattern: "\\bBybit\\b"
 
   - id: franklin_templeton
     kind: institution
     label: Franklin Templeton
+    category: asset_manager
     match:
-      - pattern: "Franklin Templeton"
-      - pattern: "\\bBenji\\b"
-        requires: "Franklin|fund|tokeni[sz]"
+      # Franklin Templeton / Franklin Resources with crypto or tokenized-fund words; its Putnam, Lexington and other deals do not count.
+      - pattern: "Franklin (?:Templeton|Resources)"
+        requires: *crypto_asset
+      # Its crypto ETFs and onchain fund by name or ticker ("Franklin Bitcoin ETF", EZBC, XRPZ, FOBXX); not Benjamin Franklin.
+      - pattern: "(?<!Benjamin )(?<!Ben )\\bFranklin (?:Bitcoin|Ethereum|XRP|Solana|Crypto|OnChain)\\b|\\b(?:EZBC|EZET|EZPZ|XRPZ|EZRP|FOBXX)\\b"
+      # Benji, its tokenized-fund platform and token, with Franklin or fund words; not Animoca's Benji Bananas or the Basenji (BENJI) memecoin.
+      - pattern: "\\bBenji\\b(?! Bananas)|\\bBENJI\\b"
+        requires: "Franklin|Templeton|money[- ]market|FOBXX|tokeni[sz]ed (?:fund|money|treasur)"
 
   - id: lfdt
     kind: institution
     label: LF Decentralized Trust
+    category: other
     match:
       - pattern: "LF Decentralized Trust|Linux Foundation Decentralized Trust|\\bLFDT\\b"
 
   - id: ibm
     kind: institution
     label: IBM
+    category: other
     match:
       - pattern: "\\bIBM\\b"
         requires: "Hedera|Hashgraph|IDTrust|blockchain|tokeni[sz]|ledger"
@@ -82,6 +112,7 @@ entities:
   - id: boe
     kind: institution
     label: Bank of England
+    category: central_bank
     match:
       - pattern: "Bank of England"
         requires: "stablecoin|tokeni[sz]|blockchain|\\bDLT\\b|Synchroni[sz]|digital pound|RTGS|ledger"
@@ -90,89 +121,125 @@ entities:
   - id: jpmorgan
     kind: institution
     label: JPMorgan
+    category: bank
     match:
-      - pattern: "J\\.?P\\. ?Morgan|JPMorgan|Kinexys"
-        requires: *fin
+      # The bank (also "JP Morgan" without dots, "JPMorganChase") or its CEO, in crypto context.
+      - pattern: "J\\.?P\\.? ?Morgan|JPMorgan|\\bDimon\\b"
+        requires: *crypto_bank
+      # Its blockchain unit and deposit tokens are crypto by name.
+      - pattern: "\\bKinexys\\b|JPM Coin|\\bJPMD\\b"
 
   - id: citi
     kind: institution
     label: Citi
+    category: bank
     match:
+      # Citi, Citigroup, Citibank in crypto context (Citi Field and Citi Bike news has none).
       - pattern: "\\bCiti(?:group|bank)?\\b"
-        requires: *fin
+        requires: *crypto_bank
 
   - id: bny
     kind: institution
     label: BNY
+    category: bank
     match:
-      - pattern: "\\bBNY\\b|BNY Mellon"
-        requires: *fin
+      # BNY, BNY Mellon, Bank of New York (Mellon) in crypto context.
+      - pattern: "\\bBNY\\b|Bank of New York"
+        requires: *crypto_bank
 
   - id: state_street
     kind: institution
     label: State Street
+    category: bank
     match:
+      # State Street in crypto context (street names rarely come with crypto words).
       - pattern: "State Street"
-        requires: *fin
+        requires: *crypto_bank
 
   - id: blackrock
     kind: institution
     label: BlackRock
+    category: asset_manager
     match:
-      - pattern: "BlackRock|\\bBUIDL\\b"
-        requires: *fin
+      # Its crypto ETF tickers: iShares Bitcoin Trust (IBIT) and iShares Ethereum Trust (ETHA).
+      - pattern: "\\b(?:IBIT|ETHA)\\b"
+      # BUIDL, its tokenized fund, with fund words; not BUIDL, the Japanese consultancy Securitize bought in 2019.
+      - pattern: "\\bBUIDL\\b"
+        requires: "BlackRock|tokeni[sz]|\\bfunds?\\b|money[- ]market|treasur|collateral|stablecoin|on-?chain|\\bAUM\\b|[mb]illion"
+      # BlackRock (also "Blackrock"), iShares or CEO Larry Fink with crypto words; its private-credit, ESG and other news does not count.
+      - pattern: "\\bBlack[Rr]ock\\b|\\biShares\\b|Larry Fink"
+        requires: *crypto_asset
 
   - id: goldman
     kind: institution
     label: Goldman Sachs
+    category: bank
     match:
-      - pattern: "Goldman Sachs"
-        requires: *fin
+      # Goldman Sachs, the headline short form "Goldman", or its GS DAP platform, in crypto context.
+      - pattern: "\\bGoldman\\b|\\bGS DAP\\b"
+        requires: *crypto_bank
 
   - id: visa
     kind: institution
     label: Visa
+    category: payments_stablecoin
     match:
-      - pattern: "\\bVisa\\b"
-        requires: *fin
+      # Visa (or VISA) with crypto context; not an immigration visa (Golden/Freedom/H-1B ... Visa, Visa program/fee/holders) or a speed yardstick ("Visa-level", "than Visa").
+      - pattern: "(?<!Golden )(?<!Freedom )(?<!Nomad )(?<!H-1B )(?<!Student )(?<!Investor )(?<!Tourist )(?<!Travel )(?<!Work )(?<!Gold Card )(?<!than )\\bV(?:isa|ISA)\\b(?!-(?i:free|beating|level|like|scale)| (?i:programs?|fees?|holders?|applications?|waivers?|lottery|scheme|policy|rules|requirements|route|pathway|sponsorship|overstays?|interview)\\b)"
+        requires: *crypto_payments
 
   - id: mastercard
     kind: institution
     label: Mastercard
+    category: payments_stablecoin
     match:
-      - pattern: "Mastercard"
-        requires: *fin
+      # Mastercard (MasterCard, MASTERCARD) with crypto context.
+      - pattern: "\\bMaster[Cc]ard\\b|\\bMASTERCARD\\b"
+        requires: *crypto_payments
 
   - id: euroclear
     kind: institution
     label: Euroclear
+    category: market_infrastructure
     match:
       - pattern: "Euroclear|Clearstream"
 
   - id: nasdaq
     kind: institution
     label: Nasdaq
+    category: exchange_broker
     match:
-      - pattern: "\\bNasdaq\\b"
-        requires: "tokeni[sz]|blockchain|digital asset|on-?chain|DLT"
+      # Nasdaq (the exchange, Nasdaq Stockholm, its Crypto Index, Calypso) with crypto context. Not the index in market wraps ("the Nasdaq", "Nasdaq hits/falls/link", Composite, 100, S&P 500, Dow), not the "Nasdaq-listed" / "(Nasdaq: XXX)" tag or "to/from Nasdaq", "Nasdaq vote" of a company moving there, and not IPO debuts.
+      - pattern: "(?<![Tt]he )(?<!THE )(?<![Tt]o )(?<![Ff]rom )\\b(?:Nasdaq|NASDAQ)\\b(?![- ](?i:listed|traded|Composite|100|futures|hits?|falls?|fell|rises?|rose|gains?|slides?|slips?|jumps?|drops?|closes?|rall(?:y|ies)|sinks?|tumbles?|surges?|soars?|link|correlation|debut|IPO|vote|treasury|merger)\\b| ?: ?\\$?[A-Z])|\\bNasdaq (?:Stockholm|Crypto|Calypso|Stock Market)\\b"
+        requires: "^(?![\\s\\S]*(?:\\bIPO\\b|\\bdebut|first day of trading|record Nasdaq|tech-heavy|S&P 500|\\bDow\\b))[\\s\\S]*(?:crypto(?!graph)|\\w+coins?\\b|tokeni[sz]|\\btokens?\\b|blockchain|digital assets?|on-?chain|stablecoin|\\bether(?:eum)?\\b|solana|\\bXRP\\b|cardano|chainlink|(?-i:\\b(?:BTC|ETH|SOL|HYPE)\\b)|가상자산|코인)"
 
   - id: ice_nyse
     kind: institution
     label: ICE / NYSE
+    category: exchange_broker
     match:
-      - pattern: "Intercontinental Exchange|\\bNYSE\\b"
-        requires: "tokeni[sz]|blockchain|digital asset|on-?chain|DLT"
+      # ICE and NYSE (incl. NYSE Arca) with crypto context; not the "(NYSE: XXX)", "(NYSE American: XXX)" or "NYSE-listed" tag of another company.
+      - pattern: "Intercontinental Exchange|\\bNYSE\\b(?![- ](?i:listed|traded)\\b| ?(?:American|Arca)? ?: ?\\$?[A-Z])"
+        requires: *crypto_exchange
+      # ICE's stakes in crypto firms (Bakkt, OKX, Polymarket); bare "ICE" only with Bakkt or OKX, since Polymarket also lists bets on the immigration agency ICE.
+      - pattern: "Intercontinental Exchange|NYSE (?:parent|owner)"
+        requires: "Polymarket|Bakkt|\\bOKX\\b"
+      - pattern: "\\bICE\\b"
+        requires: "Bakkt|\\bOKX\\b"
 
   - id: cme
     kind: institution
     label: CME Group
+    category: exchange_broker
     match:
-      - pattern: "CME Group"
-        requires: *fin
+      # CME Group or CME with crypto context; not the CME FedWatch tool or "CME gap" chart talk, and not continuing medical education or coronal mass ejections.
+      - pattern: "\\bCME\\b(?! (?i:FedWatch|(?:futures )?gaps?)\\b)"
+        requires: *crypto_exchange
 
   - id: broadridge
     kind: institution
     label: Broadridge
+    category: market_infrastructure
     match:
       - pattern: "Broadridge"
         requires: *fin
@@ -180,16 +247,511 @@ entities:
   - id: hsbc
     kind: institution
     label: HSBC
+    category: bank
     match:
+      # HSBC in crypto context.
       - pattern: "\\bHSBC\\b"
-        requires: *fin
+        requires: *crypto_bank
 
   - id: fidelity
     kind: institution
     label: Fidelity
+    category: asset_manager
     match:
-      - pattern: "\\bFidelity\\b"
-        requires: *fin
+      # Its stablecoin, Fidelity Digital Dollar (FIDD).
+      - pattern: "\\bFIDD\\b"
+      # Fund tickers FBTC/FETH with Fidelity or ETF words (Function's wrapped-bitcoin token is also "FBTC").
+      - pattern: "\\bF(?:BTC|ETH)\\b"
+        requires: "Fidelity|\\bET[FP]s?\\b|Wise Origin"
+      # "Fidelity" (Investments, International, Digital Assets) with crypto words; not Fidelity National (FIS, FNF), Fidelity Bank or High Fidelity, a VR firm that ran its own blockchain currency.
+      - pattern: "(?<![Hh]igh )(?<![Hh]igh-)(?<!Hi-)\\bFidelity\\b(?! National| Bank| & Guaranty)"
+        requires: *crypto_asset
+
+  # --- institutions added 2026-10-01 (owner's request: ETF issuers, exchanges, payments, banks) ---
+  # Each rule fires only on crypto news about the institution; cases in tests/test_entities_institutions.py.
+
+  # asset managers and ETF issuers
+  - id: grayscale
+    kind: institution
+    label: Grayscale
+    category: asset_manager
+    match:
+      # Full name and trust tickers: Bitcoin Trust (GBTC), Ethereum Trust (ETHE), Digital Large Cap Fund (GDLC).
+      - pattern: "Grayscale Investments|\\b(?:GBTC|ETHE|GDLC)\\b"
+      # "Grayscale" (capitalised) with crypto words; not the colour filter ("Grayscale on iPhone").
+      - pattern: "\\bGrayscale\\b"
+        requires: *crypto_asset
+      # ... or with fund and listing words ("Grayscale Files S-1 to Convert AAVE Trust", "Grayscale Files for an IPO").
+      - pattern: "\\bGrayscale\\b"
+        requires: "\\bET[FPN]s?\\b|exchange-traded|(?-i:\\bTrusts?\\b)|\\bS-[13]\\b|19b-4|\\bIPO\\b|NYSE|Nasdaq|in-?flows?|out-?flows?"
+
+  - id: bitwise
+    kind: institution
+    label: Bitwise
+    category: asset_manager
+    match:
+      # Full names and the Bitwise Bitcoin ETF ticker (BITB).
+      - pattern: "Bitwise (?:Asset Management|Invest(?:ments)?)\\b|\\bBITB\\b"
+      # "Bitwise"/"BitWise" with crypto words; not Bitwise Industries (the Fresno tech firm whose founders were jailed for fraud) or bitwise operators.
+      - pattern: "\\bBit[Ww]ise\\b(?! Industries| (?:[Oo]perat|[Ss]hift|AND\\b|OR\\b|XOR\\b|NOT\\b))"
+        requires: *crypto_asset
+      # ... or with fund words ("Bitwise Files S-1 For SUI ETF").
+      - pattern: "\\bBit[Ww]ise\\b(?! Industries| (?:[Oo]perat|[Ss]hift|AND\\b|OR\\b|XOR\\b|NOT\\b))"
+        requires: "\\bET[FPN]s?\\b|exchange-traded|\\bindex fund|\\bS-1\\b|asset manag|in-?flows?|out-?flows?"
+
+  - id: 21shares
+    kind: institution
+    label: 21Shares
+    category: asset_manager
+    match:
+      # The crypto ETP issuer, also written "21shares"; "21 shares" with a space is a share count.
+      - pattern: "\\b21shares\\b"
+        ignore_case: true
+
+  - id: vaneck
+    kind: institution
+    label: VanEck
+    category: asset_manager
+    match:
+      # Its tokenized Treasury fund (VBILL).
+      - pattern: "\\bVBILL\\b"
+      # VanEck (or "Van Eck") with crypto words, including its HODL bitcoin ETF; its gold, chip, China and meme-stock ETFs do not count.
+      - pattern: "\\bVan ?Eck\\b"
+        requires: *crypto_asset
+
+  - id: invesco
+    kind: institution
+    label: Invesco
+    category: asset_manager
+    match:
+      # Invesco Galaxy, its crypto ETF line with Galaxy Digital, and those tickers (BTCO, QETH, QSOL).
+      - pattern: "Invesco Galaxy|\\b(?:BTCO|QETH|QSOL)\\b"
+      # Invesco with crypto words; not "Invesco QQQ" in QQQ-versus-bitcoin comparisons.
+      - pattern: "\\bInvesco\\b(?! QQQ)"
+        requires: *crypto_asset
+
+  - id: wisdomtree
+    kind: institution
+    label: WisdomTree
+    category: asset_manager
+    match:
+      # Its tokenized-fund platforms and the WisdomTree Bitcoin Fund ticker (BTCW).
+      - pattern: "WisdomTree (?:Prime|Connect|Onchain)|\\bBTCW\\b"
+      # WisdomTree (or "Wisdom Tree") with crypto words; its dividend, UCITS and proxy-fight news does not count.
+      - pattern: "\\bWisdom ?Tree\\b"
+        requires: *crypto_asset
+
+  - id: ark_invest
+    kind: institution
+    label: ARK Invest
+    category: asset_manager
+    match:
+      # ARK 21Shares funds ("Ark and 21Shares" too) and the ARK 21Shares Bitcoin ETF ticker (ARKB).
+      - pattern: "\\bA(?:RK|rk) (?:(?:and|&) )?21Shares|\\bARKB\\b"
+      # ARK Invest, Cathie Wood or ARK fund tickers with crypto words (buying Coinbase counts); not Noah's Ark, Ark Labs (a bitcoin layer 2) or her Tesla trades.
+      - pattern: "\\bA(?:RK|rk) Invest(?:ment)?\\b|\\bCath(?:ie|y) Woods?\\b|\\bARK[KWFQ]\\b"
+        requires: *crypto_asset
+
+  - id: coinshares
+    kind: institution
+    label: CoinShares
+    category: asset_manager
+    match:
+      # The crypto asset manager (also "Coinshares", CoinShares Valkyrie); not "Coinbase shares" or "COIN shares".
+      - pattern: "\\bCoin[Ss]hares\\b"
+
+  - id: canary_capital
+    kind: institution
+    label: Canary Capital
+    category: asset_manager
+    match:
+      - pattern: "Canary Capital"
+      # "Canary" with crypto words ("Canary's XRP ETF"); not "canary in the coal mine", Kusama's "canary network", the Canary Islands, Canary Wharf or Canary tokens.
+      - pattern: "\\bCanary\\b(?! (?i:in|islands?|wharf|network|tokens?)\\b)"
+        requires: *crypto_asset
+
+  - id: hashdex
+    kind: institution
+    label: Hashdex
+    category: asset_manager
+    match:
+      # The crypto index-fund manager (also "HashDex") and its Nasdaq crypto index ETF ticker (NCIQ); not HashKey or Hashnote.
+      - pattern: "\\bHashdex\\b|\\bNCIQ\\b"
+        ignore_case: true
+
+  # exchanges and brokers
+  - id: coinbase
+    kind: institution
+    label: Coinbase
+    category: exchange_broker
+    match:
+      # The company and its units (Prime, Custody, Derivatives, 코인베이스) on the name alone, except "Coinbase (Global Inc.) CEO/founder" as a person's title: personal news of its CEO needs rule 2.
+      - pattern: "\\b(?:Coinbase|COINBASE)\\b(?!(?: Global)?(?:,? Inc\\.?)?(?: \\((?i:nasdaq): ?COIN\\))?(?:['’]s)? (?:CEO|co-?founder|founder|chief)\\b)|코인베이스"
+      # Any mention with crypto context ("Coinbase CEO says bitcoin ...").
+      - pattern: "\\b(?:Coinbase|COINBASE)\\b"
+        requires: *crypto_exchange
+
+  - id: robinhood
+    kind: institution
+    label: Robinhood
+    category: exchange_broker
+    match:
+      # Its crypto units and chain.
+      - pattern: "\\bRobinhood (?:Crypto|Chain|Wallet)\\b"
+      # One word (not the folk hero, films or charity "Robin Hood") with crypto context; most Robinhood news is stocks, cards or prediction markets.
+      - pattern: "\\b(?:Robinhood|ROBINHOOD)\\b"
+        requires: *crypto_exchange
+
+  - id: kraken
+    kind: institution
+    label: Kraken (Payward)
+    category: exchange_broker
+    match:
+      # The parent Payward and units that only mean the exchange.
+      - pattern: "\\bPayward\\b|\\bKraken (?:Financial|Pro|Futures|Exchange|Wallet)\\b"
+      # Listing notices that name only the token ("Kraken Lists LINK, OMG and BAT", "WBT is available for trading on Kraken"); not "Lists Kraken Goaltender" or "List Of Kraken Players".
+      - pattern: "\\bKraken (?:[Ll]ists|[Dd]elists|[Dd]elisting|[Ll]isting)\\b|\\b(?:trading|[Ll]isted|[Ll]ists?) on Kraken\\b"
+      # The name with crypto context, except where it is another Kraken (Seattle Kraken, Kraken Robotics, Octopus Energy's Kraken Technologies, Kraken2, "release the Kraken").
+      - pattern: "(?<!Seattle )(?<![Rr]elease the )\\b(?:Kraken|KRAKEN)\\b(?! Robotics| Technologies|2|-like)"
+        requires: *crypto_exchange
+      # The name with its bank regulators or Fed account ("Did the Federal Reserve really release the Kraken?").
+      - pattern: "\\bKraken\\b"
+        requires: "master account|Federal Reserve|(?-i:\\b(?:Fed|SEC|CFTC|OCC)\\b)"
+
+  - id: gemini
+    kind: institution
+    label: Gemini
+    category: exchange_broker
+    match:
+      # Names only the exchange uses: Gemini Space Station (Nasdaq: GEMI), Gemini Trust, Gemini Dollar (GUSD), Gemini Earn.
+      - pattern: "Gemini (?:Space Station|Trust|Dollar|Earn)\\b|\\bGEMI\\b|\\bGUSD\\b"
+      # "Gemini" with the Winklevoss twins, crypto words or its regulators; not Google's Gemini AI (or a model name such as "Gemini 3.6 Flash"), the zodiac sign or NASA's Project Gemini.
+      - pattern: "\\bGemini\\b(?! (?:\\d|Pro|Ultra|Flash|Nano|Advanced|Live|Enterprise|API|app|model)\\b)"
+        requires: "^(?![\\s\\S]*(?:Google|DeepMind|\\bAI\\b|ChatGPT|chatbot|\\bLLM|horoscope|zodiac|tarot|NASA|astronaut|Project Gemini))[\\s\\S]*(?:Winklevoss|crypto(?!graph)|\\w+coins?\\b|\\btokens?\\b|tokeni[sz]|staking|\\bether(?:eum)?\\b|solana|\\bXRP\\b|\\bperps?\\b|(?-i:\\b(?:CFTC|SEC|NYDFS)\\b))"
+
+  - id: binance
+    kind: institution
+    label: Binance
+    category: exchange_broker
+    match:
+      # The exchange group (Binance.US, Binance Square, Binance Wallet, 바이낸스); not price stories about BNB as "Binance Coin" or the chain "Binance Smart Chain".
+      - pattern: "\\b(?:Binance|BINANCE)\\b(?! Coin\\b| Smart Chain\\b)|바이낸스(?! ?코인)"
+
+  - id: okx
+    kind: institution
+    label: OKX
+    category: exchange_broker
+    match:
+      # OKX and its former name OKEx.
+      - pattern: "\\bOKX\\b|\\bOKEx\\b"
+
+  - id: bullish
+    kind: institution
+    label: Bullish
+    category: exchange_broker
+    match:
+      # The company (NYSE: BLSH) in forms the adjective "bullish" does not take: the ticker, the possessive, "Bullish CEO/IPO/exchange", "Shares of Bullish", "crypto exchange Bullish", "Bullish launches/acquires/secures ...".
+      - pattern: "\\bBLSH\\b|\\bBullish['’]s\\b|\\bBullish (?:CEO|IPO|[Ee]xchange)\\b(?! (?:[Ss]entiment|[Cc]onfidence|[Oo]utlook|[Mm]arket|[Ww]indow|[Ff]lows?|[Ii]nflows?|[Oo]utflows?|[Rr]eserves?))|[Ss]hares of Bullish\\b|(?:[Cc]rypto|[Dd]igital[- ]asset|[Ii]nstitutional) (?:[Ee]xchange|[Pp]latform|[Ff]irm|[Cc]ompany|[Oo]perator) Bullish\\b|Thiel-backed Bullish|\\bBullish (?:to (?:buy|acquire|launch)|[Ll]aunches|[Aa]cquires|[Rr]eceives|[Ss]ecures|[Ww]ins|[Gg]ranted|[Ee]xpands|[Pp]artners [Ww]ith|[Tt]aps|[Hh]ires|[Aa]ppoints|[Pp]rices (?:its )?IPO)\\b"
+      # "Bullish" with a fact only about the company: its New York licences, CEO Tom Farley, Equiniti, CoinDesk ownership, Block.one.
+      - pattern: "\\bBullish\\b"
+        requires: "BitLicense|\\bNYDFS\\b|New York licen[cs]es?|T(?:om|homas) Farley|Equiniti|owns? CoinDesk|CoinDesk(?:['’]s)? (?:owner|parent)|Block\\.one"
+
+  - id: cboe
+    kind: institution
+    label: Cboe
+    category: exchange_broker
+    match:
+      # Cboe Global Markets with crypto context; not the Cboe Volatility Index (VIX) quoted in market stories.
+      - pattern: "\\b(?:Cboe|CBOE)\\b(?!(?:['’]s)? (?:Volatility|VIX)\\b)"
+        requires: *crypto_exchange
+
+  - id: schwab
+    kind: institution
+    label: Charles Schwab
+    category: exchange_broker
+    match:
+      # Charles Schwab, Schwab (Crypto, Asset Management) or SCHW with crypto context; not Klaus Schwab of the World Economic Forum.
+      - pattern: "(?<!Klaus )\\bSchwab\\b|\\bSCHW\\b"
+        requires: *crypto_exchange
+
+  - id: interactive_brokers
+    kind: institution
+    label: Interactive Brokers
+    category: exchange_broker
+    match:
+      # Interactive Brokers (IBKR) with crypto context; most of its news is stocks, margin and ForecastEx event contracts.
+      - pattern: "Interactive Brokers|\\bIBKR\\b"
+        requires: *crypto_exchange
+
+  - id: etoro
+    kind: institution
+    label: eToro
+    category: exchange_broker
+    match:
+      # eToro with crypto context; the broker also sells stocks, copy trading and ETFs.
+      - pattern: "\\betoro\\b|이토로"
+        ignore_case: true
+        requires: *crypto_exchange
+
+  - id: upbit
+    kind: institution
+    label: Upbit (Dunamu)
+    category: exchange_broker
+    match:
+      # The exchange (업비트), except as a title for its operator ("Upbit operator Dunamu"; rule 2 decides those).
+      - pattern: "\\b(?:Upbit|UPbit|UPBIT)\\b(?! (?:operator|parent|owner)\\b)|업비트"
+      # The operator Dunamu (두나무), but not news about its stock apps Stockplus / Stockplus Unlisted (증권플러스, 비상장).
+      - pattern: "\\bDunamu\\b|두나무"
+        requires: "^(?![\\s\\S]*(?:Stockplus|증권플러스|unlisted stock|비상장))"
+
+  - id: bithumb
+    kind: institution
+    label: Bithumb
+    category: exchange_broker
+    match:
+      # The exchange (빗썸); not its charity foundation 빗썸나눔 (volunteering news).
+      - pattern: "\\b(?:Bithumb|BITHUMB)\\b|빗썸"
+        requires: "^(?![\\s\\S]*빗썸 ?나눔)"
+
+  # payments and stablecoin issuers
+  - id: paypal
+    kind: institution
+    label: PayPal
+    category: payments_stablecoin
+    match:
+      # Its stablecoin by ticker or name (PYUSD, PYUSDx, PayPal USD), not a "PayPal USD account/balance".
+      - pattern: "\\bPYUSDx?\\b|\\b(?:Pay[Pp]al|PAYPAL) USD\\b(?! (?i:accounts?|balances?|conversion|exchange rate))"
+      # PayPal (also Paypal, PAYPAL) or Venmo with crypto context.
+      - pattern: "\\bPay[Pp]al\\b|\\bPAYPAL\\b|\\bVenmo\\b"
+        requires: *crypto_payments
+
+  - id: stripe
+    kind: institution
+    label: Stripe
+    category: payments_stablecoin
+    match:
+      # Stripe with crypto context (covers "Stripe's Bridge", "Stripe-owned Bridge", "Stripe-backed Tempo"); not Red Stripe beer.
+      - pattern: "(?<!Red )\\bStripe\\b"
+        requires: *crypto_payments
+
+  - id: moneygram
+    kind: institution
+    label: MoneyGram
+    category: payments_stablecoin
+    match:
+      # Its stablecoin.
+      - pattern: "\\bMGUSD\\b"
+      # MoneyGram (also Moneygram) with crypto context; not the MoneyGram Haas F1 Team.
+      - pattern: "\\bMoney[Gg]ram\\b(?! Haas)|\\bMONEYGRAM\\b"
+        requires: *crypto_payments
+      # MoneyGram with Stellar, its crypto partner and shareholder since 2021-2023 ("Stellar invests in MoneyGram").
+      - pattern: "\\bMoney[Gg]ram\\b(?! Haas)"
+        requires: "(?-i:\\bStellar\\b)"
+
+  - id: western_union
+    kind: institution
+    label: Western Union
+    category: payments_stablecoin
+    match:
+      # Its stablecoin.
+      - pattern: "\\bUSDPT\\b"
+      # Western Union with crypto context.
+      - pattern: "Western Union|WESTERN UNION"
+        requires: *crypto_payments
+
+  - id: circle
+    kind: institution
+    label: Circle
+    category: payments_stablecoin
+    match:
+      # Names only Circle uses: Circle Internet (Group/Financial), Circle National Trust, CRCL, its CEO, "Circle's shares/stock/IPO/CEO".
+      - pattern: "Circle Internet|Circle National Trust|\\bCRCL\\b|Jeremy Allaire|(?<![Ii]nner )(?<![Ff]ull )\\bCircle(?:['’]s)? (?:[Ss]hares|[Ss]tock|IPO|CEO)\\b"
+      # "Circle" with crypto context; not Circle K, Circle Line/Health/Medical, "Circle of", the Inner/Full/Arctic/Polar Circle or "The Circle".
+      - pattern: "(?<!Arctic )(?<![Ii]nner )(?<![Ff]ull )(?<!Polar )(?<!The )\\bCircle\\b(?! K\\b| Line\\b| of\\b| Health\\b| Medical\\b)"
+        requires: *crypto_payments
+      # The same "Circle" with its trust-bank charter news ("Circle Hits Regulatory Milestone With NYDFS Trust Charter").
+      - pattern: "(?<!Arctic )(?<![Ii]nner )(?<![Ff]ull )(?<!Polar )(?<!The )\\bCircle\\b(?! K\\b| Line\\b| of\\b| Health\\b| Medical\\b)"
+        requires: "trust (?:bank|charter)|national trust|\\bNYDFS\\b|\\bOCC\\b"
+
+  - id: paxos
+    kind: institution
+    label: Paxos
+    category: payments_stablecoin
+    match:
+      # Paxos the trust company (all its news is digital-asset news); not the Paxos consensus algorithm (Paxos Made Simple, Fast/Cheap/Multi-Paxos, Raft) or the Greek island.
+      - pattern: "(?<!Fast )(?<!Cheap )(?<!Multi-)\\bPaxos\\b(?![- ](?i:made|family|algorithm|consensus|protocol)\\b)"
+        requires: "^(?![\\s\\S]*(?:consensus|Lamport|\\bRaft\\b|replicat|Antipaxos|Corfu|Ionian|Greece|festival))"
+
+  - id: block
+    kind: institution
+    label: Block (Square, Cash App)
+    category: payments_stablecoin
+    match:
+      # Block by full name, owner or ticker, or its Square and Cash App brands, with crypto context; not Times/Binance/Union Square, Square Enix/One/Mile/Feet/Root.
+      - pattern: "\\bBlock,? Inc\\b|(?:Dorsey['’]s|Dorsey-led|[Ff]intech|[Pp]ayments (?:firm|company|giant)) Block\\b|\\bBlock \\((?:NYSE: ?)?XYZ\\)|\\bCash App\\b|(?<!Times )(?<!Binance )(?<!Union )(?<!Red )\\bSquare\\b(?! Enix| One\\b| Mile\\b| Feet\\b| Foot\\b| Root\\b| Peg\\b)"
+        requires: *crypto_payments
+      # "Block" opening a headline ("Block launches ..."), with crypto context; not chain words (Block Reward/Height/Size/Time, Block 840,000, Block.one), Block Earner or Block Scholes.
+      - pattern: "^Block\\b(?![.\\-]| \\d| #|(?:['’]s)? (?i:rewards?|heights?|sizes?|times?|space|explorers?|producers?|builders?|proposers?|subsidy|trades?|chain|party|scholes|earner|street|headers?|hash)\\b)"
+        requires: *crypto_payments
+
+  - id: revolut
+    kind: institution
+    label: Revolut
+    category: payments_stablecoin
+    match:
+      # Revolut (incl. its exchange Revolut X) with crypto context.
+      - pattern: "\\bRevolut\\b|\\bREVOLUT\\b"
+        requires: *crypto_payments
+
+  - id: tether
+    kind: institution
+    label: Tether
+    category: payments_stablecoin
+    match:
+      # Names only the company uses: Tether Holdings/Limited/Investments/Gold/Data, "Tether CEO", Paolo Ardoino, the gold token XAUT.
+      - pattern: "\\bTether (?:Holdings|Limited|Ltd|International|Investments|Gold|Data|CEO)\\b|Paolo Ardoino|\\bXAU[Tt₮]\\b"
+      # "Tether" (not tethered/tethering or Tether Tools) with crypto context.
+      - pattern: "\\bTether\\b(?! Tools)"
+        requires: *crypto_payments
+      # "Tether" with its own business words (freezes, wallets, audit, reserves, gold, mints, Bitfinex); space tethers and the verb lack them.
+      - pattern: "\\bTether\\b(?! Tools)"
+        requires: "\\bfr(?:eez|oze)|\\bwallets?\\b|\\baudit|attestation|\\breserves\\b|\\bgold\\b|\\bmint|Bitfinex"
+
+  # banks
+  - id: santander
+    kind: institution
+    label: Banco Santander
+    category: bank
+    match:
+      # Santander or its online bank Openbank in crypto context (the city, the region and auto-loan news have none).
+      - pattern: "\\bSantander\\b|\\bOpenbank\\b"
+        requires: *crypto_bank
+
+  - id: morgan_stanley
+    kind: institution
+    label: Morgan Stanley
+    category: bank
+    match:
+      # Morgan Stanley or its broker E*Trade in crypto context.
+      - pattern: "Morgan Stanley|\\bE[*-]?(?:Trade|TRADE)\\b"
+        requires: *crypto_bank
+
+  - id: bank_of_america
+    kind: institution
+    label: Bank of America
+    category: bank
+    match:
+      # Bank of America, BofA or its Merrill wealth arm in crypto context.
+      - pattern: "Bank of America|\\bBofA\\b|\\bMerrill\\b"
+        requires: *crypto_bank
+
+  - id: wells_fargo
+    kind: institution
+    label: Wells Fargo
+    category: bank
+    match:
+      # Wells Fargo or its WFUSD trademark in crypto context ("Wells" alone is also the SEC's Wells notice).
+      - pattern: "Wells Fargo|\\bWFUSD\\b"
+        requires: *crypto_bank
+
+  - id: deutsche_bank
+    kind: institution
+    label: Deutsche Bank
+    category: bank
+    match:
+      # Deutsche Bank in crypto context (not Deutsche Börse or Bundesbank).
+      - pattern: "Deutsche Bank"
+        requires: *crypto_bank
+
+  - id: ubs
+    kind: institution
+    label: UBS
+    category: bank
+    match:
+      # UBS in crypto context.
+      - pattern: "\\bUBS\\b"
+        requires: *crypto_bank
+
+  - id: bnp_paribas
+    kind: institution
+    label: BNP Paribas
+    category: bank
+    match:
+      # BNP Paribas or its AssetFoundry platform in crypto context; bare "BNP" is also Bangladesh's party.
+      - pattern: "BNP Paribas|\\bBNPP\\b|AssetFoundry"
+        requires: *crypto_bank
+
+  - id: societe_generale
+    kind: institution
+    label: Société Générale
+    category: bank
+    match:
+      # Société Générale / Societe-Generale / SocGen in crypto context.
+      - pattern: "Soci[eé]t[eé][- ]G[eé]n[eé]rale|\\bSocGen\\b"
+        ignore_case: true
+        requires: *crypto_bank
+      # Its crypto arm SG-FORGE and the CoinVertible stablecoins (EURCV, USDCV).
+      - pattern: "\\bSG[- ]?FORGE\\b|CoinVertible|\\b(?:EUR|USD)CV\\b"
+        ignore_case: true
+
+  - id: standard_chartered
+    kind: institution
+    label: Standard Chartered
+    category: bank
+    match:
+      # Standard Chartered / StanChart, its custody unit Zodia or tokenization unit Libeara, in crypto context (marathon news has none).
+      - pattern: "Standard Chartered|\\bStanChart\\b|\\bZodia\\b|\\bLibeara\\b"
+        requires: *crypto_bank
+
+  - id: barclays
+    kind: institution
+    label: Barclays
+    category: bank
+    match:
+      # Barclays or Barclaycard in crypto context (Barclays Center news has none).
+      - pattern: "\\bBarclays\\b|Barclaycard"
+        requires: *crypto_bank
+
+  - id: mufg
+    kind: institution
+    label: MUFG
+    category: bank
+    match:
+      # MUFG / Mitsubishi UFJ or the Progmat platform it started, in crypto context.
+      - pattern: "\\bMUFG\\b|Mitsubishi UFJ|\\bProgmat\\b"
+        requires: *crypto_bank
+
+  - id: sbi_holdings
+    kind: institution
+    label: SBI Holdings
+    category: bank
+    match:
+      # Names only Japan's SBI uses, in crypto context.
+      - pattern: "SBI (?:Holdings|VC Trade|Ripple Asia|Shinsei|Sumishin|Digital (?:Asset|Markets))\\b|Kitao\\b"
+        requires: *crypto_bank
+      # Bare "SBI" in crypto context, unless the text is about State Bank of India or its units.
+      - pattern: "\\bSBI\\b"
+        requires: "^(?![\\s\\S]*(?:India|rupee|\\bRBI\\b|\\bUPI\\b|State Bank|SBI (?:Card|Life|General|Funds|Mutual|Cap|Growth)))[\\s\\S]*(?:crypto|stablecoin|tokeni[sz]|blockchain|on-?chain|\\bDeFi\\b|XRP|Ripple|Solana|bitcoin|Chainlink|digital asset)"
+
+  - id: nomura
+    kind: institution
+    label: Nomura
+    category: bank
+    match:
+      # Nomura, its crypto unit Laser Digital or custody venture Komainu, in crypto context.
+      - pattern: "\\bNomura\\b|Laser Digital|\\bKomainu\\b"
+        requires: *crypto_bank
+      # "Nomura's Laser Digital/Komainu" names its crypto units even without crypto words.
+      - pattern: "Nomura['’]s (?:Laser Digital|Komainu)"
+
+  - id: shinhan
+    kind: institution
+    label: Shinhan Financial
+    category: bank
+    match:
+      # Shinhan (Bank, Financial, Securities, Asset Management) in crypto context.
+      - pattern: "\\bShinhan\\b"
+        requires: *crypto_bank
 
   # --- projects (watch sample and control, docs/open-questions.md Q7) ---------
   - id: quant
