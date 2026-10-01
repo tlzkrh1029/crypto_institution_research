@@ -175,3 +175,11 @@
 - 상태: 확정
 - 내용: D-016의 제외 규칙에서 "증권형 토큰"은 토큰화된 증권과 펀드를 뜻한다(예: Figure HELOC, BUIDL, USYC, USDY). 증권성을 두고 소송이 있었던 토큰(예: XRP)은 이 범주에 들지 않으며 포함한다. D-016의 "해석" 줄은 이 항목으로 확정된다.
 - 결정: 사용자가 "맞아"라고 답했다 (2026-10-01).
+
+## D-019 기관 엔터티를 넓히고 분야를 표시한다
+
+- 날짜: 2026-10-01
+- 상태: 확정 (방법은 D-017을 따른다)
+- 내용: Grayscale, Robinhood, BlackRock, Coinbase, MoneyGram, Santander처럼 크립토와 연결되는 주요 회사와 기관을 뉴스 대조용 기관 엔터티로 등록한다. 2026-10-01에 60곳을 새로 등록해 기관은 85곳이 되었다. 기관마다 분야(`category`: bank, asset_manager, exchange_broker, payments_stablecoin, market_infrastructure, custody_infra, central_bank, other)를 표시한다. 기관 규칙은 크립토 뉴스에서만 대조되도록 분야별 크립토 문맥 조건을 쓰고, 실제 헤드라인으로 시험한다. 결과는 [2026-10-01 기관 엔터티 확대](../research/2026-10-01-claude-institution-entities/README.md)에 있다.
+- 남은 것: 추천 조사에서 필수로 꼽힌 기관(필수 51곳)을 언제, 어떤 순서로 넣을지와, 규제기관과 토큰 매입 상장사를 어떤 구조로 다룰지는 [open-questions.md](open-questions.md) Q13에서 정한다.
+- 결정: 사용자가 "Grayscale, MoneyGram, Santander 같은 회사들도 중요해. 특히 grayscale, robinhood, blackrock 등이 중요해. coinbase도. 그 외에 이런 쪽으로 중요한 회사들, 기관들도 모아야 해"라고 지시했다 (2026-10-01). 분야 표시와 분야별 문맥 조건은 Claude Code가 제안했다.
