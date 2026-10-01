@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-2026-09-30 기준으로 수집 프로그램 v0.1을 만들었다. 공식 피드 뉴스 수집, 엔터티 대조와 사건 기록, 업비트와 Kraken(QNT) 시세 감시, 가격 반응 계산, 텔레그램 알림이 작동한다. 구현 현황은 [docs/collector-spec.md](docs/collector-spec.md) 11절에, 설치 방법은 [docs/setup-macos.md](docs/setup-macos.md)에 있다. 결정되지 않은 사항은 [docs/open-questions.md](docs/open-questions.md)에 모아 두었다.
+2026-09-30 기준으로 수집 프로그램 v0.1을 만들었다. 공식 피드 뉴스 수집, 엔터티 대조와 사건 기록, 사건 전후의 가격 반응 계산(업비트, Kraken), 텔레그램 알림이 작동한다. 실시간 시세 감시와 시세 이상 알림은 꺼 두었다(D-015). 구현 현황은 [docs/collector-spec.md](docs/collector-spec.md) 11절에, 설치 방법은 [docs/setup-macos.md](docs/setup-macos.md)에 있다. 결정되지 않은 사항은 [docs/open-questions.md](docs/open-questions.md)에 모아 두었다.
 
 ## 먼저 읽을 문서
 
@@ -58,3 +58,4 @@ research/                 날짜별 조사 기록과 원자료 (추가만 하고
 | [research/2026-09-30-claude-data-source-check/](research/2026-09-30-claude-data-source-check/) | Claude Code | Yahoo Finance와 뉴스·시장 데이터 출처의 이용 조건 점검 |
 | [research/2026-09-30-claude-project-feed-check/](research/2026-09-30-claude-project-feed-check/) | Claude Code | 프로젝트 공식 피드 6곳의 이용 조건 점검, 바이낸스 접속 확인 |
 | [research/2026-09-30-claude-connection-errors/](research/2026-09-30-claude-connection-errors/) | Claude Code | 맥북 첫 운영에서 나온 수집 오류의 원인 추정과 조치 |
+| [research/2026-10-01-claude-entity-ranks-11-20/](research/2026-10-01-claude-entity-ranks-11-20/) | Claude Code | 뉴스 대조 범위를 시가총액 11~20위로 시험 확대, 실제 헤드라인으로 규칙 검증 |

@@ -94,6 +94,22 @@ def test_undelivered_alert_is_retried(harness):
     assert retry_undelivered(ctx, clock.now) == 0          # nothing left
 
 
+def test_retry_skips_alerts_by_source_prefix(harness):
+    # `collector run` skips 'market:' while market.yaml tickers.enabled is false.
+    ctx, fetcher, notifier, clock, register = harness
+    ctx.notifier = FlakyNotifier()
+    deliver_alert(ctx, Alert("medium", "HBAR +5.1% vs BTC", source_id="market:upbit"),
+                  clock.now)
+    deliver_alert(ctx, Alert("high", "news", source_id="sec-press"), clock.now)
+    ctx.notifier.up = True
+    assert retry_undelivered(ctx, clock.now, skip_source_prefixes=("market:",)) == 1
+    assert [a.message for a in ctx.notifier.sent] == ["news"]
+    market = ctx.conn.execute(
+        "SELECT * FROM alerts WHERE source_id = 'market:upbit'").fetchone()
+    assert market["delivered_at"] is None and market["attempts"] == 1   # not charged
+    assert retry_undelivered(ctx, clock.now) == 1          # sent once not skipped
+
+
 def test_check_config_reports_notifier_without_printing_the_token(tmp_path, capsys):
     import shutil
     from pathlib import Path

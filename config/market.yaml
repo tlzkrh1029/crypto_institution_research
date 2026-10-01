@@ -11,8 +11,18 @@ venues:
     terms_checked: "2026-09-30 Upbit Open API 이용약관 (2024-10-30) and rate-limit docs"
     quote: KRW
     reference: BTC
-    # Watch sample and control (docs/open-questions.md Q7).
-    symbols: [LINK, XLM, HBAR, ONDO, XRP]
+    # symbols: where price reactions around events are measured. Watch sample
+    # and control (docs/open-questions.md Q7): LINK, XLM, HBAR, ONDO, XRP.
+    # Coverage of CoinGecko ranks 11-20 (config/entities.yaml): only tokens with
+    # an Upbit KRW market for the same asset, DOGE and ADA (checked 2026-10-01
+    # 00:32 KST via /v1/market/all). HYPE, XMR, WBT and RAIN have no Upbit KRW
+    # market, so their reactions are recorded as no_market (measured later if a
+    # venue is configured for them); Kraken is used for QNT only
+    # (docs/decisions.md D-012).
+    symbols: [LINK, XLM, HBAR, ONDO, XRP, DOGE, ADA]
+    # watch: polled for tickers and anomaly alerts when tickers.enabled is true.
+    # Only the Q7 watch sample; DOGE and ADA are for reactions only.
+    watch: [LINK, XLM, HBAR, ONDO, XRP]
     ticker_interval_sec: 300
 
   kraken:
@@ -23,9 +33,15 @@ venues:
     quote: USD
     reference: BTC
     symbols: [QNT]
+    watch: [QNT]
     ticker_interval_sec: 300
 
+tickers:
+  # Price reactions around events (hourly candles, `reactions` below) run either way.
+  enabled: false   # D-015 (docs/decisions.md): real-time ticker polling and anomaly alerts are off
+
 anomaly:
+  # Only applies when tickers.enabled is true.
   # Alert when a symbol moves this much more (or less) than BTC over the window
   # (docs/decisions.md D-011).
   window_minutes: 60
