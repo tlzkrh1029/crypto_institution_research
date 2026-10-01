@@ -28,6 +28,9 @@ x-context:
   # Validated on the banks group's real headlines (research/2026-10-01-claude-institution-entities).
   # Crypto/tokenized-money words and major asset names for bank and other big-name institutions. Not "settlement" or bare "ledger" (lawsuits, general ledger), nor the adjective "stellar" or "ripple effect".
   crypto_bank: &crypto_bank "crypto(?!graph)|bitcoin|\\bBTC\\b|\\bether(?:eum)?\\b|solana|\\bXRP\\b|\\bXLM\\b|stellar (?:network|blockchain|lumens|development)|\\b(?:selects|picks|taps|uses|joins|via) stellar\\b|\\bon stellar(?![ -]\\w)|(?-i:\\bRipple\\b)(?! effects?)|\\bHedera\\b|chainlink|\\bUSD[CT]\\b|coinbase|binance|stable ?coin|tokeni[sz]|deposit tokens?|security tokens?|digital (?:assets?|bonds?|securities|currenc|money|euro|pound|dollar)|virtual assets?|\\bCBDC|blockchain|distributed ledger|\\bDLT\\b|\\bon-?chain|smart contract|\\bweb ?3\\b|\\bDeFi\\b|decentrali[sz]ed (?:exchange|finance)|\\bDEXs?\\b|\\bNFTs?\\b|Canton Network|Project Agora|Agorá"
+  # Validated on the custody/infrastructure group's real headlines (research/2026-10-01-claude-institution-entities).
+  # Crypto context for custody, private-markets and market-infrastructure institutions: crypto, tokenization and DLT words, major coins, stablecoins and exchanges. Not "settlement", "ledger" or "custody" alone (ordinary finance news); not "same token" or AI tokens, cryptography, Cryptosporidium, ETH Zurich, "Avalanche of" or Yahoo Finance's Coinbase disclaimer.
+  crypto_infra: &crypto_infra "(?<!securities or )crypto(?!graph|spor)|blockchain|tokeni[sz]|(?<!same )(?<!AI )(?<!inference )\\btokens?\\b(?! gesture| per second)|stable ?coin|digital (?:assets?|currenc|bonds?|securities|euro\\b|pound\\b)|virtual assets?|BitLicense|\\bCLARITY Act\\b|(?:on|off)-?chain|\\bDeFi\\b|\\bWeb ?3\\b|\\bDLT\\b|distributed ledger|smart contract|staking (?:ETPs?|ETFs?|rewards?|yields?|services?|infrastructure)|liquid staking|CBDC|\\bNFTs?\\b|real-world assets?|\\bRWAs?\\b|Canton (?:Network|Coin)|bitcoin|\\bether(?:eum)?\\b|solana|cardano|dogecoin|litecoin|chainlink|hedera|\\bXRP|\\bXLM\\b|\\bHBAR\\b|\\bAVAX\\b|\\bPolygon\\b(?!\\.io)|(?-i:\\b(?:BTC|ETH(?! Z[uü]rich)|SOL|USD[CT]|Tether|MiCAR?|GENIUS Act)\\b|\\bTRON\\b(?!:)|(?<!Colorado )\\bAvalanche\\b(?! [Oo]f))|Coinbase(?!\\. Yahoo| pays us)|Binance|Kraken(?! Robotics| Technologies)|\\bOKX\\b|Bitpanda|Payward|xStocks?"
 
 entities:
   # --- institutions in docs/institution-map.md --------------------------------
@@ -36,24 +39,32 @@ entities:
     label: The Clearing House
     category: market_infrastructure
     match:
-      - pattern: "The Clearing House"
-      - pattern: "\\bTCH\\b"
-        requires: "payment|bank|clearing|on-?chain|tokeni[sz]|\\bRTP\\b|CHIPS"
+      # (The) Clearing House or TCH in crypto news (its On-Chain Money Initiative), not its RTP/CHIPS payment-volume news; not Publishers Clearing House, the Automated Clearing House (ACH), London's LCH, a "crypto/stablecoin clearing house" or a legislature's Clearing House Committee.
+      - pattern: "(?<!Publishers )(?<!Publisher['’]s )(?<!Automated )(?<!London )(?<!Crypto )(?<!Bitcoin )(?<![Dd]igital )(?<!Stablecoin )\\bClearing House\\b(?! Committee)|\\bTCH\\b"
+        requires: *crypto_infra
 
   - id: dtcc
     kind: institution
     label: DTCC
     category: market_infrastructure
     match:
+      # DTCC, Fund/SERV or the Depository Trust in crypto news, not its Treasury-clearing or insurance news.
       - pattern: "\\bDTCC\\b|Fund/?SERV|Depository Trust"
+        requires: *crypto_infra
+      # Its subsidiary DTC's tokenization service ("DTC" alone is also "direct-to-consumer").
+      - pattern: "\\bDTC(?:['’]s)? [Tt]okeni[sz]"
 
   - id: swift
     kind: institution
     label: Swift
     category: market_infrastructure
     match:
+      # Swift in crypto news (its blockchain ledger, tokenized deposits), not Taylor Swift, ISO 20022 deadlines or Russia's SWIFT ban.
       - pattern: "\\bSWIFT\\b|(?<!Taylor )\\bSwift\\b"
-        requires: *pay
+        requires: *crypto_infra
+      # Its blockchain-based shared ledger, sometimes named only as "Swift's ledger".
+      - pattern: "\\bSWIFT\\b|(?<!Taylor )\\bSwift\\b"
+        requires: "\\bledger\\b"
 
   - id: us_bank
     kind: institution
@@ -202,7 +213,11 @@ entities:
     label: Euroclear
     category: market_infrastructure
     match:
-      - pattern: "Euroclear|Clearstream"
+      # Euroclear in crypto news, not the frozen Russian assets; Clearstream is Deutsche Börse's (id clearstream).
+      - pattern: "\\bEuroclear\\b"
+        requires: *crypto_infra
+      # Its DLT bond platform (Digital Financial Market Infrastructure).
+      - pattern: "\\bD-FMI\\b|Digital Financial Market Infrastructure"
 
   - id: nasdaq
     kind: institution
@@ -241,8 +256,12 @@ entities:
     label: Broadridge
     category: market_infrastructure
     match:
+      # Broadridge in crypto news, not proxy-voting or earnings news.
       - pattern: "Broadridge"
-        requires: *fin
+        requires: *crypto_infra
+      # Its Distributed Ledger Repo (DLR) and DLX platforms, often named only by acronym.
+      - pattern: "Broadridge"
+        requires: "\\bDL[RX]\\b"
 
   - id: hsbc
     kind: institution
@@ -752,6 +771,160 @@ entities:
       # Shinhan (Bank, Financial, Securities, Asset Management) in crypto context.
       - pattern: "\\bShinhan\\b"
         requires: *crypto_bank
+
+  # custody and infrastructure firms
+  - id: anchorage
+    kind: institution
+    label: Anchorage Digital
+    category: custody_infra
+    match:
+      # The firm's own names.
+      - pattern: "Anchorage Digital|Porto by Anchorage"
+      # Bare "Anchorage" in crypto news, but not the Alaska city: no Alaska, Putin or local-paper name anywhere.
+      - pattern: "(?s)^(?!.*(?:Alaska|Putin|Anchorage (?:Daily News|Press|Today|Assembly|[Pp]olice))).*?\\bAnchorage\\b"
+        requires: *crypto_infra
+
+  - id: bitgo
+    kind: institution
+    label: BitGo
+    category: custody_infra
+    match:
+      # The name in any case ("Bitgo" too) and its NYSE ticker.
+      - pattern: "\\bbitgo\\b|\\bBTGO\\b"
+        ignore_case: true
+
+  - id: fireblocks
+    kind: institution
+    label: Fireblocks
+    category: custody_infra
+    match:
+      # The name (building codes say "fireblocking", lower case).
+      - pattern: "\\bFireblocks\\b"
+
+  - id: galaxy_digital
+    kind: institution
+    label: Galaxy Digital
+    category: custody_infra
+    match:
+      # Galaxy, GalaxyOne or GLXY in crypto news; not Samsung Galaxy phones, Galaxy Entertainment (Macau), LA Galaxy, China Galaxy Securities, Project Galaxy (Galxe), astronomy or Galaxy's AI data centres (Helios, CoreWeave).
+      - pattern: "(?s)^(?!.*(?i:Samsung|Macau|astronom|telescope|Milky Way|Helios|CoreWeave|data cent|\\bAI\\b|\\bHPC\\b)).*?(?:\\bGLXY\\b|(?<!LA )(?<!China )(?<!Project )\\bGalaxy(?:One)?\\b(?! (?:Entertainment|Securities|S\\d+|Z|Note|Fold|Flip|Tab|Watch|Buds|Ring|Unpacked|A\\d+)\\b))"
+        requires: *crypto_infra
+
+  - id: securitize
+    kind: institution
+    label: Securitize
+    category: custody_infra
+    match:
+      # The capitalised company name and ticker, not the verb ("to Securitize", "Securitize Construction Loans"); "securitize" and "Securitization" never match.
+      - pattern: "(?<![Tt]o )\\bSecuritize\\b(?! (?:\\w+ ){0,2}(?i:loans|mortgages|receivables|debt|leases)\\b)|\\bSECZ\\b"
+      - pattern: "\\bSecuritize\\b"
+        requires: *crypto_infra
+
+  - id: copper
+    kind: institution
+    label: Copper (copper.co)
+    category: custody_infra
+    match:
+      # Its domain and its ClearLoop settlement network (Silicon Ranch's solar "Clearloop" has a lower-case l).
+      - pattern: "\\bCopper\\.[Cc]o\\b|\\bClearLoop\\b"
+      # "Copper" with custody or off-exchange settlement words, or its (former) CEOs.
+      - pattern: "\\bCopper\\b"
+        requires: "custod|off-exchange|Kuchinad|Tokarev"
+      # "Copper" in other crypto news unless it is the metal: no metal-market words (gold, silver, price, pound, ratio, forecast, futures, yields, mining, LME, tariff, AI) and no "Bitcoin and Copper" pairing anywhere.
+      - pattern: "(?s)^(?!.*(?i:\\bgold\\b|silver|metals?\\b|prices?\\b|\\bpound\\b|ratio\\b|commodit|forecast|futures|yields?\\b|\\bmin(?:e|es|ers|ing)\\b|\\bores?\\b|tonnes?\\b|\\bLME\\b|Comex|tariff|\\bAI\\b|(?:Bitcoin|BTC),? (?:and|vs\\.?|&) Copper|Copper,? (?:and|vs\\.?|&) (?:Bitcoin|BTC)|Dr\\. Copper|Copper Resources|Coppercoin)).*?\\bCopper\\b"
+        requires: *crypto_infra
+
+  # private-markets managers (tokenized funds)
+  - id: apollo
+    kind: institution
+    label: Apollo Global Management
+    category: asset_manager
+    match:
+      # Apollo in crypto news; not Apollo Crypto or Apollo Capital (Australian crypto funds), Apollo 11/NASA NFTs, Apollo Tyres, Stockhead's "Apollo's Alpha" column (Apollo Capital), Apollo Hospitals, FutureBit's Apollo bitcoin miners or other products named Apollo (AI, Wallet, Fintech, GraphQL).
+      - pattern: "(?s)^(?!.*(?i:NASA|lunar|\\bmoon\\b|astronaut|Aldrin|FutureBit)).*?\\bApollo\\b(?! (?:Crypto|Capital|Tyres|Hospitals?|Fintech|Currency|GraphQL|Program|[Mm]ission|AI|Wallet|BTC|I{1,3}|\\d+)\\b|['’]s Alpha|-\\d)"
+        requires: *crypto_infra
+      # ACRED, the tokenized Apollo Diversified Credit Securitize Fund.
+      - pattern: "\\bACRED\\b"
+
+  - id: kkr
+    kind: institution
+    label: KKR
+    category: asset_manager
+    match:
+      # KKR in crypto news (tokenized funds on Avalanche, crypto investments), not as one ticker in a stock roundup ("TTD, KKR, SPCX and HOOD") or FS KKR Capital (a separate listed BDC).
+      - pattern: "(?s)^(?!.*\\b[A-Z]{2,5}, KKR,).*?(?<!FS )\\bKKR\\b"
+        requires: *crypto_infra
+
+  - id: hamilton_lane
+    kind: institution
+    label: Hamilton Lane
+    category: asset_manager
+    match:
+      # Hamilton Lane in crypto news.
+      - pattern: "Hamilton Lane"
+        requires: *crypto_infra
+      # HLSCOPE, its tokenized feeder fund.
+      - pattern: "\\bHLSCOPE\\b"
+
+  # market infrastructure
+  - id: cantor
+    kind: institution
+    label: Cantor Fitzgerald
+    category: market_infrastructure
+    match:
+      # Cantor (Fitzgerald, Equity Partners SPACs) in crypto news; not Eric Cantor or Georg Cantor.
+      - pattern: "(?<!Eric )(?<!Georg )\\bCantor\\b"
+        requires: *crypto_infra
+      # Its bitcoin-treasury SPAC with Adam Back's Bitcoin Standard Treasury (BSTR), often named without a crypto word.
+      - pattern: "\\bCantor\\b"
+        requires: "\\bBSTR\\b|Adam Back"
+
+  - id: clearstream
+    kind: institution
+    label: Clearstream
+    category: market_infrastructure
+    match:
+      # Deutsche Börse's post-trade arm (lower-case s; ClearStream Environmental and ClearStream Energy are other firms) in crypto news.
+      - pattern: "\\bClearstream\\b"
+        requires: *crypto_infra
+      # Its D7 digital-securities platform.
+      - pattern: "\\bClearstream\\b"
+        requires: "\\bD7\\b|digital (?:issuance|post-trade)"
+
+  - id: six_sdx
+    kind: institution
+    label: SIX / SIX Digital Exchange (SDX)
+    category: market_infrastructure
+    match:
+      # SDX by name.
+      - pattern: "SIX Digital Exchange"
+      # The acronym with SIX, Swiss or digital-securities words; not SDX Energy (CVE:SDX) or the SDX/USD token.
+      - pattern: "(?<!:)\\bSDX\\b(?! Energy|/)"
+        requires: "\\bSIX\\b|Swi(?:ss|tzerland)|tokeni[sz]|digital|\\bDLT\\b|blockchain|CBDC"
+      # SIX (the Swiss exchange group, always written in capitals) in crypto news; not a ticker ("NYSE: SIX" is Six Flags); "Six" and "six" never match.
+      - pattern: "(?<![A-Z]: )\\bSIX\\b"
+        requires: *crypto_infra
+
+  - id: lseg
+    kind: institution
+    label: LSEG
+    category: market_infrastructure
+    match:
+      # LSEG or the London Stock Exchange in crypto news, not "LSEG data" quoted for a bitcoin price.
+      - pattern: "\\bLSEG\\b(?!['’]?s? (?:data|Lipper|Datastream|Workspace))|London Stock Exchange"
+        requires: *crypto_infra
+      # Its tokenized-cash and private-funds DLT platforms (DiSH, DMI).
+      - pattern: "\\bLSEG\\b|London Stock Exchange"
+        requires: "\\bDiSH\\b|Digital Settlement House|\\bDMI\\b|digital markets? infrastructure"
+
+  - id: deutsche_boerse
+    kind: institution
+    label: Deutsche Börse
+    category: market_infrastructure
+    match:
+      # Deutsche Börse (any spelling) and its units 360T and Crypto Finance, in crypto news.
+      - pattern: "Deutsche B(?:ö|oe|o)rse|D\\. Boerse|\\b360T\\b|Crypto Finance(?: AG| Group|['’]s)"
+        requires: *crypto_infra
 
   # --- projects (watch sample and control, docs/open-questions.md Q7) ---------
   - id: quant
