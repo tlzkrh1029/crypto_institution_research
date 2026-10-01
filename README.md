@@ -59,3 +59,5 @@ research/                 날짜별 조사 기록과 원자료 (추가만 하고
 | [research/2026-09-30-claude-project-feed-check/](research/2026-09-30-claude-project-feed-check/) | Claude Code | 프로젝트 공식 피드 6곳의 이용 조건 점검, 바이낸스 접속 확인 |
 | [research/2026-09-30-claude-connection-errors/](research/2026-09-30-claude-connection-errors/) | Claude Code | 맥북 첫 운영에서 나온 수집 오류의 원인 추정과 조치 |
 | [research/2026-10-01-claude-entity-ranks-11-20/](research/2026-10-01-claude-entity-ranks-11-20/) | Claude Code | 뉴스 대조 범위를 시가총액 11~20위로 시험 확대, 실제 헤드라인으로 규칙 검증 |
+| [research/2026-10-01-claude-institution-entities/](research/2026-10-01-claude-institution-entities/) | Claude Code | 기관 엔터티를 25곳에서 85곳으로 확대, 분야 표시 |
+| [research/2026-10-01-claude-institution-recommendations/](research/2026-10-01-claude-institution-recommendations/) | Claude Code | 추가할 기관 후보 조사 (필수 51곳, 권장 96곳), 규제기관·토큰 매입 상장사 처리 방식 제안 |
